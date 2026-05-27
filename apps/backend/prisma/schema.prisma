@@ -27,7 +27,9 @@ model User {
   updatedAt    DateTime   @updatedAt @map("updated_at") @db.Timestamptz()
 
   refreshTokens RefreshToken[]
-  
+  ownedRooms    Room[]         @relation("OwnedRooms")
+  memberships   RoomMember[]
+
   @@index([email])
   @@map("users")
 }
@@ -46,4 +48,48 @@ model RefreshToken {
 
   @@index([userId])
   @@map("refresh_tokens")
+}
+
+enum MemberRole {
+  admin
+  member
+}
+
+model Room {
+  id          String    @id @default(uuid()) @db.Uuid
+  name        String    @db.VarChar(120)
+  description String?
+  coverUrl    String?   @map("cover_url")
+  ownerId     String    @map("owner_id") @db.Uuid
+  inviteCode  String    @unique @map("invite_code") @db.VarChar(12)
+  inviteToken String    @unique @default(uuid()) @map("invite_token") @db.Uuid
+  startsAt    DateTime? @map("starts_at") @db.Date
+  endsAt      DateTime? @map("ends_at") @db.Date
+  archivedAt  DateTime? @map("archived_at") @db.Timestamptz()
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+
+  owner   User         @relation("OwnedRooms", fields: [ownerId], references: [id], onDelete: Restrict)
+  members RoomMember[]
+
+  @@index([ownerId])
+  @@index([inviteCode])
+  @@map("rooms")
+}
+
+model RoomMember {
+  id         String     @id @default(uuid()) @db.Uuid
+  roomId     String     @map("room_id") @db.Uuid
+  userId     String     @map("user_id") @db.Uuid
+  role       MemberRole @default(member)
+  joinedAt   DateTime   @default(now()) @map("joined_at") @db.Timestamptz()
+  lastSeenAt DateTime?  @map("last_seen_at") @db.Timestamptz()
+
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, userId])
+  @@index([roomId])
+  @@index([userId])
+  @@map("room_members")
 }
