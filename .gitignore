@@ -141,3 +141,32 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# CampFlow custom
+.env
+.env.local
+.env.*.local
+*.log
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# Build outputs
+dist/
+build/
+.next/
+.turbo/
+.cache/
+
+# Prisma
+prisma/migrations/dev/
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Docker volumes
+postgres-data/
+redis-data/

@@ -1,0 +1,24 @@
+{
+  "name": "campflow",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Collaborative trip planning app — Asana for vacations",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
+  "packageManager": "pnpm@9.15.9",
+  "scripts": {
+    "dev": "echo 'TODO: добавим в следующих спринтах'",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\""
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
+  }
+}
