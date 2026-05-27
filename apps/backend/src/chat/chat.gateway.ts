@@ -8,7 +8,7 @@ import {
   WebSocketServer,
   WsException,
 } from '@nestjs/websockets';
-import { Logger, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Logger, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Server, Socket } from 'socket.io';
