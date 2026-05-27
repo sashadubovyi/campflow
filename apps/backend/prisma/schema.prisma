@@ -29,6 +29,7 @@ model User {
   refreshTokens RefreshToken[]
   ownedRooms    Room[]         @relation("OwnedRooms")
   memberships   RoomMember[]
+  messages      Message[]
 
   @@index([email])
   @@map("users")
@@ -70,7 +71,9 @@ model Room {
   updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
 
   owner   User         @relation("OwnedRooms", fields: [ownerId], references: [id], onDelete: Restrict)
-  members RoomMember[]
+  members  RoomMember[]
+  messages Message[]
+  
 
   @@index([ownerId])
   @@index([inviteCode])
@@ -92,4 +95,25 @@ model RoomMember {
   @@index([roomId])
   @@index([userId])
   @@map("room_members")
+}
+
+enum MessageType {
+  text
+  system
+}
+
+model Message {
+  id        String      @id @default(uuid()) @db.Uuid
+  roomId    String      @map("room_id") @db.Uuid
+  authorId  String?     @map("author_id") @db.Uuid
+  type      MessageType @default(text)
+  content   String      @db.Text
+  editedAt  DateTime?   @map("edited_at") @db.Timestamptz()
+  createdAt DateTime    @default(now()) @map("created_at") @db.Timestamptz()
+
+  room   Room  @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  author User? @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@index([roomId, createdAt(sort: Desc)])
+  @@map("messages")
 }
