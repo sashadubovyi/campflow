@@ -65,4 +65,11 @@ export class ChatService {
       hasMore,
     };
   }
+
+  async touchLastSeen(userId: string, roomId: string) {
+    await this.prisma.roomMember.updateMany({
+      where: { roomId, userId },
+      data: { lastSeenAt: new Date() },
+    });
+  }
 }

@@ -62,8 +62,18 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  handleDisconnect(client: AuthenticatedSocket) {
+  async handleDisconnect(client: AuthenticatedSocket) {
     this.logger.log(`Client disconnected: ${client.data?.email ?? client.id}`);
+    if (!client.data?.userId) return;
+
+    // Сообщаем всем комнатам, в которых был сокет, что юзер вышел
+    for (const room of client.rooms) {
+      if (room.startsWith('room:')) {
+        const roomId = room.slice(5);
+        await this.chatService.touchLastSeen(client.data.userId, roomId).catch(() => {});
+        client.to(room).emit('presence:leave', { userId: client.data.userId });
+      }
+    }
   }
 
   @SubscribeMessage('room:join')
@@ -74,6 +84,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!data?.roomId) throw new WsException('roomId is required');
     await this.chatService.assertMembership(client.data.userId, data.roomId);
     await client.join(this.roomChannel(data.roomId));
+    await this.chatService.touchLastSeen(client.data.userId, data.roomId);
     client.emit('room:joined', { roomId: data.roomId });
     client.to(this.roomChannel(data.roomId)).emit('presence:join', {
       userId: client.data.userId,
