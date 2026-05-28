@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
+import { AiService } from '../ai/ai.service';
 
 const WARN_BEFORE_DAYS = 2;
 const INACTIVITY_DAYS = 15;
@@ -17,7 +18,10 @@ const BATCH_SIZE = 100;
 export class RoomLifecycleService {
   private readonly logger = new Logger(RoomLifecycleService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly ai: AiService,
+  ) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_3AM)
   async handleLifecycle() {
@@ -135,7 +139,14 @@ export class RoomLifecycleService {
     if (room.status === 'closed') throw new BadRequestException('Room is already closed');
 
     const participants = room.members.map((m) => m.user.fullName);
-    const summary = `Подія "${room.name}" завершена. Учасників: ${participants.length}.`;
+
+    const planItems = await this.prisma.finalPlanItem.findMany({
+      where: { roomId },
+      select: { title: true },
+    });
+    const planTitles = planItems.map((p) => p.title);
+
+    const summary = await this.ai.summarizeRoom(room.name, participants, planTitles, 'uk');
 
     await this.prisma.$transaction(async (tx) => {
       for (const m of room.members) {

@@ -13,6 +13,7 @@ import { PollsModule } from './polls/polls.module';
 import { FinalPlanModule } from './final-plan/final-plan.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { RoomLifecycleModule } from './room-lifecycle/room-lifecycle.module';
+import { AiModule } from './ai/ai.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { RoomLifecycleModule } from './room-lifecycle/room-lifecycle.module';
     FinalPlanModule,
     FinalPlanModule,
     RoomLifecycleModule,
+    AiModule,
   ],
   controllers: [AppController],
   providers: [
