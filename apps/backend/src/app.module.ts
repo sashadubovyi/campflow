@@ -10,6 +10,7 @@ import { RoomsModule } from './rooms/rooms.module';
 import { ChatModule } from './chat/chat.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { PollsModule } from './polls/polls.module';
+import { FinalPlanModule } from './final-plan/final-plan.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { PollsModule } from './polls/polls.module';
     RoomsModule,
     ChatModule,
     PollsModule,
+    FinalPlanModule,
   ],
   controllers: [AppController],
   providers: [

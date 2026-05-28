@@ -74,9 +74,10 @@ model Room {
   updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
 
   owner   User         @relation("OwnedRooms", fields: [ownerId], references: [id], onDelete: Restrict)
-  members  RoomMember[]
-  messages Message[]
-  polls    Poll[]
+  members        RoomMember[]
+  messages       Message[]
+  polls          Poll[]
+  finalPlanItems FinalPlanItem[]
   
 
   @@index([ownerId])
@@ -195,4 +196,25 @@ model PollVote {
   @@index([pollId])
   @@index([userId])
   @@map("poll_votes")
+}
+
+model FinalPlanItem {
+  id         String   @id @default(uuid()) @db.Uuid
+  roomId     String   @map("room_id") @db.Uuid
+  pollId     String?  @map("poll_id") @db.Uuid
+  optionId   String?  @map("option_id") @db.Uuid
+  title      String   @db.VarChar(255)
+  category   String?  @db.VarChar(50)
+  latitude   Decimal? @db.Decimal(9, 6)
+  longitude  Decimal? @db.Decimal(9, 6)
+  address    String?
+  assignedTo String?  @map("assigned_to") @db.Uuid
+  payload    Json     @default("{}")
+  approvedBy String   @map("approved_by") @db.Uuid
+  approvedAt DateTime @default(now()) @map("approved_at") @db.Timestamptz()
+
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@index([roomId])
+  @@map("final_plan_items")
 }
