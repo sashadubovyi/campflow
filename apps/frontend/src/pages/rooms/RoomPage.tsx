@@ -56,7 +56,7 @@ export function RoomPage() {
       {/* Трипанельний layout 20 / 60 / 20 */}
       <div className="flex-1 grid grid-cols-[20%_60%_20%] overflow-hidden">
         <MembersPanel members={room.members} currentUserId={user?.id ?? ''} />
-        <ChatPanel roomName={room.name} />
+        <ChatPanel roomId={room.id} roomName={room.name} />
         <PollsPanel />
       </div>
     </div>

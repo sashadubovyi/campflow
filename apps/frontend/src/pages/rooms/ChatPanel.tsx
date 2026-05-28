@@ -1,32 +1,160 @@
+import { useEffect, useRef, useState } from 'react';
+import { useRoomChat } from '../../shared/api/useRoomChat';
+import { useAuth } from '../../shared/store/useAuth';
+import { Avatar } from '../../shared/ui/Avatar';
+import type { Message } from '../../shared/api/chat.api';
+
 interface Props {
+  roomId: string;
   roomName: string;
 }
 
-export function ChatPanel({ roomName }: Props) {
+function formatTime(iso: string): string {
+  return new Date(iso).toLocaleTimeString('uk-UA', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+export function ChatPanel({ roomId, roomName }: Props) {
+  const { user } = useAuth();
+  const { messages, isLoading, typingUsers, sendMessage, emitTyping } = useRoomChat(roomId);
+  const [text, setText] = useState('');
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Автоскрол донизу при нових повідомленнях
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setText(e.target.value);
+    emitTyping(true);
+    if (typingTimeout.current) clearTimeout(typingTimeout.current);
+    typingTimeout.current = setTimeout(() => emitTyping(false), 1500);
+  }
+
+  function handleSend() {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    sendMessage(trimmed);
+    setText('');
+    emitTyping(false);
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  }
+
+  // Кількість тих, хто друкує (крім себе)
+  const othersTyping = [...typingUsers].filter((id) => id !== user?.id);
+
   return (
     <section className="h-full flex flex-col bg-forest-50">
-      <div className="px-6 py-4 border-b border-forest-100 bg-white">
+      <div className="px-6 py-4 border-b border-forest-100 bg-white shrink-0">
         <h2 className="font-display text-lg font-bold text-forest-900">{roomName}</h2>
         <p className="font-body text-xs text-forest-500">Обговорення</p>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 py-6 flex items-center justify-center">
-        <div className="text-center text-forest-500 font-body">
-          <p className="text-2xl mb-2">💬</p>
-          <p>Тут буде чат обговорення.</p>
-          <p className="text-xs mt-2 text-forest-700">
-            Real-time чат підключимо в наступному блоці.
+      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
+        {isLoading && (
+          <p className="text-center text-forest-500 font-body text-sm animate-pulse">
+            Завантаження повідомлень…
           </p>
-        </div>
+        )}
+
+        {!isLoading && messages.length === 0 && (
+          <div className="h-full flex items-center justify-center">
+            <div className="text-center text-forest-500 font-body">
+              <p className="text-2xl mb-2">💬</p>
+              <p>Повідомлень ще немає.</p>
+              <p className="text-xs mt-1 text-forest-700">Напишіть перше!</p>
+            </div>
+          </div>
+        )}
+
+        {messages.map((m) => (
+          <MessageBubble key={m.id} message={m} isOwn={m.authorId === user?.id} />
+        ))}
+
+        <div ref={bottomRef} />
       </div>
 
-      <div className="px-6 py-4 border-t border-forest-100 bg-white">
-        <input
-          disabled
-          placeholder="Написати повідомлення…"
-          className="w-full px-4 py-2.5 rounded-xl border border-forest-100 bg-forest-50 text-forest-500 outline-none"
-        />
+      {/* Typing-індикатор */}
+      <div className="h-5 px-6 shrink-0">
+        {othersTyping.length > 0 && (
+          <p className="font-body text-xs text-forest-500 animate-pulse">
+            {othersTyping.length === 1 ? 'Хтось друкує…' : 'Кілька людей друкують…'}
+          </p>
+        )}
+      </div>
+
+      <div className="px-6 py-4 border-t border-forest-100 bg-white shrink-0">
+        <div className="flex gap-2">
+          <input
+            value={text}
+            onChange={handleChange}
+            onKeyDown={handleKeyDown}
+            placeholder="Написати повідомлення…"
+            className="flex-1 px-4 py-2.5 rounded-xl border border-forest-100 focus:border-forest-500 focus:ring-2 focus:ring-forest-500/20 outline-none transition font-body"
+          />
+          <button
+            onClick={handleSend}
+            disabled={!text.trim()}
+            className="bg-forest-600 hover:bg-forest-700 disabled:opacity-40 text-white font-semibold px-5 rounded-xl transition"
+          >
+            ➤
+          </button>
+        </div>
       </div>
     </section>
+  );
+}
+
+function MessageBubble({ message, isOwn }: { message: Message; isOwn: boolean }) {
+  // Системні повідомлення — окремий стиль по центру
+  if (message.type === 'system') {
+    return (
+      <div className="flex justify-center">
+        <p className="font-body text-xs text-forest-500 bg-forest-100/60 rounded-full px-3 py-1">
+          {message.content}
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`flex gap-2.5 ${isOwn ? 'flex-row-reverse' : ''}`}>
+      <Avatar
+        fullName={message.author?.fullName ?? '?'}
+        avatarUrl={message.author?.avatarUrl}
+        size={32}
+      />
+      <div className={`max-w-[70%] ${isOwn ? 'items-end' : 'items-start'} flex flex-col`}>
+        <div className="flex items-baseline gap-2">
+          {!isOwn && (
+            <span className="font-body text-xs font-medium text-forest-700">
+              {message.author?.fullName}
+            </span>
+          )}
+          <span className="font-body text-[10px] text-forest-500">
+            {formatTime(message.createdAt)}
+          </span>
+        </div>
+        <div
+          className={`mt-0.5 px-3.5 py-2 rounded-2xl font-body text-sm ${
+            isOwn
+              ? 'bg-forest-600 text-white rounded-tr-sm'
+              : 'bg-white text-forest-900 border border-forest-100 rounded-tl-sm'
+          }`}
+        >
+          {message.content}
+        </div>
+      </div>
+    </div>
   );
 }
