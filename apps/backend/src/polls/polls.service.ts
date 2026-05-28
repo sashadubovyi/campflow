@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePollDto } from './dto/create-poll.dto';
+import { CreateMultiPollDto } from './dto/create-multi-poll.dto';
 
 @Injectable()
 export class PollsService {
@@ -96,6 +97,7 @@ export class PollsService {
       title: poll.title,
       description: poll.description,
       status: poll.status,
+      allowAssign: poll.allowAssign,
       authorId: poll.authorId,
       createdAt: poll.createdAt,
       options: poll.options.map((o) => ({
@@ -103,6 +105,7 @@ export class PollsService {
         label: o.label,
         position: o.position,
         votes: o._count.votes,
+        assignedTo: o.assignedTo,
       })),
       progress: {
         voted: votedUserIds.size,
@@ -166,5 +169,90 @@ export class PollsService {
     });
 
     return this.getPollResults(userId, pollId);
+  }
+
+  async createMultiChoice(userId: string, dto: CreateMultiPollDto) {
+    await this.assertMember(userId, dto.roomId);
+
+    const poll = await this.prisma.poll.create({
+      data: {
+        roomId: dto.roomId,
+        authorId: userId,
+        type: 'multi_choice',
+        title: dto.title,
+        description: dto.description,
+        allowAssign: dto.allowAssign ?? false,
+        options: {
+          create: dto.options.map((o, idx) => ({
+            label: o.label,
+            position: idx,
+          })),
+        },
+      },
+    });
+
+    return this.getPollResults(userId, poll.id);
+  }
+
+  async toggleVote(userId: string, pollId: string, optionId: string) {
+    const poll = await this.prisma.poll.findUnique({
+      where: { id: pollId },
+      include: { options: { select: { id: true } } },
+    });
+    if (!poll) throw new NotFoundException('Poll not found');
+    await this.assertMember(userId, poll.roomId);
+
+    if (poll.type !== 'multi_choice') {
+      throw new BadRequestException('toggleVote is only for multi_choice polls');
+    }
+    if (poll.status !== 'open' && poll.status !== 'reopened') {
+      throw new BadRequestException('Poll is not open for voting');
+    }
+    if (!poll.options.some((o) => o.id === optionId)) {
+      throw new BadRequestException('Option does not belong to this poll');
+    }
+
+    // Перемикач: якщо голос є — знімаємо, якщо немає — ставимо
+    const existing = await this.prisma.pollVote.findUnique({
+      where: { optionId_userId: { optionId, userId } },
+    });
+
+    if (existing) {
+      await this.prisma.pollVote.delete({ where: { id: existing.id } });
+    } else {
+      await this.prisma.pollVote.create({
+        data: { pollId, optionId, userId },
+      });
+    }
+
+    return this.getPollResults(userId, pollId);
+  }
+
+  async assignOption(userId: string, optionId: string, assignedTo: string | null) {
+    const option = await this.prisma.pollOption.findUnique({
+      where: { id: optionId },
+      include: { poll: { select: { id: true, roomId: true, allowAssign: true, type: true } } },
+    });
+    if (!option) throw new NotFoundException('Option not found');
+    await this.assertMember(userId, option.poll.roomId);
+
+    if (!option.poll.allowAssign) {
+      throw new BadRequestException('This poll does not allow assignments');
+    }
+
+    // Якщо закріплюємо за кимось — переконуємось, що він учасник кімнати
+    if (assignedTo) {
+      const member = await this.prisma.roomMember.findUnique({
+        where: { roomId_userId: { roomId: option.poll.roomId, userId: assignedTo } },
+      });
+      if (!member) throw new BadRequestException('Assignee is not a member of this room');
+    }
+
+    await this.prisma.pollOption.update({
+      where: { id: optionId },
+      data: { assignedTo },
+    });
+
+    return this.getPollResults(userId, option.poll.id);
   }
 }

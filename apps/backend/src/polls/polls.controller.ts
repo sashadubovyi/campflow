@@ -13,6 +13,8 @@ import { PollsGateway } from './polls.gateway';
 import { CreatePollDto } from './dto/create-poll.dto';
 import { VoteDto } from './dto/vote.dto';
 import { CurrentUser, AuthenticatedUser } from '../auth/decorators/current-user.decorator';
+import { CreateMultiPollDto } from './dto/create-multi-poll.dto';
+import { AssignOptionDto } from './dto/assign-option.dto';
 
 @Controller('polls')
 export class PollsController {
@@ -71,6 +73,37 @@ export class PollsController {
     @Param('id', new ParseUUIDPipe()) id: string,
   ) {
     const poll = await this.pollsService.reopenPoll(user.id, id);
+    this.pollsGateway.broadcastPollUpdate(poll.roomId, poll);
+    return poll;
+  }
+
+  @Post('multi')
+  async createMulti(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateMultiPollDto) {
+    const poll = await this.pollsService.createMultiChoice(user.id, dto);
+    this.pollsGateway.broadcastPollCreated(poll.roomId, poll);
+    return poll;
+  }
+
+  @Post(':id/toggle-vote')
+  @HttpCode(HttpStatus.OK)
+  async toggleVote(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() dto: VoteDto,
+  ) {
+    const poll = await this.pollsService.toggleVote(user.id, id, dto.optionId);
+    this.pollsGateway.broadcastPollUpdate(poll.roomId, poll);
+    return poll;
+  }
+
+  @Post('options/:optionId/assign')
+  @HttpCode(HttpStatus.OK)
+  async assign(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('optionId', new ParseUUIDPipe()) optionId: string,
+    @Body() dto: AssignOptionDto,
+  ) {
+    const poll = await this.pollsService.assignOption(user.id, optionId, dto.assignedTo ?? null);
     this.pollsGateway.broadcastPollUpdate(poll.roomId, poll);
     return poll;
   }
