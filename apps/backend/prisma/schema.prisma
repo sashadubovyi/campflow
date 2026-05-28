@@ -26,10 +26,13 @@ model User {
   createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt    DateTime   @updatedAt @map("updated_at") @db.Timestamptz()
 
-  refreshTokens RefreshToken[]
-  ownedRooms    Room[]         @relation("OwnedRooms")
-  memberships   RoomMember[]
-  messages      Message[]
+  refreshTokens   RefreshToken[]
+  ownedRooms      Room[]         @relation("OwnedRooms")
+  memberships     RoomMember[]
+  messages        Message[]
+  polls           Poll[]
+  votes           PollVote[]
+  assignedOptions PollOption[]   @relation("AssignedOptions")
 
   @@index([email])
   @@map("users")
@@ -73,6 +76,7 @@ model Room {
   owner   User         @relation("OwnedRooms", fields: [ownerId], references: [id], onDelete: Restrict)
   members  RoomMember[]
   messages Message[]
+  polls    Poll[]
   
 
   @@index([ownerId])
@@ -116,4 +120,79 @@ model Message {
 
   @@index([roomId, createdAt(sort: Desc)])
   @@map("messages")
+}
+
+enum PollType {
+  single_choice
+  multi_choice
+  location
+}
+
+enum PollStatus {
+  open
+  closed
+  reopened
+  approved
+}
+
+model Poll {
+  id          String     @id @default(uuid()) @db.Uuid
+  roomId      String     @map("room_id") @db.Uuid
+  authorId    String     @map("author_id") @db.Uuid
+  type        PollType
+  title       String     @db.VarChar(200)
+  description String?
+  status      PollStatus @default(open)
+  deadlineAt  DateTime?  @map("deadline_at") @db.Timestamptz()
+  allowAssign Boolean    @default(false) @map("allow_assign")
+  closedAt    DateTime?  @map("closed_at") @db.Timestamptz()
+  approvedAt  DateTime?  @map("approved_at") @db.Timestamptz()
+  createdAt   DateTime   @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt   DateTime   @updatedAt @map("updated_at") @db.Timestamptz()
+
+  room    Room         @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  author  User         @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  options PollOption[]
+  votes   PollVote[]
+
+  @@index([roomId, status])
+  @@map("polls")
+}
+
+model PollOption {
+  id         String   @id @default(uuid()) @db.Uuid
+  pollId     String   @map("poll_id") @db.Uuid
+  label      String   @db.VarChar(255)
+  position   Int      @default(0)
+  latitude   Decimal? @db.Decimal(9, 6)
+  longitude  Decimal? @db.Decimal(9, 6)
+  address    String?
+  assignedTo String?  @map("assigned_to") @db.Uuid
+  metadata   Json     @default("{}")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  poll     Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  assignee User?      @relation("AssignedOptions", fields: [assignedTo], references: [id], onDelete: SetNull)
+  votes    PollVote[]
+
+  @@index([pollId])
+  @@index([assignedTo])
+  @@map("poll_options")
+}
+
+model PollVote {
+  id        String   @id @default(uuid()) @db.Uuid
+  pollId    String   @map("poll_id") @db.Uuid
+  optionId  String   @map("option_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  poll   Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  option PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  user   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([optionId, userId])
+  @@index([pollId])
+  @@index([userId])
+  @@map("poll_votes")
 }
