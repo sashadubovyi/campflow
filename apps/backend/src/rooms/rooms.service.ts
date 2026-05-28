@@ -114,6 +114,8 @@ export class RoomsService {
       data: { roomId: room.id, userId, role: 'member' },
     });
 
+    await this.touchActivity(room.id);
+
     return this.getRoom(userId, room.id);
   }
 
@@ -193,5 +195,12 @@ export class RoomsService {
       createdAt: room.createdAt,
       updatedAt: room.updatedAt,
     };
+  }
+
+  async touchActivity(roomId: string) {
+    await this.prisma.room.updateMany({
+      where: { id: roomId, status: 'active' },
+      data: { lastActivityAt: new Date() },
+    });
   }
 }

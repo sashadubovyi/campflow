@@ -9,10 +9,14 @@ import { CreatePollDto } from './dto/create-poll.dto';
 import { CreateMultiPollDto } from './dto/create-multi-poll.dto';
 import { CreateLocationPollDto } from './dto/create-location-poll.dto';
 import { AddLocationOptionDto } from './dto/add-location-option.dto';
+import { RoomsService } from '../rooms/rooms.service';
 
 @Injectable()
 export class PollsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly roomsService: RoomsService,
+  ) {}
 
   private async assertMember(userId: string, roomId: string) {
     const member = await this.prisma.roomMember.findUnique({
@@ -46,6 +50,8 @@ export class PollsService {
       },
       include: { options: { orderBy: { position: 'asc' } } },
     });
+
+    await this.roomsService.touchActivity(dto.roomId);
 
     return this.getPollResults(userId, poll.id);
   }
@@ -147,6 +153,8 @@ export class PollsService {
       });
     });
 
+    await this.roomsService.touchActivity(poll.roomId);
+
     return this.getPollResults(userId, pollId);
   }
 
@@ -196,6 +204,8 @@ export class PollsService {
       },
     });
 
+    await this.roomsService.touchActivity(dto.roomId);
+
     return this.getPollResults(userId, poll.id);
   }
 
@@ -229,6 +239,8 @@ export class PollsService {
         data: { pollId, optionId, userId },
       });
     }
+
+    await this.roomsService.touchActivity(poll.roomId);
 
     return this.getPollResults(userId, pollId);
   }
@@ -282,6 +294,8 @@ export class PollsService {
         },
       },
     });
+
+    await this.roomsService.touchActivity(dto.roomId);
 
     return this.getPollResults(userId, poll.id);
   }

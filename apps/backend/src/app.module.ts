@@ -11,6 +11,8 @@ import { ChatModule } from './chat/chat.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { PollsModule } from './polls/polls.module';
 import { FinalPlanModule } from './final-plan/final-plan.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { RoomLifecycleModule } from './room-lifecycle/room-lifecycle.module';
 
 @Module({
   imports: [
@@ -18,6 +20,7 @@ import { FinalPlanModule } from './final-plan/final-plan.module';
       isGlobal: true,
       envFilePath: ['.env.local', '.env'],
     }),
+    ScheduleModule.forRoot(),
     PrismaModule,
     AuthModule,
     UsersModule,
@@ -25,6 +28,8 @@ import { FinalPlanModule } from './final-plan/final-plan.module';
     ChatModule,
     PollsModule,
     FinalPlanModule,
+    FinalPlanModule,
+    RoomLifecycleModule,
   ],
   controllers: [AppController],
   providers: [

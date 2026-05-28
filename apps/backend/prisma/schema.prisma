@@ -33,6 +33,7 @@ model User {
   polls           Poll[]
   votes           PollVote[]
   assignedOptions PollOption[]   @relation("AssignedOptions")
+  eventMemories   EventMemory[]
 
   @@index([email])
   @@map("users")
@@ -59,29 +60,40 @@ enum MemberRole {
   member
 }
 
-model Room {
-  id          String    @id @default(uuid()) @db.Uuid
-  name        String    @db.VarChar(120)
-  description String?
-  coverUrl    String?   @map("cover_url")
-  ownerId     String    @map("owner_id") @db.Uuid
-  inviteCode  String    @unique @map("invite_code") @db.VarChar(12)
-  inviteToken String    @unique @default(uuid()) @map("invite_token") @db.Uuid
-  startsAt    DateTime? @map("starts_at") @db.Date
-  endsAt      DateTime? @map("ends_at") @db.Date
-  archivedAt  DateTime? @map("archived_at") @db.Timestamptz()
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz()
-  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+enum RoomStatus {
+  active
+  closed
+}
 
-  owner   User         @relation("OwnedRooms", fields: [ownerId], references: [id], onDelete: Restrict)
+model Room {
+  id               String      @id @default(uuid()) @db.Uuid
+  name             String      @db.VarChar(120)
+  description      String?
+  coverUrl         String?     @map("cover_url")
+  ownerId          String      @map("owner_id") @db.Uuid
+  inviteCode       String      @unique @map("invite_code") @db.VarChar(12)
+  inviteToken      String      @unique @default(uuid()) @map("invite_token") @db.Uuid
+  startsAt         DateTime?   @map("starts_at") @db.Date
+  endsAt           DateTime?   @map("ends_at") @db.Date
+  eventDate        DateTime?   @map("event_date") @db.Date
+  status           RoomStatus  @default(active)
+  lastActivityAt   DateTime    @default(now()) @map("last_activity_at") @db.Timestamptz()
+  deletionWarnedAt DateTime?   @map("deletion_warned_at") @db.Timestamptz()
+  closedAt         DateTime?   @map("closed_at") @db.Timestamptz()
+  archivedAt       DateTime?   @map("archived_at") @db.Timestamptz()
+  createdAt        DateTime    @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt        DateTime    @updatedAt @map("updated_at") @db.Timestamptz()
+
+  owner          User            @relation("OwnedRooms", fields: [ownerId], references: [id], onDelete: Restrict)
   members        RoomMember[]
   messages       Message[]
   polls          Poll[]
   finalPlanItems FinalPlanItem[]
-  
 
   @@index([ownerId])
   @@index([inviteCode])
+  @@index([status, lastActivityAt])
+  @@index([status, eventDate])
   @@map("rooms")
 }
 
@@ -217,4 +229,19 @@ model FinalPlanItem {
 
   @@index([roomId])
   @@map("final_plan_items")
+}
+
+model EventMemory {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  roomName     String   @map("room_name") @db.VarChar(120)
+  eventDate    DateTime? @map("event_date") @db.Date
+  participants Json     @default("[]")
+  summary      String?
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("event_memories")
 }

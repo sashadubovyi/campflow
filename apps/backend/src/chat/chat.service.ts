@@ -1,9 +1,13 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { RoomsService } from '../rooms/rooms.service';
 
 @Injectable()
 export class ChatService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly roomsService: RoomsService,
+  ) {}
 
   async assertMembership(userId: string, roomId: string) {
     const member = await this.prisma.roomMember.findUnique({
@@ -32,6 +36,8 @@ export class ChatService {
         },
       },
     });
+
+    await this.roomsService.touchActivity(roomId);
 
     return message;
   }
