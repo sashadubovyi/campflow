@@ -27,3 +27,11 @@ export function useJoinRoom() {
     },
   });
 }
+
+export function useRoom(id: string) {
+  return useQuery({
+    queryKey: ['room', id],
+    queryFn: () => roomsApi.get(id),
+    enabled: !!id,
+  });
+}
