@@ -4,10 +4,12 @@ import { RegisterPage } from '../pages/auth/RegisterPage';
 import { RoomsPage } from '../pages/RoomsPage';
 import { ProtectedRoute } from './ProtectedRoute';
 import { RoomPage } from '../pages/rooms/RoomPage';
+import { JoinByLinkPage } from '../pages/JoinByLinkPage';
 
 export const router: ReturnType<typeof createBrowserRouter> = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
   { path: '/register', element: <RegisterPage /> },
+  { path: '/join/:code', element: <JoinByLinkPage /> },
   {
     path: '/rooms',
     element: (

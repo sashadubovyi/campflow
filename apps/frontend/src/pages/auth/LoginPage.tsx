@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../shared/store/useAuth';
 
 interface LoginForm {
@@ -11,6 +11,8 @@ interface LoginForm {
 export function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirect = searchParams.get('redirect');
   const [serverError, setServerError] = useState<string | null>(null);
 
   const {
@@ -23,7 +25,7 @@ export function LoginPage() {
     setServerError(null);
     try {
       await login(values);
-      navigate('/rooms');
+      navigate(redirect || '/rooms');
     } catch {
       setServerError('Невірний email або пароль');
     }
