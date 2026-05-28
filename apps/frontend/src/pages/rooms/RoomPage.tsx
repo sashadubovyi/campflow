@@ -4,6 +4,7 @@ import { useAuth } from '../../shared/store/useAuth';
 import { MembersPanel } from './MembersPanel';
 import { ChatPanel } from './ChatPanel';
 import { PollsPanel } from './PollsPanel';
+import { InviteButton } from './InviteButton';
 
 export function RoomPage() {
   const { id } = useParams<{ id: string }>();
@@ -49,7 +50,10 @@ export function RoomPage() {
               Camp<span className="text-ember-500">Flow</span>
             </span>
           </div>
-          <span className="font-body text-sm text-forest-700">{user?.fullName}</span>
+          <div className="flex items-center gap-4">
+            <InviteButton inviteCode={room.inviteCode} />
+            <span className="font-body text-sm text-forest-700">{user?.fullName}</span>
+          </div>
         </div>
       </header>
 
