@@ -7,6 +7,8 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePollDto } from './dto/create-poll.dto';
 import { CreateMultiPollDto } from './dto/create-multi-poll.dto';
+import { CreateLocationPollDto } from './dto/create-location-poll.dto';
+import { AddLocationOptionDto } from './dto/add-location-option.dto';
 
 @Injectable()
 export class PollsService {
@@ -106,6 +108,9 @@ export class PollsService {
         position: o.position,
         votes: o._count.votes,
         assignedTo: o.assignedTo,
+        latitude: o.latitude ? Number(o.latitude) : null,
+        longitude: o.longitude ? Number(o.longitude) : null,
+        address: o.address,
       })),
       progress: {
         voted: votedUserIds.size,
@@ -254,5 +259,61 @@ export class PollsService {
     });
 
     return this.getPollResults(userId, option.poll.id);
+  }
+
+  async createLocationPoll(userId: string, dto: CreateLocationPollDto) {
+    await this.assertMember(userId, dto.roomId);
+
+    const poll = await this.prisma.poll.create({
+      data: {
+        roomId: dto.roomId,
+        authorId: userId,
+        type: 'location',
+        title: dto.title,
+        description: dto.description,
+        options: {
+          create: dto.options.map((o, idx) => ({
+            label: o.label,
+            position: idx,
+            latitude: o.latitude,
+            longitude: o.longitude,
+            address: o.address,
+          })),
+        },
+      },
+    });
+
+    return this.getPollResults(userId, poll.id);
+  }
+
+  async addLocationOption(userId: string, pollId: string, dto: AddLocationOptionDto) {
+    const poll = await this.prisma.poll.findUnique({
+      where: { id: pollId },
+      include: { options: { select: { position: true } } },
+    });
+    if (!poll) throw new NotFoundException('Poll not found');
+    await this.assertMember(userId, poll.roomId);
+
+    if (poll.type !== 'location') {
+      throw new BadRequestException('Can only add location options to a location poll');
+    }
+    if (poll.status !== 'open' && poll.status !== 'reopened') {
+      throw new BadRequestException('Poll is not open');
+    }
+
+    const nextPosition = poll.options.length;
+
+    await this.prisma.pollOption.create({
+      data: {
+        pollId,
+        label: dto.label,
+        position: nextPosition,
+        latitude: dto.latitude,
+        longitude: dto.longitude,
+        address: dto.address,
+      },
+    });
+
+    return this.getPollResults(userId, pollId);
   }
 }

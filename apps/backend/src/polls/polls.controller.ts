@@ -15,6 +15,8 @@ import { VoteDto } from './dto/vote.dto';
 import { CurrentUser, AuthenticatedUser } from '../auth/decorators/current-user.decorator';
 import { CreateMultiPollDto } from './dto/create-multi-poll.dto';
 import { AssignOptionDto } from './dto/assign-option.dto';
+import { CreateLocationPollDto } from './dto/create-location-poll.dto';
+import { AddLocationOptionDto } from './dto/add-location-option.dto';
 
 @Controller('polls')
 export class PollsController {
@@ -104,6 +106,25 @@ export class PollsController {
     @Body() dto: AssignOptionDto,
   ) {
     const poll = await this.pollsService.assignOption(user.id, optionId, dto.assignedTo ?? null);
+    this.pollsGateway.broadcastPollUpdate(poll.roomId, poll);
+    return poll;
+  }
+
+  @Post('location')
+  async createLocation(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateLocationPollDto) {
+    const poll = await this.pollsService.createLocationPoll(user.id, dto);
+    this.pollsGateway.broadcastPollCreated(poll.roomId, poll);
+    return poll;
+  }
+
+  @Post(':id/location-option')
+  @HttpCode(HttpStatus.OK)
+  async addLocationOption(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() dto: AddLocationOptionDto,
+  ) {
+    const poll = await this.pollsService.addLocationOption(user.id, id, dto);
     this.pollsGateway.broadcastPollUpdate(poll.roomId, poll);
     return poll;
   }
