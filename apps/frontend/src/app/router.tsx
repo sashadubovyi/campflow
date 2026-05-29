@@ -6,6 +6,7 @@ import { ProtectedRoute } from './ProtectedRoute';
 import { RoomPage } from '../pages/rooms/RoomPage';
 import { JoinByLinkPage } from '../pages/JoinByLinkPage';
 import { ProfilePage } from '../pages/ProfilePage';
+import { ProfileSettingsPage } from '../pages/ProfileSettingsPage';
 
 export const router: ReturnType<typeof createBrowserRouter> = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -32,6 +33,14 @@ export const router: ReturnType<typeof createBrowserRouter> = createBrowserRoute
     element: (
       <ProtectedRoute>
         <ProfilePage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/settings/profile',
+    element: (
+      <ProtectedRoute>
+        <ProfileSettingsPage />
       </ProtectedRoute>
     ),
   },
