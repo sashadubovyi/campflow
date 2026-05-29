@@ -61,7 +61,12 @@ export function RoomPage() {
       <div className="flex-1 grid grid-cols-[20%_60%_20%] overflow-hidden">
         <MembersPanel members={room.members} currentUserId={user?.id ?? ''} />
         <ChatPanel roomId={room.id} roomName={room.name} />
-        <PollsPanel />
+        <PollsPanel
+          roomId={room.id}
+          isAdmin={room.currentUserRole === 'admin'}
+          members={room.members}
+          currentUserId={user?.id ?? ''}
+        />
       </div>
     </div>
   );
