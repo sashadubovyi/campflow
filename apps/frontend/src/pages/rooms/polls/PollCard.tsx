@@ -10,6 +10,7 @@ import {
 import type { PollDetails, PollOption } from '../../../shared/api/polls.api';
 import type { RoomMember } from '../../../shared/api/rooms.api';
 import { Avatar } from '../../../shared/ui/Avatar';
+import { LocationMap } from '../../../shared/ui/map/LocationMap';
 
 interface Props {
   poll: PollDetails;
@@ -136,9 +137,7 @@ function SingleView({
             >
               <div className="flex items-center justify-between gap-2">
                 <span className="text-sm text-forest-900 truncate">{opt.label}</span>
-                <span className="text-xs text-forest-700 font-semibold shrink-0">
-                  {opt.votes}
-                </span>
+                <span className="text-xs text-forest-700 font-semibold shrink-0">{opt.votes}</span>
               </div>
               {totalVotes > 0 && <ProgressBar percent={percent} isWinning={isWinning} />}
             </button>
@@ -199,9 +198,7 @@ function MultiView({
                   {isChosen && <span className="text-white text-[10px]">✓</span>}
                 </span>
                 <span className="text-sm text-forest-900 flex-1 truncate">{opt.label}</span>
-                <span className="text-xs text-forest-700 font-semibold shrink-0">
-                  {opt.votes}
-                </span>
+                <span className="text-xs text-forest-700 font-semibold shrink-0">{opt.votes}</span>
               </div>
               {totalVotes > 0 && <ProgressBar percent={percent} isWinning={isWinning} />}
             </button>
@@ -284,45 +281,58 @@ function LocationView({
 }) {
   const vote = useVote();
 
-  return (
-    <ul className="space-y-1.5">
-      {poll.options.map((opt) => {
-        const isChosen = poll.myVotes.includes(opt.id);
-        const isWinning = opt.votes === maxVotes && opt.votes > 0;
-        const percent = totalVotes > 0 ? (opt.votes / totalVotes) * 100 : 0;
+  // Конвертуємо опції в формат MapPoint для карти
+  const mapPoints = poll.options
+    .filter((o) => o.latitude !== null && o.longitude !== null)
+    .map((o) => ({
+      id: o.id,
+      label: o.label,
+      address: o.address,
+      latitude: o.latitude!,
+      longitude: o.longitude!,
+      votes: o.votes,
+      isWinning: o.votes === maxVotes && o.votes > 0,
+    }));
 
-        return (
-          <li key={opt.id}>
-            <button
-              type="button"
-              disabled={isClosed || vote.isPending}
-              onClick={() => vote.mutate({ pollId: poll.id, optionId: opt.id })}
-              className={`w-full text-left px-3 py-2 rounded-lg border transition disabled:cursor-default ${
-                isChosen
-                  ? 'border-forest-500 bg-forest-50'
-                  : 'border-forest-100 hover:border-forest-500/50'
-              }`}
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <p className="text-sm text-forest-900 truncate">📍 {opt.label}</p>
-                  {opt.address && (
-                    <p className="text-[10px] text-forest-500 truncate">{opt.address}</p>
-                  )}
-                  <p className="text-[10px] text-forest-500 font-mono">
-                    {opt.latitude?.toFixed(4)}, {opt.longitude?.toFixed(4)}
-                  </p>
+  return (
+    <div className="space-y-2">
+      <LocationMap points={mapPoints} height={180} />
+      <ul className="space-y-1.5">
+        {poll.options.map((opt) => {
+          const isChosen = poll.myVotes.includes(opt.id);
+          const isWinning = opt.votes === maxVotes && opt.votes > 0;
+          const percent = totalVotes > 0 ? (opt.votes / totalVotes) * 100 : 0;
+
+          return (
+            <li key={opt.id}>
+              <button
+                type="button"
+                disabled={isClosed || vote.isPending}
+                onClick={() => vote.mutate({ pollId: poll.id, optionId: opt.id })}
+                className={`w-full text-left px-3 py-2 rounded-lg border transition disabled:cursor-default ${
+                  isChosen
+                    ? 'border-forest-500 bg-forest-50'
+                    : 'border-forest-100 hover:border-forest-500/50'
+                }`}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-sm text-forest-900 truncate">📍 {opt.label}</p>
+                    {opt.address && (
+                      <p className="text-[10px] text-forest-500 truncate">{opt.address}</p>
+                    )}
+                  </div>
+                  <span className="text-xs text-forest-700 font-semibold shrink-0">
+                    {opt.votes}
+                  </span>
                 </div>
-                <span className="text-xs text-forest-700 font-semibold shrink-0">
-                  {opt.votes}
-                </span>
-              </div>
-              {totalVotes > 0 && <ProgressBar percent={percent} isWinning={isWinning} />}
-            </button>
-          </li>
-        );
-      })}
-    </ul>
+                {totalVotes > 0 && <ProgressBar percent={percent} isWinning={isWinning} />}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }
 
