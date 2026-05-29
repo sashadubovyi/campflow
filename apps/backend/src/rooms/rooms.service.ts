@@ -10,6 +10,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
 import { PresenceService } from '../presence/presence.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 // 6 символов из A-Z и 0-9. Без I/O/0/1, чтобы не путать визуально.
 const generateInviteCode = customAlphabet('ABCDEFGHJKLMNPQRSTUVWXYZ23456789', 8);
@@ -19,6 +20,7 @@ export class RoomsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly presence: PresenceService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   async createRoom(userId: string, dto: CreateRoomDto) {
@@ -216,5 +218,136 @@ export class RoomsService {
       where: { id: roomId, status: 'active' },
       data: { lastActivityAt: new Date() },
     });
+  }
+
+  // ====== Видалення учасника (адмін) ======
+  async removeMember(adminId: string, roomId: string, memberId: string) {
+    await this.assertAdmin(adminId, roomId);
+
+    const member = await this.prisma.roomMember.findUnique({
+      where: { id: memberId },
+      include: { user: { select: { id: true, fullName: true } } },
+    });
+    if (!member || member.roomId !== roomId) {
+      throw new NotFoundException('Member not found');
+    }
+    if (member.userId === adminId) {
+      throw new BadRequestException('Use leave endpoint to exit room yourself');
+    }
+
+    const room = await this.prisma.room.findUnique({
+      where: { id: roomId },
+      select: { id: true, name: true },
+    });
+
+    await this.prisma.$transaction([
+      this.prisma.roomMember.delete({ where: { id: memberId } }),
+      this.prisma.message.create({
+        data: {
+          roomId,
+          type: 'system',
+          content: `${member.user.fullName} було видалено з кімнати`,
+        },
+      }),
+    ]);
+
+    // Сповіщення видаленому
+    await this.notifications.create(member.userId, 'member_removed', {
+      roomId,
+      roomName: room?.name ?? 'Кімната',
+    });
+
+    return { ok: true };
+  }
+
+  // ====== Самовихід ======
+  async leaveRoom(userId: string, roomId: string) {
+    const member = await this.prisma.roomMember.findUnique({
+      where: { roomId_userId: { roomId, userId } },
+      include: { user: { select: { id: true, fullName: true } } },
+    });
+    if (!member) throw new ForbiddenException('You are not a member of this room');
+
+    const room = await this.prisma.room.findUnique({
+      where: { id: roomId },
+      include: { _count: { select: { members: true } } },
+    });
+    if (!room) throw new NotFoundException('Room not found');
+
+    const otherAdmins = await this.prisma.roomMember.count({
+      where: { roomId, role: 'admin', NOT: { userId } },
+    });
+    const totalMembers = room._count.members;
+    const isLastAdmin = member.role === 'admin' && otherAdmins === 0;
+
+    // Якщо я останній адмін і в кімнаті ще є інші учасники → треба передати права
+    if (isLastAdmin && totalMembers > 1) {
+      throw new BadRequestException({
+        reason: 'transfer_admin_required',
+        message: 'Передайте права адміна іншому учаснику, перш ніж вийти',
+      });
+    }
+
+    // Якщо я останній учасник взагалі — кімната видаляється
+    if (totalMembers === 1) {
+      await this.prisma.room.delete({ where: { id: roomId } });
+      return { ok: true, deleted: true };
+    }
+
+    // Звичайний вихід
+    await this.prisma.$transaction([
+      this.prisma.roomMember.delete({ where: { id: member.id } }),
+      this.prisma.message.create({
+        data: {
+          roomId,
+          type: 'system',
+          content: `${member.user.fullName} залишив(-ла) кімнату`,
+        },
+      }),
+    ]);
+
+    return { ok: true, deleted: false };
+  }
+
+  // ====== Передача прав адміна ======
+  async transferAdmin(adminId: string, roomId: string, newAdminMemberId: string) {
+    await this.assertAdmin(adminId, roomId);
+
+    const newAdmin = await this.prisma.roomMember.findUnique({
+      where: { id: newAdminMemberId },
+      include: { user: { select: { id: true, fullName: true } } },
+    });
+    if (!newAdmin || newAdmin.roomId !== roomId) {
+      throw new NotFoundException('Member not found');
+    }
+    if (newAdmin.role === 'admin') {
+      throw new BadRequestException('User is already admin');
+    }
+
+    const room = await this.prisma.room.findUnique({
+      where: { id: roomId },
+      select: { name: true },
+    });
+
+    await this.prisma.$transaction([
+      this.prisma.roomMember.update({
+        where: { id: newAdmin.id },
+        data: { role: 'admin' },
+      }),
+      this.prisma.message.create({
+        data: {
+          roomId,
+          type: 'system',
+          content: `${newAdmin.user.fullName} тепер адміністратор`,
+        },
+      }),
+    ]);
+
+    await this.notifications.create(newAdmin.userId, 'room_admin_transferred', {
+      roomId,
+      roomName: room?.name ?? 'Кімната',
+    });
+
+    return { ok: true };
   }
 }

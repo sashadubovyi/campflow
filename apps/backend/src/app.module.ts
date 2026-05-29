@@ -16,6 +16,8 @@ import { RoomLifecycleModule } from './room-lifecycle/room-lifecycle.module';
 import { AiModule } from './ai/ai.module';
 import { PresenceModule } from './presence/presence.module';
 import { ContactsModule } from './contacts/contacts.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { InvitesModule } from './invites/invites.module';
 
 @Module({
   imports: [
@@ -36,6 +38,8 @@ import { ContactsModule } from './contacts/contacts.module';
     AiModule,
     PresenceModule,
     ContactsModule,
+    NotificationsModule,
+    InvitesModule,
   ],
   controllers: [AppController],
   providers: [

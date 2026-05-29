@@ -8,6 +8,7 @@ import { JoinByLinkPage } from '../pages/JoinByLinkPage';
 import { ProfilePage } from '../pages/ProfilePage';
 import { ProfileSettingsPage } from '../pages/ProfileSettingsPage';
 import { ContactsPage } from '../pages/ContactsPage';
+import { NotificationsPage } from '../pages/NotificationsPage';
 
 export const router: ReturnType<typeof createBrowserRouter> = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -50,6 +51,14 @@ export const router: ReturnType<typeof createBrowserRouter> = createBrowserRoute
     element: (
       <ProtectedRoute>
         <ContactsPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/notifications',
+    element: (
+      <ProtectedRoute>
+        <NotificationsPage />
       </ProtectedRoute>
     ),
   },

@@ -5,6 +5,7 @@ import { useRooms } from '../shared/api/rooms.hooks';
 import type { RoomListItem } from '../shared/api/rooms.api';
 import { CreateRoomModal } from './rooms/CreateRoomModal';
 import { JoinRoomModal } from './rooms/JoinRoomModal';
+import { useUnreadCount } from '../shared/api/notifications.hooks';
 
 function formatDateRange(startsAt: string | null, endsAt: string | null): string | null {
   if (!startsAt) return null;
@@ -56,6 +57,7 @@ export function RoomsPage() {
             Camp<span className="text-ember-500">Flow</span>
           </h1>
           <div className="flex items-center gap-4">
+            <NotificationsBell />
             <button
               onClick={() => navigate('/contacts')}
               className="text-sm text-forest-600 hover:text-forest-900 font-medium"
@@ -144,5 +146,25 @@ export function RoomsPage() {
         />
       )}
     </div>
+  );
+}
+
+function NotificationsBell() {
+  const { data: count } = useUnreadCount();
+  const navigate = useNavigate();
+
+  return (
+    <button
+      onClick={() => navigate('/notifications')}
+      className="relative text-2xl hover:scale-110 transition"
+      title="Сповіщення"
+    >
+      🔔
+      {count !== undefined && count > 0 && (
+        <span className="absolute -top-1 -right-1 bg-ember-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center">
+          {count > 99 ? '99+' : count}
+        </span>
+      )}
+    </button>
   );
 }

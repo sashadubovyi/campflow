@@ -1,0 +1,52 @@
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { NotificationKind } from '@prisma/client';
+import { NotificationsGateway } from './notifications.gateway';
+import { Prisma } from '@prisma/client';
+
+@Injectable()
+export class NotificationsService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly gateway: NotificationsGateway,
+  ) {}
+
+  async create(userId: string, kind: NotificationKind, payload: Record<string, unknown>) {
+    const notification = await this.prisma.notification.create({
+      data: { userId, kind, payload: payload as Prisma.InputJsonValue },
+    });
+    // Real-time доставка одержувачу
+    this.gateway.emitToUser(userId, 'notification:new', notification);
+    return notification;
+  }
+
+  async list(userId: string) {
+    return this.prisma.notification.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+    });
+  }
+
+  async unreadCount(userId: string): Promise<number> {
+    return this.prisma.notification.count({
+      where: { userId, readAt: null },
+    });
+  }
+
+  async markRead(userId: string, notificationId: string) {
+    await this.prisma.notification.updateMany({
+      where: { id: notificationId, userId },
+      data: { readAt: new Date() },
+    });
+    return { ok: true };
+  }
+
+  async markAllRead(userId: string) {
+    await this.prisma.notification.updateMany({
+      where: { userId, readAt: null },
+      data: { readAt: new Date() },
+    });
+    return { ok: true };
+  }
+}

@@ -64,4 +64,30 @@ export class RoomsController {
   archive(@CurrentUser() user: AuthenticatedUser, @Param('id', new ParseUUIDPipe()) id: string) {
     return this.roomsService.archiveRoom(user.id, id);
   }
+
+  @Delete(':id/members/me')
+  @HttpCode(HttpStatus.OK)
+  leave(@CurrentUser() user: AuthenticatedUser, @Param('id', new ParseUUIDPipe()) id: string) {
+    return this.roomsService.leaveRoom(user.id, id);
+  }
+
+  @Delete(':id/members/:memberId')
+  @HttpCode(HttpStatus.OK)
+  removeMember(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param('memberId', new ParseUUIDPipe()) memberId: string,
+  ) {
+    return this.roomsService.removeMember(user.id, id, memberId);
+  }
+
+  @Patch(':id/members/:memberId/role')
+  @HttpCode(HttpStatus.OK)
+  transferAdmin(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param('memberId', new ParseUUIDPipe()) memberId: string,
+  ) {
+    return this.roomsService.transferAdmin(user.id, id, memberId);
+  }
 }
