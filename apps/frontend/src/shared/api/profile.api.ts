@@ -1,6 +1,9 @@
 import { api } from './client';
 
 export type Gender = 'male' | 'female' | 'unspecified';
+export type Visibility = 'public' | 'contacts' | 'hidden';
+export type InvitePolicy = 'all' | 'contacts' | 'none';
+export type Locale = 'uk' | 'en' | 'ru';
 
 export interface UserLookupResult {
   id: string;
@@ -32,16 +35,56 @@ export interface PublicProfile {
   isContact: boolean;
 }
 
+export interface MyProfile {
+  id: string;
+  username: string;
+  fullName: string;
+  email: string;
+  phone: string | null;
+  avatarUrl: string | null;
+  locale: Locale;
+  bio: string | null;
+  city: string | null;
+  birthDate: string | null;
+  gender: Gender | null;
+  hobbies: string[];
+  hobbiesCustom: string | null;
+  telegram: string | null;
+  whatsapp: string | null;
+  instagram: string | null;
+  facebook: string | null;
+  emailVisibility: Visibility;
+  phoneVisibility: Visibility;
+  telegramVisibility: Visibility;
+  whatsappVisibility: Visibility;
+  instagramVisibility: Visibility;
+  facebookVisibility: Visibility;
+  inviteFrom: InvitePolicy;
+  createdAt: string;
+}
+
+export type UpdateProfilePayload = Partial<
+  Omit<MyProfile, 'id' | 'username' | 'email' | 'avatarUrl' | 'createdAt'>
+>;
+
 export const profileApi = {
   async lookup(username: string): Promise<UserLookupResult> {
-    const { data } = await api.get<UserLookupResult>('/users/lookup', {
-      params: { username },
-    });
+    const { data } = await api.get<UserLookupResult>('/users/lookup', { params: { username } });
     return data;
   },
 
   async getProfile(username: string): Promise<PublicProfile> {
     const { data } = await api.get<PublicProfile>(`/users/${username}`);
+    return data;
+  },
+
+  async getMyProfile(): Promise<MyProfile> {
+    const { data } = await api.get<MyProfile>('/users/me');
+    return data;
+  },
+
+  async updateMyProfile(payload: UpdateProfilePayload): Promise<MyProfile> {
+    const { data } = await api.patch<MyProfile>('/users/me', payload);
     return data;
   },
 };

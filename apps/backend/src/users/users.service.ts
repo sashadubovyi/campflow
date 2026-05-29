@@ -13,21 +13,36 @@ export class UsersService {
   async getProfile(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: {
-        id: true,
-        username: true,
-        fullName: true,
-        email: true,
-        phone: true,
-        avatarUrl: true,
-        locale: true,
-        createdAt: true,
-      },
     });
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-    return user;
+    if (!user) throw new NotFoundException('User not found');
+
+    return {
+      id: user.id,
+      username: user.username,
+      fullName: user.fullName,
+      email: user.email,
+      phone: user.phone,
+      avatarUrl: user.avatarUrl,
+      locale: user.locale,
+      bio: user.bio,
+      city: user.city,
+      birthDate: user.birthDate,
+      gender: user.gender,
+      hobbies: user.hobbies,
+      hobbiesCustom: user.hobbiesCustom,
+      telegram: user.telegram,
+      whatsapp: user.whatsapp,
+      instagram: user.instagram,
+      facebook: user.facebook,
+      emailVisibility: user.emailVisibility,
+      phoneVisibility: user.phoneVisibility,
+      telegramVisibility: user.telegramVisibility,
+      whatsappVisibility: user.whatsappVisibility,
+      instagramVisibility: user.instagramVisibility,
+      facebookVisibility: user.facebookVisibility,
+      inviteFrom: user.inviteFrom,
+      createdAt: user.createdAt,
+    };
   }
 
   async updateProfile(userId: string, dto: UpdateProfileDto) {
@@ -37,19 +52,26 @@ export class UsersService {
         fullName: dto.fullName,
         phone: dto.phone,
         locale: dto.locale,
-      },
-      select: {
-        id: true,
-        username: true,
-        fullName: true,
-        email: true,
-        phone: true,
-        avatarUrl: true,
-        locale: true,
-        createdAt: true,
+        bio: dto.bio,
+        city: dto.city,
+        birthDate: dto.birthDate ? new Date(dto.birthDate) : dto.birthDate,
+        gender: dto.gender,
+        hobbies: dto.hobbies,
+        hobbiesCustom: dto.hobbiesCustom,
+        telegram: dto.telegram,
+        whatsapp: dto.whatsapp,
+        instagram: dto.instagram,
+        facebook: dto.facebook,
+        emailVisibility: dto.emailVisibility,
+        phoneVisibility: dto.phoneVisibility,
+        telegramVisibility: dto.telegramVisibility,
+        whatsappVisibility: dto.whatsappVisibility,
+        instagramVisibility: dto.instagramVisibility,
+        facebookVisibility: dto.facebookVisibility,
+        inviteFrom: dto.inviteFrom,
       },
     });
-    return user;
+    return this.getProfile(user.id);
   }
 
   // === Пошук юзера за username (для майбутніх запрошень) ===

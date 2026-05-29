@@ -135,9 +135,8 @@ export function ProfilePage() {
           )}
           {profile.isSelf && (
             <button
-              disabled
-              className="mt-5 w-full border border-forest-100 text-forest-500 font-semibold py-2 rounded-xl text-sm cursor-not-allowed"
-              title="Доступно в наступному блоці"
+              onClick={() => navigate('/settings/profile')}
+              className="mt-5 w-full border border-forest-500 text-forest-700 hover:bg-forest-50 font-semibold py-2 rounded-xl text-sm transition"
             >
               ✎ Редагувати профіль
             </button>
