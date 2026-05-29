@@ -25,6 +25,7 @@ model User {
   locale       UserLocale @default(uk)
   createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt    DateTime   @updatedAt @map("updated_at") @db.Timestamptz()
+  lastSeenAt   DateTime  @default(now()) @map("last_seen_at") @db.Timestamptz()
 
   refreshTokens   RefreshToken[]
   ownedRooms      Room[]         @relation("OwnedRooms")

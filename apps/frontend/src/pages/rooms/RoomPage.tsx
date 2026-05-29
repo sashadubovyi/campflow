@@ -5,12 +5,14 @@ import { MembersPanel } from './MembersPanel';
 import { ChatPanel } from './ChatPanel';
 import { PollsPanel } from './PollsPanel';
 import { InviteButton } from './InviteButton';
+import { usePresence } from '../../shared/api/usePresence';
 
 export function RoomPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { data: room, isLoading, isError } = useRoom(id ?? '');
+  usePresence(id ?? '');
 
   if (isLoading) {
     return (

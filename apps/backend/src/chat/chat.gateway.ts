@@ -15,6 +15,7 @@ import { Server, Socket } from 'socket.io';
 import { ChatService } from './chat.service';
 import { SendMessageDto } from './dto/send-message.dto';
 import type { JwtPayload } from '../auth/strategies/jwt.strategy';
+import { PresenceService } from '../presence/presence.service';
 
 interface AuthenticatedSocket extends Socket {
   data: {
@@ -39,8 +40,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   constructor(
     private readonly chatService: ChatService,
-    private readonly jwt: JwtService,
+    private readonly jwtService: JwtService,
     private readonly config: ConfigService,
+    private readonly presence: PresenceService,
   ) {}
 
   async handleConnection(client: AuthenticatedSocket) {
@@ -49,12 +51,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (!token) {
         throw new Error('No token provided');
       }
-      const payload = await this.jwt.verifyAsync<JwtPayload>(token, {
+      const payload = await this.jwtService.verifyAsync<JwtPayload>(token, {
         secret: this.config.getOrThrow<string>('JWT_ACCESS_SECRET'),
       });
       client.data.userId = payload.sub;
       client.data.email = payload.email;
       this.logger.log(`Client connected: ${payload.email} (${client.id})`);
+
+      // ↓↓↓ Presence: онлайн ↓↓↓
+      await this.presence.markOnline(payload.sub);
+      this.server.emit('presence:online', { userId: payload.sub });
     } catch (err) {
       this.logger.warn(`Connection rejected: ${(err as Error).message}`);
       client.emit('error', { message: 'Unauthorized' });
@@ -66,14 +72,23 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.logger.log(`Client disconnected: ${client.data?.email ?? client.id}`);
     if (!client.data?.userId) return;
 
+    const userId = client.data.userId;
+
     // Сообщаем всем комнатам, в которых был сокет, что юзер вышел
     for (const room of client.rooms) {
       if (room.startsWith('room:')) {
         const roomId = room.slice(5);
-        await this.chatService.touchLastSeen(client.data.userId, roomId).catch(() => {});
-        client.to(room).emit('presence:leave', { userId: client.data.userId });
+        await this.chatService.touchLastSeen(userId, roomId).catch(() => {});
+        client.to(room).emit('presence:leave', { userId });
       }
     }
+
+    // ↓↓↓ Presence: офлайн ↓↓↓
+    await this.presence.markOffline(userId);
+    this.server.emit('presence:offline', {
+      userId,
+      lastSeenAt: new Date().toISOString(),
+    });
   }
 
   @SubscribeMessage('room:join')
@@ -145,16 +160,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   private extractToken(client: Socket): string | null {
-    // 1) Из auth-поля handshake (рекомендованный способ Socket.IO)
     const fromAuth = client.handshake.auth?.token;
     if (typeof fromAuth === 'string' && fromAuth.length > 0) return fromAuth;
 
-    // 2) Из заголовка Authorization
     const header = client.handshake.headers.authorization;
     if (typeof header === 'string' && header.startsWith('Bearer ')) {
       return header.slice(7);
     }
-
     return null;
   }
 }

@@ -9,13 +9,17 @@ import { customAlphabet } from 'nanoid';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
+import { PresenceService } from '../presence/presence.service';
 
 // 6 символов из A-Z и 0-9. Без I/O/0/1, чтобы не путать визуально.
 const generateInviteCode = customAlphabet('ABCDEFGHJKLMNPQRSTUVWXYZ23456789', 8);
 
 @Injectable()
 export class RoomsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly presence: PresenceService,
+  ) {}
 
   async createRoom(userId: string, dto: CreateRoomDto) {
     this.validateDates(dto.startsAt, dto.endsAt);
@@ -67,7 +71,13 @@ export class RoomsService {
         members: {
           include: {
             user: {
-              select: { id: true, fullName: true, email: true, avatarUrl: true },
+              select: {
+                id: true,
+                fullName: true,
+                email: true,
+                avatarUrl: true,
+                lastSeenAt: true,
+              },
             },
           },
           orderBy: { joinedAt: 'asc' },
@@ -88,7 +98,10 @@ export class RoomsService {
         id: m.id,
         role: m.role,
         joinedAt: m.joinedAt,
-        user: m.user,
+        user: {
+          ...m.user,
+          isOnline: this.presence.isOnline(m.user.id),
+        },
       })),
     };
   }

@@ -23,6 +23,8 @@ export interface RoomMember {
     fullName: string;
     email: string;
     avatarUrl: string | null;
+    isOnline: boolean;
+    lastSeenAt: string;
   };
 }
 

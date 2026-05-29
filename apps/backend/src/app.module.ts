@@ -14,6 +14,7 @@ import { FinalPlanModule } from './final-plan/final-plan.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { RoomLifecycleModule } from './room-lifecycle/room-lifecycle.module';
 import { AiModule } from './ai/ai.module';
+import { PresenceModule } from './presence/presence.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { AiModule } from './ai/ai.module';
     FinalPlanModule,
     RoomLifecycleModule,
     AiModule,
+    PresenceModule,
   ],
   controllers: [AppController],
   providers: [
