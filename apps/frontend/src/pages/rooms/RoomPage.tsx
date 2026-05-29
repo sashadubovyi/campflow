@@ -53,7 +53,7 @@ export function RoomPage() {
             </span>
           </div>
           <div className="flex items-center gap-4">
-            <InviteButton inviteCode={room.inviteCode} />
+            <InviteButton roomId={room.id} inviteCode={room.inviteCode} />
             <span className="font-body text-sm text-forest-700">{user?.fullName}</span>
           </div>
         </div>
@@ -61,7 +61,12 @@ export function RoomPage() {
 
       {/* Трипанельний layout 20 / 60 / 20 */}
       <div className="flex-1 grid grid-cols-[20%_60%_20%] min-h-0 overflow-hidden">
-        <MembersPanel members={room.members} currentUserId={user?.id ?? ''} />
+        <MembersPanel
+          roomId={room.id}
+          members={room.members}
+          currentUserId={user?.id ?? ''}
+          isAdmin={room.currentUserRole === 'admin'}
+        />
         <ChatPanel roomId={room.id} roomName={room.name} />
         <PollsPanel
           roomId={room.id}

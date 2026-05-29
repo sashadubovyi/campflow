@@ -1,11 +1,11 @@
 # 🏕️ CampFlow
 
 > **A social platform for organizing group trips and events.**
-> Real-time chat, polls, maps, and a final shared plan — built on a serious full-stack architecture.
+> Real-time chat, polls, maps, invitations, and a final shared plan — built on a serious full-stack architecture.
 
 CampFlow started as "Asana for vacations" and grew into a full social platform for planning shared adventures with friends. A group creates a private room, talks in real time, votes on dates / destinations / packing lists / map locations, and an admin locks the agreed choices into a **Final Plan**. After the event, the room is automatically cleaned up — leaving a small memory in each participant's profile.
 
-This is a portfolio project built to demonstrate full-stack engineering at a mid-level depth: a modular NestJS backend, real-time WebSockets, a relational data model with transactions and cron jobs, an LLM integration with graceful fallback, and a polished React frontend with maps, presence, and field-level privacy.
+This is a portfolio project built to demonstrate full-stack engineering at a mid-level depth: a modular NestJS backend, real-time WebSockets across two namespaces, a relational data model with transactions and cron jobs, an LLM integration with graceful fallback, and a polished React frontend with maps, presence, field-level privacy, and a notifications center.
 
 ---
 
@@ -13,9 +13,13 @@ This is a portfolio project built to demonstrate full-stack engineering at a mid
 
 ### Working today
 - **🔐 Authentication** — JWT access/refresh with rotation, bcrypt, httpOnly refresh cookies, server-side session revocation.
-- **👤 User profiles** — unique `@username` generated from email at registration. Public profile pages (`/u/:username`) with **field-level privacy** (every contact field is `public` / `contacts only` / `hidden` independently).
-- **🚪 Private rooms** — invite by short code or shareable link with auto-join, admin/member roles, soft delete.
-- **💬 Real-time chat** — Socket.IO with JWT handshake, message history (cursor pagination), typing indicators, presence.
+- **👤 User profiles** — unique `@username` generated from email at registration. Public profile pages (`/u/:username`) with **field-level privacy** (every contact field is `public` / `contacts only` / `hidden` independently). Full profile editor with bio, city, birthday, gender, hobby tags, all contact fields, visibility per field, and invite policy.
+- **📒 Contacts** — personal "friends without consent" address book. One-sided, no approval needed. Detects mutual connections (🔁 badge) with a single batched query.
+- **📩 Room invites by username** — invite anyone with a username search and a debounced "can invite?" preflight check. Recipients see a notifications card with **Accept / Later / Decline** buttons. Real-time delivery via a dedicated WebSocket namespace.
+- **🔔 Notifications center** — bell icon in the header with unread counter, full `/notifications` page with type-specific cards (invites, member removed, admin transferred, system).
+- **🚪 Private rooms** — invite by short code, shareable link with auto-join, or by username. Admin / member roles. Soft delete and lifecycle-driven cleanup.
+- **👥 Room membership management** — admins remove members, anyone can leave, and the last admin in a populated room must **transfer admin rights** (with a dedicated modal listing candidates ordered by `joinedAt`). If the last member leaves, the room and all its data are cascade-deleted.
+- **💬 Real-time chat** — Socket.IO with JWT handshake, message history (cursor pagination), typing indicators, presence, automatic system messages on key events ("X left the room", "Y was made admin", etc.).
 - **🟢 Online presence** — avatars show online state via a colored ring and brightness; offline members show "last seen X ago".
 - **🗳️ Polls (3 types)** with optimistic UI, live `X of Y voted` progress, and real-time updates:
   - **Single choice** — dates, destinations (one vote per user).
@@ -27,9 +31,7 @@ This is a portfolio project built to demonstrate full-stack engineering at a mid
 - **♻️ Room lifecycle** — daily cron cleanup (event date + 2 days, or 15 days of inactivity), in-chat warning two days before deletion, automatic memory snapshot to participants' profiles.
 
 ### Coming next
-- **📒 Contacts ("friends without consent")** — personal address book; one-sided, no approval needed.
-- **📩 Room invites by username** with a dedicated notifications center.
-- **🛡️ Field-level privacy editor + user blocking** — control who sees what, who can invite you, who is blocked.
+- **🚫 User blocking** — symmetric block: mutual message hiding in shared rooms, automatic contact removal, invitation prevention.
 - **🌍 Internationalization** — Ukrainian, English, Russian (UI + AI responses).
 - **🚀 Deployment** — Vercel + Railway with a live demo.
 
@@ -43,7 +45,7 @@ This is a portfolio project built to demonstrate full-stack engineering at a mid
 | Runtime / Framework | Node.js 20, **NestJS 10** (TypeScript) |
 | Database | **PostgreSQL 16** with `citext` extension |
 | ORM | **Prisma 6** (type-safe queries, SQL migrations) |
-| Real-time | **Socket.IO** (WebSocket gateway with JWT auth) |
+| Real-time | **Socket.IO** (two WebSocket gateways: `/ws` for chat/polls/presence, `/notifications` for delivery) |
 | Cache | **Redis 7** |
 | Auth | JWT (access + refresh), Passport, bcrypt |
 | Scheduling | `@nestjs/schedule` (cron) |
@@ -61,7 +63,7 @@ This is a portfolio project built to demonstrate full-stack engineering at a mid
 | Forms | react-hook-form + `useFieldArray` for dynamic option lists |
 | Maps | **React-Leaflet** + OpenStreetMap tiles |
 | Geocoding | Nominatim (OSM) for reverse-geocoding |
-| Real-time | socket.io-client (presence, chat, polls) |
+| Real-time | socket.io-client (presence, chat, polls, notifications) |
 
 ### Infrastructure
 - **pnpm workspaces** monorepo
@@ -84,7 +86,10 @@ campflow/
 │   │   └── src/
 │   │       ├── auth/              # JWT auth, guards, strategies
 │   │       ├── users/             # profiles, public profile, field-level privacy
-│   │       ├── rooms/             # private rooms, invites, roles
+│   │       ├── contacts/          # personal address book
+│   │       ├── rooms/             # private rooms, invites, roles, member management
+│   │       ├── invites/           # room invitations by username
+│   │       ├── notifications/     # notifications center + WS gateway
 │   │       ├── chat/              # WebSocket gateway + REST history
 │   │       ├── polls/             # single / multi / location polls + voting
 │   │       ├── final-plan/        # poll approval, plan snapshots
@@ -96,10 +101,10 @@ campflow/
 │   └── frontend/                  # React + Vite + Tailwind
 │       └── src/
 │           ├── app/               # router, ProtectedRoute
-│           ├── pages/             # rooms, profile, auth pages
+│           ├── pages/             # rooms, profile, settings, contacts, notifications, auth
 │           ├── shared/
 │           │   ├── api/           # axios client, REST + WS hooks
-│           │   ├── socket/        # singleton socket.io-client
+│           │   ├── socket/        # singleton socket.io clients (chat + notifications)
 │           │   ├── store/         # Zustand auth store
 │           │   ├── lib/           # helpers (relative time)
 │           │   └── ui/            # Avatar, map components
@@ -115,8 +120,11 @@ campflow/
 |-------|---------|
 | `users` | account, public profile (bio, city, birthDate, gender, hobbies), all contact fields, **field-level visibility settings**, invite-policy, `lastSeenAt` |
 | `refresh_tokens` | hashed refresh tokens with rotation / revocation |
+| `contacts` | one-sided personal address book (`owner` → `contact`) |
 | `rooms` | private rooms, invite codes, status, lifecycle timestamps |
 | `room_members` | user ↔ room with `admin` / `member` role |
+| `room_invites` | invitations by username with `pending` / `accepted` / `declined` / `deferred` / `cancelled` status |
+| `notifications` | per-user notifications with `kind` (room_invite, member_removed, admin_transferred, …) and JSON payload |
 | `messages` | chat messages (`text` / `system`) |
 | `polls` | polls with type (`single_choice` / `multi_choice` / `location`), status, assignment toggle |
 | `poll_options` | label, coordinates (`Decimal(9,6)`), address, optional assignee |
@@ -125,7 +133,7 @@ campflow/
 | `event_memories` | per-user memory after the room is gone |
 | `ai_interactions` | log/cache of every Gemini call |
 
-All foreign keys use `ON DELETE CASCADE` from the room — deleting a room atomically removes its chat, polls, options, votes, and plan.
+All foreign keys use `ON DELETE CASCADE` from the room — deleting a room atomically removes its chat, polls, options, votes, plan, and invitations.
 
 ---
 
@@ -142,6 +150,8 @@ A room is automatically deleted by the **earliest** of these conditions:
 
 A daily cron job (03:00) posts an in-chat warning **2 days before** deletion and removes expired rooms. Before deletion (or on manual close by an admin), an AI summary is generated, the chat is cleared, and a small memory (event name, date, participants) is saved to each member's profile.
 
+Additionally, the room is **deleted immediately** when the last member leaves (cascading all related data atomically).
+
 This keeps the database lean at scale: abandoned rooms self-clean while active ones live as long as they're used.
 
 ---
@@ -151,12 +161,34 @@ This keeps the database lean at scale: abandoned rooms self-clean while active o
 Every contact field on a user profile (`email`, `phone`, `telegram`, `whatsapp`, `instagram`, `facebook`) has its **own visibility setting**:
 
 - **Public** — visible to everyone.
-- **Contacts only** — visible only to users who added this person to their contacts (Block 9, in progress).
+- **Contacts only** — visible only to users who added this person to their contacts.
 - **Hidden** — not shown at all, not even the field label.
 
 The backend enforces this per-field on every public profile request. The UI honors it transparently — hidden fields simply don't render.
 
 > This is one of the design choices that makes CampFlow feel like a real product rather than a toy demo: each user owns their data without all-or-nothing decisions.
+
+---
+
+## 📩 Invitations & Notifications
+
+Anyone in a room can invite others by **username**. The system performs a real-time **preflight check** (`/can-invite`) to instantly show whether an invitation is possible — with four explicit rejection reasons (user not found, already a member, already invited, blocked by recipient's privacy policy).
+
+Recipients see invitations in two places at once:
+- A dedicated `/notifications` page with full action cards.
+- A bell icon in the header with a live unread counter — both update in real time via a separate `/notifications` WebSocket namespace.
+
+Invitations have three actions: **Accept** (joins the room and notifies the inviter), **Later** (deferred state, stays in notifications), **Decline** (sends a soft notification to the inviter, then disappears).
+
+---
+
+## 👥 Member Management
+
+Admins can **remove any non-self member** from a room — the action posts a system message in chat and sends a notification to the removed user.
+
+Any member can **leave on their own**. If they are the **last admin with other members present**, the UI opens a *Transfer Admin Rights* modal listing candidates (ordered by `joinedAt`). Picking one (or accepting the default first candidate) transfers admin role atomically with a system chat message and a notification to the new admin.
+
+If a member is the **last person in the room**, leaving deletes the room entirely (cascading chat, polls, votes, invites, and the final plan).
 
 ---
 
@@ -241,9 +273,16 @@ Health check: `GET http://localhost:3001/api/health`.
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/users/me` | Full profile of current user |
-| PATCH | `/api/users/me` | Update name / phone / locale |
+| PATCH | `/api/users/me` | Update profile (any field including visibility) |
 | GET | `/api/users/lookup?username=...` | Find a user by username |
 | GET | `/api/users/:username` | Public profile (with field-level privacy applied) |
+
+### Contacts
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/contacts` | List my contacts (with mutual detection) |
+| POST | `/api/contacts` | Add user to my contacts |
+| DELETE | `/api/contacts/:contactId` | Remove from contacts |
 
 ### Rooms
 | Method | Endpoint | Description |
@@ -255,6 +294,28 @@ Health check: `GET http://localhost:3001/api/health`.
 | PATCH | `/api/rooms/:id` | Update (admin) |
 | POST | `/api/rooms/:id/regenerate-invite` | New invite code (admin) |
 | POST | `/api/rooms/:id/close` | Close room with AI summary (admin) |
+| DELETE | `/api/rooms/:id/members/me` | Leave the room |
+| DELETE | `/api/rooms/:id/members/:memberId` | Remove a member (admin) |
+| PATCH | `/api/rooms/:id/members/:memberId/role` | Transfer admin rights |
+
+### Invites
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/rooms/:roomId/can-invite?username=...` | Preflight: can I invite this user? |
+| POST | `/api/rooms/:roomId/invites` | Send invitation |
+| GET | `/api/invites/incoming` | My pending invitations |
+| POST | `/api/invites/:id/accept` | Accept → join room |
+| POST | `/api/invites/:id/decline` | Decline |
+| POST | `/api/invites/:id/defer` | Defer (mark as "Later") |
+
+### Notifications
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/notifications` | List notifications (newest first) |
+| GET | `/api/notifications/unread-count` | Unread counter for header bell |
+| POST | `/api/notifications/:id/read` | Mark one read |
+| POST | `/api/notifications/read-all` | Mark all read |
+| *WS* | `/notifications` | `notification:new` real-time delivery |
 
 ### Chat
 | Method | Endpoint | Description |
@@ -294,9 +355,11 @@ Health check: `GET http://localhost:3001/api/health`.
 - [x] Frontend: interactive maps (Leaflet + Nominatim)
 - [x] Frontend: online presence (avatar ring + brightness + last-seen)
 - [x] Frontend: public profile pages with field-level privacy
-- [ ] Frontend: contacts (personal address book, no approval needed)
-- [ ] Frontend: room invites by username + notifications center
-- [ ] Frontend: privacy editor + user blocking
+- [x] Frontend: profile editor (bio, hobbies, contacts, per-field visibility, invite policy)
+- [x] Frontend: contacts (personal address book with mutual detection)
+- [x] Frontend: room invites by username + notifications center (with dedicated WS namespace)
+- [x] Frontend: member management (remove, leave, transfer admin)
+- [ ] Frontend: user blocking
 - [ ] Frontend: i18n (Ukrainian / English / Russian)
 - [ ] Frontend: AI assistant UI + Final Plan tab
 - [ ] Deployment (Vercel + Railway/Render) with a live demo
