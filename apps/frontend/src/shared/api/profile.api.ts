@@ -33,6 +33,7 @@ export interface PublicProfile {
   facebook: string | null;
   isSelf: boolean;
   isContact: boolean;
+  isMutual: boolean;
 }
 
 export interface MyProfile {

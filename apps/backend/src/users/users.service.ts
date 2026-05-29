@@ -2,12 +2,14 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { PresenceService } from '../presence/presence.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ContactsService } from '../contacts/contacts.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly presence: PresenceService,
+    private readonly contacts: ContactsService,
   ) {}
 
   async getProfile(userId: string) {
@@ -100,7 +102,8 @@ export class UsersService {
     if (!user) throw new NotFoundException('User not found');
 
     // Чи viewer є в контактах user'а? (для Блоку 9 — поки завжди false)
-    const isContact = false;
+    const isContact = await this.contacts.isContact(viewerId, user.id);
+    const isMutual = await this.contacts.isMutual(viewerId, user.id);
 
     // Хелпер: чи показувати поле згідно з visibility
     const canSee = (visibility: 'public' | 'contacts' | 'hidden') => {
@@ -135,6 +138,7 @@ export class UsersService {
       // UI-зручність
       isSelf: user.id === viewerId,
       isContact,
+      isMutual,
     };
   }
 }

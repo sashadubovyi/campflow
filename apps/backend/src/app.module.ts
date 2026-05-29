@@ -15,6 +15,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { RoomLifecycleModule } from './room-lifecycle/room-lifecycle.module';
 import { AiModule } from './ai/ai.module';
 import { PresenceModule } from './presence/presence.module';
+import { ContactsModule } from './contacts/contacts.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { PresenceModule } from './presence/presence.module';
     RoomLifecycleModule,
     AiModule,
     PresenceModule,
+    ContactsModule,
   ],
   controllers: [AppController],
   providers: [

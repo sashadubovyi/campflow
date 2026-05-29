@@ -7,6 +7,7 @@ import { RoomPage } from '../pages/rooms/RoomPage';
 import { JoinByLinkPage } from '../pages/JoinByLinkPage';
 import { ProfilePage } from '../pages/ProfilePage';
 import { ProfileSettingsPage } from '../pages/ProfileSettingsPage';
+import { ContactsPage } from '../pages/ContactsPage';
 
 export const router: ReturnType<typeof createBrowserRouter> = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -41,6 +42,14 @@ export const router: ReturnType<typeof createBrowserRouter> = createBrowserRoute
     element: (
       <ProtectedRoute>
         <ProfileSettingsPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/contacts',
+    element: (
+      <ProtectedRoute>
+        <ContactsPage />
       </ProtectedRoute>
     ),
   },

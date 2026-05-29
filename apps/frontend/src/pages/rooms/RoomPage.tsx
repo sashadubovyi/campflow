@@ -37,7 +37,7 @@ export function RoomPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-forest-50">
+    <div className="h-[100dvh] flex flex-col bg-forest-50 overflow-hidden">
       {/* Верхній хедер */}
       <header className="bg-white border-b border-forest-100 shrink-0">
         <div className="px-6 py-3 flex items-center justify-between">
@@ -60,7 +60,7 @@ export function RoomPage() {
       </header>
 
       {/* Трипанельний layout 20 / 60 / 20 */}
-      <div className="flex-1 grid grid-cols-[20%_60%_20%] overflow-hidden">
+      <div className="flex-1 grid grid-cols-[20%_60%_20%] min-h-0 overflow-hidden">
         <MembersPanel members={room.members} currentUserId={user?.id ?? ''} />
         <ChatPanel roomId={room.id} roomName={room.name} />
         <PollsPanel

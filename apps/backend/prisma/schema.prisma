@@ -67,6 +67,8 @@ model User {
   createdPolls    Poll[]
   eventMemories   EventMemory[]
   aiInteractions  AiInteraction[]
+  contactsOwned   Contact[]       @relation("ContactsOwned")
+  contactsOf      Contact[]       @relation("ContactsOf")
 
   @@map("users")
 }
@@ -311,4 +313,19 @@ model AiInteraction {
   @@index([userId])
   @@index([kind])
   @@map("ai_interactions")
+}
+
+model Contact {
+  id         String   @id @default(uuid()) @db.Uuid
+  ownerId    String   @map("owner_id") @db.Uuid
+  contactId  String   @map("contact_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  owner   User @relation("ContactsOwned", fields: [ownerId], references: [id], onDelete: Cascade)
+  contact User @relation("ContactsOf", fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@unique([ownerId, contactId])
+  @@index([ownerId])
+  @@index([contactId])
+  @@map("contacts")
 }

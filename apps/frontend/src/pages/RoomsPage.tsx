@@ -56,6 +56,12 @@ export function RoomsPage() {
             Camp<span className="text-ember-500">Flow</span>
           </h1>
           <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate('/contacts')}
+              className="text-sm text-forest-600 hover:text-forest-900 font-medium"
+            >
+              📒 Контакти
+            </button>
             <span className="text-forest-700 text-sm">{user?.fullName}</span>
             <button
               onClick={logout}
