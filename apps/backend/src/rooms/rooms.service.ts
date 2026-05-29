@@ -73,6 +73,7 @@ export class RoomsService {
             user: {
               select: {
                 id: true,
+                username: true,
                 fullName: true,
                 email: true,
                 avatarUrl: true,

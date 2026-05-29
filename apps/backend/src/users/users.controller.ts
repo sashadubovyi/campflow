@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Query } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { CurrentUser, AuthenticatedUser } from '../auth/decorators/current-user.decorator';
@@ -15,5 +15,17 @@ export class UsersController {
   @Patch('me')
   updateMe(@CurrentUser() user: AuthenticatedUser, @Body() dto: UpdateProfileDto) {
     return this.usersService.updateProfile(user.id, dto);
+  }
+
+  // Швидкий пошук юзера за username — для подальших запрошень у кімнати
+  @Get('lookup')
+  lookupByUsername(@Query('username') username: string) {
+    return this.usersService.lookupByUsername(username);
+  }
+
+  // Публічний профіль за username (з приватністю)
+  @Get(':username')
+  getPublicProfile(@Param('username') username: string, @CurrentUser() viewer: AuthenticatedUser) {
+    return this.usersService.getPublicProfile(username, viewer.id);
   }
 }

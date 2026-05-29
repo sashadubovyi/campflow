@@ -16,29 +16,77 @@ enum UserLocale {
 }
 
 model User {
-  id           String     @id @default(uuid()) @db.Uuid
-  fullName     String     @map("full_name") @db.VarChar(120)
-  email        String     @unique @db.Citext
-  passwordHash String     @map("password_hash") @db.VarChar(255)
-  phone        String?    @db.VarChar(32)
-  avatarUrl    String?    @map("avatar_url")
-  locale       UserLocale @default(uk)
-  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz()
-  updatedAt    DateTime   @updatedAt @map("updated_at") @db.Timestamptz()
-  lastSeenAt   DateTime  @default(now()) @map("last_seen_at") @db.Timestamptz()
+  id              String   @id @default(uuid()) @db.Uuid
+  email           String   @unique @db.Citext
+  username        String   @unique @db.VarChar(32)
+  passwordHash    String   @map("password_hash")
+  fullName        String   @map("full_name")
+  phone           String?
+  avatarUrl       String?  @map("avatar_url")
+  locale          UserLocale @default(uk)
+  lastSeenAt      DateTime @default(now()) @map("last_seen_at") @db.Timestamptz()
 
+  // Розширений профіль (поки без UI редагування — закладено під Блок 9)
+  bio             String?  @db.Text
+  city            String?  @db.VarChar(100)
+  birthDate       DateTime? @map("birth_date") @db.Date
+  gender          Gender?
+  hobbies         String[] @default([])
+  hobbiesCustom   String?  @map("hobbies_custom") @db.VarChar(200)
+
+  // Контакти
+  telegram        String?  @db.VarChar(64)
+  whatsapp        String?  @db.VarChar(32)
+  instagram       String?  @db.VarChar(64)
+  facebook        String?  @db.VarChar(64)
+
+  // Приватність контактних полів (за замовчуванням — приховано)
+  emailVisibility     FieldVisibility @default(hidden) @map("email_visibility")
+  phoneVisibility     FieldVisibility @default(hidden) @map("phone_visibility")
+  telegramVisibility  FieldVisibility @default(hidden) @map("telegram_visibility")
+  whatsappVisibility  FieldVisibility @default(hidden) @map("whatsapp_visibility")
+  instagramVisibility FieldVisibility @default(hidden) @map("instagram_visibility")
+  facebookVisibility  FieldVisibility @default(hidden) @map("facebook_visibility")
+
+  // Налаштування приватності запрошень (для Блоку 11)
+  inviteFrom      InvitePolicy @default(all) @map("invite_from")
+
+  // Технічне
+  usernameChangedAt DateTime? @map("username_changed_at") @db.Timestamptz()
+
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  // Зв'язки
   refreshTokens   RefreshToken[]
-  ownedRooms      Room[]         @relation("OwnedRooms")
+  ownedRooms      Room[]          @relation("OwnedRooms")
   memberships     RoomMember[]
   messages        Message[]
-  polls           Poll[]
   votes           PollVote[]
-  assignedOptions PollOption[]   @relation("AssignedOptions")
+  assignedItems   PollOption[]    @relation("AssignedOptions")
+  createdPolls    Poll[]
   eventMemories   EventMemory[]
   aiInteractions  AiInteraction[]
 
-  @@index([email])
   @@map("users")
+}
+
+enum Gender {
+  male
+  female
+  unspecified
+}
+
+enum FieldVisibility {
+  public      // бачать усі
+  contacts    // тільки ті, кого я додав у контакти
+  hidden      // не показується взагалі (навіть заголовок)
+}
+
+enum InvitePolicy {
+  all         // всі можуть запрошувати
+  contacts    // тільки контакти
+  none        // ніхто
 }
 
 model RefreshToken {

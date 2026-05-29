@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import type { RoomMember } from '../../shared/api/rooms.api';
 import { Avatar } from '../../shared/ui/Avatar';
 import { relativeTime } from '../../shared/lib/relativeTime';
@@ -8,6 +9,8 @@ interface Props {
 }
 
 export function MembersPanel({ members, currentUserId }: Props) {
+  const navigate = useNavigate();
+
   // Сортуємо: онлайн нагору, в межах груп — за іменем
   const sortMembers = (arr: RoomMember[]) =>
     [...arr].sort((a, b) => {
@@ -19,6 +22,10 @@ export function MembersPanel({ members, currentUserId }: Props) {
   const regular = sortMembers(members.filter((m) => m.role === 'member'));
 
   const onlineCount = members.filter((m) => m.user.isOnline).length;
+
+  function openProfile(username: string) {
+    navigate(`/u/${username}`);
+  }
 
   return (
     <aside className="h-full bg-white border-r border-forest-100 flex flex-col">
@@ -32,10 +39,20 @@ export function MembersPanel({ members, currentUserId }: Props) {
 
       <div className="flex-1 overflow-y-auto px-2 py-3 space-y-4">
         {admins.length > 0 && (
-          <MemberGroup title="Адміністратори" members={admins} currentUserId={currentUserId} />
+          <MemberGroup
+            title="Адміністратори"
+            members={admins}
+            currentUserId={currentUserId}
+            onOpen={openProfile}
+          />
         )}
         {regular.length > 0 && (
-          <MemberGroup title="Учасники" members={regular} currentUserId={currentUserId} />
+          <MemberGroup
+            title="Учасники"
+            members={regular}
+            currentUserId={currentUserId}
+            onOpen={openProfile}
+          />
         )}
       </div>
     </aside>
@@ -46,53 +63,58 @@ function MemberGroup({
   title,
   members,
   currentUserId,
+  onOpen,
 }: {
   title: string;
   members: RoomMember[];
   currentUserId: string;
+  onOpen: (username: string) => void;
 }) {
   return (
     <div>
       <p className="font-body text-xs font-medium text-forest-500 px-2 mb-1.5">{title}</p>
       <ul className="space-y-0.5">
         {members.map((m) => (
-          <li
-            key={m.id}
-            className="flex items-center gap-3 px-2 py-1.5 rounded-lg hover:bg-forest-50 transition"
-          >
-            <Avatar
-              fullName={m.user.fullName}
-              avatarUrl={m.user.avatarUrl}
-              size={32}
-              isOnline={m.user.isOnline}
-              showStatus
-            />
-            <div className="min-w-0 flex-1">
-              <p
-                className={`font-body text-sm truncate ${
-                  m.user.isOnline ? 'text-forest-900' : 'text-forest-700'
-                }`}
-              >
-                {m.user.fullName}
-                {m.user.id === currentUserId && (
-                  <span className="text-forest-500 text-xs"> (ви)</span>
-                )}
-              </p>
-              {m.role === 'admin' && !m.user.isOnline && (
-                <p className="font-body text-[10px] text-ember-500">Адмін</p>
-              )}
-              {m.role === 'admin' && m.user.isOnline && (
-                <p className="font-body text-[10px] text-ember-500">Адмін · онлайн</p>
-              )}
-              {m.role !== 'admin' && !m.user.isOnline && (
-                <p className="font-body text-[10px] text-forest-500">
-                  був(-ла) {relativeTime(m.user.lastSeenAt)}
+          <li key={m.id}>
+            <button
+              type="button"
+              onClick={() => onOpen(m.user.username)}
+              className="w-full flex items-center gap-3 px-2 py-1.5 rounded-lg hover:bg-forest-50 transition text-left"
+            >
+              <Avatar
+                fullName={m.user.fullName}
+                avatarUrl={m.user.avatarUrl}
+                size={32}
+                isOnline={m.user.isOnline}
+                showStatus
+              />
+              <div className="min-w-0 flex-1">
+                <p
+                  className={`font-body text-sm truncate ${
+                    m.user.isOnline ? 'text-forest-900' : 'text-forest-700'
+                  }`}
+                >
+                  {m.user.fullName}
+                  {m.user.id === currentUserId && (
+                    <span className="text-forest-500 text-xs"> (ви)</span>
+                  )}
                 </p>
-              )}
-              {m.role !== 'admin' && m.user.isOnline && (
-                <p className="font-body text-[10px] text-forest-500">онлайн</p>
-              )}
-            </div>
+                {m.role === 'admin' && !m.user.isOnline && (
+                  <p className="font-body text-[10px] text-ember-500">Адмін</p>
+                )}
+                {m.role === 'admin' && m.user.isOnline && (
+                  <p className="font-body text-[10px] text-ember-500">Адмін · онлайн</p>
+                )}
+                {m.role !== 'admin' && !m.user.isOnline && (
+                  <p className="font-body text-[10px] text-forest-500">
+                    був(-ла) {relativeTime(m.user.lastSeenAt)}
+                  </p>
+                )}
+                {m.role !== 'admin' && m.user.isOnline && (
+                  <p className="font-body text-[10px] text-forest-500">онлайн</p>
+                )}
+              </div>
+            </button>
           </li>
         ))}
       </ul>

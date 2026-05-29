@@ -34,18 +34,21 @@ export class AuthService {
       throw new ConflictException('Email already in use');
     }
 
+    const username = await this.generateUniqueUsername(dto.email);
     const passwordHash = await bcrypt.hash(dto.password, this.BCRYPT_ROUNDS);
 
     const user = await this.prisma.user.create({
       data: {
         fullName: dto.fullName,
         email: dto.email,
+        username,
         passwordHash,
         phone: dto.phone,
       },
       select: {
         id: true,
         email: true,
+        username: true,
         fullName: true,
         avatarUrl: true,
         locale: true,
@@ -160,5 +163,26 @@ export class AuthService {
     const days = match?.[1];
     if (!days) return 7;
     return parseInt(days, 10);
+  }
+
+  private async generateUniqueUsername(email: string): Promise<string> {
+    const base = email
+      .split('@')[0]!
+      .toLowerCase()
+      .replace(/[^a-z0-9_]/g, '_')
+      .slice(0, 24);
+
+    let candidate = base;
+    let exists = await this.prisma.user.findUnique({ where: { username: candidate } });
+    if (!exists) return candidate;
+
+    for (let i = 0; i < 5; i++) {
+      const suffix = Math.random().toString(36).slice(2, 6);
+      candidate = `${base}_${suffix}`.slice(0, 32);
+      exists = await this.prisma.user.findUnique({ where: { username: candidate } });
+      if (!exists) return candidate;
+    }
+
+    return `${base}_${Date.now().toString(36)}`.slice(0, 32);
   }
 }

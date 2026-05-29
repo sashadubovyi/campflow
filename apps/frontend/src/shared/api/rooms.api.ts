@@ -20,6 +20,7 @@ export interface RoomMember {
   joinedAt: string;
   user: {
     id: string;
+    username: string;
     fullName: string;
     email: string;
     avatarUrl: string | null;
