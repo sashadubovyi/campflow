@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import {
   useCreateSinglePoll,
   useCreateMultiPoll,
@@ -27,25 +28,14 @@ interface LocationDraft {
   address?: string;
 }
 
-const TYPE_LABELS: Record<PollType, { label: string; emoji: string; hint: string }> = {
-  single_choice: {
-    label: 'Один вибір',
-    emoji: '📅',
-    hint: 'Дата, напрямок — один голос на учасника',
-  },
-  multi_choice: {
-    label: 'Чек-лист',
-    emoji: '✅',
-    hint: 'Список речей — можна обрати кілька, призначити відповідального',
-  },
-  location: {
-    label: 'Локація',
-    emoji: '📍',
-    hint: 'Точки на мапі — клікніть на карту, додайте назву',
-  },
+const TYPE_EMOJI: Record<PollType, string> = {
+  single_choice: '📅',
+  multi_choice: '✅',
+  location: '📍',
 };
 
 export function CreatePollModal({ roomId, onClose }: Props) {
+  const { t } = useTranslation();
   const [type, setType] = useState<PollType>('single_choice');
   const [locationDrafts, setLocationDrafts] = useState<LocationDraft[]>([]);
   const [pendingPick, setPendingPick] = useState<PickedLocation | null>(null);
@@ -73,9 +63,14 @@ export function CreatePollModal({ roomId, onClose }: Props) {
 
   const isLoading = createSingle.isPending || createMulti.isPending || createLocation.isPending;
 
+  function getTypeLabel(t: PollType): string {
+    if (t === 'single_choice') return 'singleChoice';
+    if (t === 'multi_choice') return 'multiChoice';
+    return 'location';
+  }
+
   function handleMapPick(loc: PickedLocation) {
     setPendingPick(loc);
-    // Підставимо коротку адресу як попередню назву
     if (loc.address) {
       const short = loc.address.split(',').slice(0, 2).join(',').trim();
       setPendingLabel(short);
@@ -86,7 +81,7 @@ export function CreatePollModal({ roomId, onClose }: Props) {
     if (!pendingPick) return;
     const label = pendingLabel.trim();
     if (!label) {
-      alert('Введіть назву точки');
+      alert(t('polls.pointName'));
       return;
     }
     setLocationDrafts((prev) => [
@@ -133,7 +128,7 @@ export function CreatePollModal({ roomId, onClose }: Props) {
         });
       } else {
         if (locationDrafts.length < 2) {
-          alert('Додайте хоча б 2 точки на карті');
+          alert(t('polls.addMinPoints'));
           return;
         }
         await createLocation.mutateAsync({
@@ -149,6 +144,8 @@ export function CreatePollModal({ roomId, onClose }: Props) {
     }
   }
 
+  const pollTypes: PollType[] = ['single_choice', 'multi_choice', 'location'];
+
   return (
     <div
       className="fixed inset-0 bg-forest-900/40 flex items-center justify-center px-4 z-50"
@@ -158,51 +155,53 @@ export function CreatePollModal({ roomId, onClose }: Props) {
         className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 font-body max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="font-display text-xl font-bold text-forest-900 mb-4">Нове опитування</h2>
+        <h2 className="font-display text-xl font-bold text-forest-900 mb-4">
+          {t('polls.newPoll')}
+        </h2>
 
-        {/* Вибір типу */}
         <div className="grid grid-cols-3 gap-2 mb-5">
-          {(Object.keys(TYPE_LABELS) as PollType[]).map((t) => (
+          {pollTypes.map((pt) => (
             <button
-              key={t}
+              key={pt}
               type="button"
-              onClick={() => setType(t)}
+              onClick={() => setType(pt)}
               className={`p-3 rounded-xl border-2 transition text-left ${
-                type === t
+                type === pt
                   ? 'border-forest-500 bg-forest-50'
                   : 'border-forest-100 hover:border-forest-500/50'
               }`}
             >
-              <div className="text-xl mb-1">{TYPE_LABELS[t].emoji}</div>
-              <div className="text-xs font-semibold text-forest-900">{TYPE_LABELS[t].label}</div>
+              <div className="text-xl mb-1">{TYPE_EMOJI[pt]}</div>
+              <div className="text-xs font-semibold text-forest-900">
+                {t(`polls.types.${getTypeLabel(pt)}`)}
+              </div>
             </button>
           ))}
         </div>
-        <p className="text-xs text-forest-500 mb-5 italic">{TYPE_LABELS[type].hint}</p>
+        <p className="text-xs text-forest-500 mb-5 italic">
+          {t(`polls.types.${getTypeLabel(type)}Hint`)}
+        </p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-forest-700 mb-1.5">Питання</label>
+            <label className="block text-sm font-medium text-forest-700 mb-1.5">
+              {t('polls.question')}
+            </label>
             <input
               className="w-full px-4 py-2.5 rounded-xl border border-forest-100 focus:border-forest-500 focus:ring-2 focus:ring-forest-500/20 outline-none transition"
-              placeholder={
-                type === 'single_choice'
-                  ? 'Коли їдемо?'
-                  : type === 'multi_choice'
-                    ? 'Що беремо в дорогу?'
-                    : 'Куди заїдемо?'
-              }
               {...register('title', {
-                required: 'Введіть питання',
-                minLength: { value: 2, message: 'Мінімум 2 символи' },
+                required: true,
+                minLength: { value: 2, message: '' },
               })}
             />
-            {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title.message}</p>}
+            {errors.title && (
+              <p className="text-red-500 text-xs mt-1">{t('polls.question')}</p>
+            )}
           </div>
 
           <div>
             <label className="block text-sm font-medium text-forest-700 mb-1.5">
-              Опис <span className="text-forest-500 font-normal">(необов'язково)</span>
+              {t('rooms.descriptionOptional')}
             </label>
             <textarea
               rows={2}
@@ -225,30 +224,29 @@ export function CreatePollModal({ roomId, onClose }: Props) {
                   />
                 )}
               />
-              <span className="text-sm text-forest-700">
-                Дозволити закріпити пункт за учасником
-              </span>
+              <span className="text-sm text-forest-700">{t('polls.allowAssign')}</span>
             </label>
           )}
 
-          {/* Варіанти для single/multi */}
           {type !== 'location' && (
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="text-sm font-medium text-forest-700">Варіанти</label>
+                <label className="text-sm font-medium text-forest-700">
+                  {t('polls.options')}
+                </label>
                 <button
                   type="button"
                   onClick={() => append({ label: '' })}
                   className="text-xs text-forest-600 hover:text-forest-900 font-semibold"
                 >
-                  + Додати варіант
+                  {t('polls.addOption')}
                 </button>
               </div>
               <div className="space-y-2">
                 {fields.map((field, idx) => (
                   <div key={field.id} className="flex gap-2">
                     <input
-                      placeholder={`Варіант ${idx + 1}`}
+                      placeholder={`${idx + 1}`}
                       className="flex-1 px-3 py-2 rounded-lg border border-forest-100 focus:border-forest-500 outline-none text-sm"
                       {...register(`options.${idx}.label` as const)}
                     />
@@ -267,16 +265,17 @@ export function CreatePollModal({ roomId, onClose }: Props) {
             </div>
           )}
 
-          {/* Карта для location */}
           {type === 'location' && (
             <div className="space-y-3">
-              <label className="text-sm font-medium text-forest-700">Точки на мапі</label>
+              <label className="text-sm font-medium text-forest-700">
+                {t('polls.mapHint')}
+              </label>
               <MapPicker onPick={handleMapPick} />
 
               {pendingPick && (
                 <div className="bg-forest-50 rounded-xl p-3 space-y-2">
                   <p className="text-xs text-forest-700">
-                    📍 Точка обрана: {pendingPick.latitude.toFixed(4)},{' '}
+                    {t('polls.pointSelected')}: {pendingPick.latitude.toFixed(4)},{' '}
                     {pendingPick.longitude.toFixed(4)}
                   </p>
                   {pendingPick.address && (
@@ -286,7 +285,7 @@ export function CreatePollModal({ roomId, onClose }: Props) {
                     <input
                       value={pendingLabel}
                       onChange={(e) => setPendingLabel(e.target.value)}
-                      placeholder="Назва точки"
+                      placeholder={t('polls.pointName')}
                       className="flex-1 px-3 py-2 rounded-lg border border-forest-100 focus:border-forest-500 outline-none text-sm"
                     />
                     <button
@@ -294,7 +293,7 @@ export function CreatePollModal({ roomId, onClose }: Props) {
                       onClick={confirmLocationDraft}
                       className="bg-forest-600 hover:bg-forest-700 text-white font-semibold px-4 rounded-lg text-sm transition"
                     >
-                      Додати
+                      {t('polls.addPoint')}
                     </button>
                   </div>
                 </div>
@@ -326,9 +325,7 @@ export function CreatePollModal({ roomId, onClose }: Props) {
               )}
 
               {locationDrafts.length < 2 && (
-                <p className="text-xs text-forest-500 italic">
-                  Додайте мінімум 2 точки, щоб було за що голосувати.
-                </p>
+                <p className="text-xs text-forest-500 italic">{t('polls.addMinPoints')}</p>
               )}
             </div>
           )}
@@ -339,14 +336,14 @@ export function CreatePollModal({ roomId, onClose }: Props) {
               onClick={onClose}
               className="flex-1 border border-forest-100 text-forest-700 font-semibold py-2.5 rounded-xl hover:bg-forest-50 transition"
             >
-              Скасувати
+              {t('common.cancel')}
             </button>
             <button
               type="submit"
               disabled={isLoading}
               className="flex-1 bg-forest-600 hover:bg-forest-700 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition"
             >
-              {isLoading ? 'Створення…' : 'Створити'}
+              {isLoading ? t('common.creating') : t('common.create')}
             </button>
           </div>
         </form>
