@@ -6,6 +6,7 @@ import {
   useCreateMultiPoll,
   useCreateLocationPoll,
 } from '../../../shared/api/polls.hooks';
+import { useGenerateChecklist } from '../../../shared/api/ai.hooks';
 import type { PollType } from '../../../shared/api/polls.api';
 import { MapPicker, type PickedLocation } from '../../../shared/ui/map/MapPicker';
 
@@ -40,15 +41,20 @@ export function CreatePollModal({ roomId, onClose }: Props) {
   const [locationDrafts, setLocationDrafts] = useState<LocationDraft[]>([]);
   const [pendingPick, setPendingPick] = useState<PickedLocation | null>(null);
   const [pendingLabel, setPendingLabel] = useState('');
+  const [showAiInput, setShowAiInput] = useState(false);
+  const [aiDescription, setAiDescription] = useState('');
+  const [aiSource, setAiSource] = useState<'ai' | 'fallback' | null>(null);
 
   const createSingle = useCreateSinglePoll();
   const createMulti = useCreateMultiPoll();
   const createLocation = useCreateLocationPoll();
+  const generateChecklist = useGenerateChecklist();
 
   const {
     register,
     handleSubmit,
     control,
+    setValue,
     formState: { errors },
   } = useForm<BaseFormValues>({
     defaultValues: {
@@ -59,7 +65,7 @@ export function CreatePollModal({ roomId, onClose }: Props) {
     },
   });
 
-  const { fields, append, remove } = useFieldArray({ control, name: 'options' });
+  const { fields, append, remove, replace } = useFieldArray({ control, name: 'options' });
 
   const isLoading = createSingle.isPending || createMulti.isPending || createLocation.isPending;
 
@@ -67,6 +73,25 @@ export function CreatePollModal({ roomId, onClose }: Props) {
     if (t === 'single_choice') return 'singleChoice';
     if (t === 'multi_choice') return 'multiChoice';
     return 'location';
+  }
+
+  async function handleAiGenerate() {
+    const wordCount = aiDescription.trim().split(/\s+/).filter(Boolean).length;
+    if (wordCount < 5) {
+      alert(t('polls.ai.tooShort'));
+      return;
+    }
+    try {
+      const result = await generateChecklist.mutateAsync(aiDescription.trim());
+      // Заміняємо всі варіанти на згенеровані
+      replace(result.items.map((item) => ({ label: item.label })));
+      setAiSource(result.source);
+      setShowAiInput(false);
+      // Якщо заголовок порожній — підставляємо опис як підказку
+      setValue('title', aiDescription.trim().slice(0, 80));
+    } catch {
+      alert(t('polls.ai.errorBody'));
+    }
   }
 
   function handleMapPick(loc: PickedLocation) {
@@ -164,7 +189,10 @@ export function CreatePollModal({ roomId, onClose }: Props) {
             <button
               key={pt}
               type="button"
-              onClick={() => setType(pt)}
+              onClick={() => {
+                setType(pt);
+                setAiSource(null);
+              }}
               className={`p-3 rounded-xl border-2 transition text-left ${
                 type === pt
                   ? 'border-forest-500 bg-forest-50'
@@ -194,9 +222,7 @@ export function CreatePollModal({ roomId, onClose }: Props) {
                 minLength: { value: 2, message: '' },
               })}
             />
-            {errors.title && (
-              <p className="text-red-500 text-xs mt-1">{t('polls.question')}</p>
-            )}
+            {errors.title && <p className="text-red-500 text-xs mt-1">{t('polls.question')}</p>}
           </div>
 
           <div>
@@ -228,12 +254,66 @@ export function CreatePollModal({ roomId, onClose }: Props) {
             </label>
           )}
 
+          {/* === AI блок для multi_choice === */}
+          {type === 'multi_choice' && !showAiInput && (
+            <button
+              type="button"
+              onClick={() => setShowAiInput(true)}
+              className="w-full bg-gradient-to-r from-ember-500/10 to-forest-500/10 hover:from-ember-500/20 hover:to-forest-500/20 border border-ember-500/30 text-forest-900 font-semibold py-2.5 rounded-xl text-sm transition"
+            >
+              {t('polls.ai.generateChecklist')}
+            </button>
+          )}
+
+          {type === 'multi_choice' && showAiInput && (
+            <div className="bg-gradient-to-br from-ember-500/5 to-forest-500/5 border border-ember-500/30 rounded-xl p-4 space-y-3">
+              <div className="flex items-start justify-between gap-2">
+                <label className="text-sm font-semibold text-forest-900">
+                  {t('polls.ai.describePrompt')}
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowAiInput(false)}
+                  className="text-forest-500 hover:text-forest-700 text-xs"
+                >
+                  ✕
+                </button>
+              </div>
+              <textarea
+                value={aiDescription}
+                onChange={(e) => setAiDescription(e.target.value)}
+                rows={2}
+                placeholder={t('polls.ai.describePlaceholder')}
+                className="w-full px-3 py-2 rounded-lg border border-forest-100 focus:border-forest-500 outline-none text-sm resize-none"
+              />
+              <button
+                type="button"
+                onClick={handleAiGenerate}
+                disabled={generateChecklist.isPending || aiDescription.trim().length < 5}
+                className="w-full bg-ember-500 hover:bg-ember-400 disabled:opacity-50 text-white font-semibold py-2 rounded-lg text-sm transition"
+              >
+                {generateChecklist.isPending ? t('polls.ai.generating') : t('polls.ai.generate')}
+              </button>
+            </div>
+          )}
+
+          {/* Бейдж джерела (AI/fallback) */}
+          {aiSource && (
+            <div
+              className={`text-xs font-medium px-3 py-1.5 rounded-lg inline-block ${
+                aiSource === 'ai'
+                  ? 'bg-ember-500/10 text-ember-500'
+                  : 'bg-forest-100 text-forest-700'
+              }`}
+            >
+              {aiSource === 'ai' ? t('polls.ai.fromAi') : t('polls.ai.fromFallback')}
+            </div>
+          )}
+
           {type !== 'location' && (
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="text-sm font-medium text-forest-700">
-                  {t('polls.options')}
-                </label>
+                <label className="text-sm font-medium text-forest-700">{t('polls.options')}</label>
                 <button
                   type="button"
                   onClick={() => append({ label: '' })}
@@ -267,9 +347,7 @@ export function CreatePollModal({ roomId, onClose }: Props) {
 
           {type === 'location' && (
             <div className="space-y-3">
-              <label className="text-sm font-medium text-forest-700">
-                {t('polls.mapHint')}
-              </label>
+              <label className="text-sm font-medium text-forest-700">{t('polls.mapHint')}</label>
               <MapPicker onPick={handleMapPick} />
 
               {pendingPick && (
