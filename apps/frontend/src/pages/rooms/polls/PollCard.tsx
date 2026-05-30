@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   useVote,
   useToggleVote,
@@ -19,28 +20,21 @@ interface Props {
   currentUserId: string;
 }
 
-// Кольорова стрічка статусу
 function StatusBadge({ status }: { status: PollDetails['status'] }) {
+  const { t } = useTranslation();
   const styles: Record<PollDetails['status'], string> = {
     open: 'bg-forest-50 text-forest-700',
     reopened: 'bg-forest-50 text-forest-700',
     closed: 'bg-forest-100 text-forest-500',
     approved: 'bg-ember-500/10 text-ember-500',
   };
-  const labels: Record<PollDetails['status'], string> = {
-    open: 'Відкрите',
-    reopened: 'Перевідкрите',
-    closed: 'Закрите',
-    approved: 'Затверджене',
-  };
   return (
     <span className={`text-[10px] font-semibold rounded-full px-2 py-0.5 ${styles[status]}`}>
-      {labels[status]}
+      {t(`polls.${status}`)}
     </span>
   );
 }
 
-// Прогрес-бар голосу серед інших опцій
 function ProgressBar({ percent, isWinning }: { percent: number; isWinning: boolean }) {
   return (
     <div className="h-1.5 bg-forest-50 rounded-full overflow-hidden mt-1">
@@ -53,13 +47,13 @@ function ProgressBar({ percent, isWinning }: { percent: number; isWinning: boole
 }
 
 export function PollCard({ poll, isAdmin, members, currentUserId }: Props) {
+  const { t } = useTranslation();
   const isClosed = poll.status === 'closed' || poll.status === 'approved';
   const totalVotes = poll.options.reduce((sum, o) => sum + o.votes, 0);
   const maxVotes = Math.max(...poll.options.map((o) => o.votes), 0);
 
   return (
     <article className="bg-white rounded-xl border border-forest-100 p-3 shadow-sm">
-      {/* Шапка */}
       <header className="flex items-start justify-between gap-2 mb-2">
         <div className="min-w-0 flex-1">
           <h3 className="font-display text-sm font-semibold text-forest-900 leading-tight">
@@ -72,12 +66,10 @@ export function PollCard({ poll, isAdmin, members, currentUserId }: Props) {
         <StatusBadge status={poll.status} />
       </header>
 
-      {/* Прогрес */}
       <p className="text-[10px] text-forest-500 font-medium mb-3">
-        {poll.progress.voted} з {poll.progress.total} проголосували
+        {t('polls.voted', { voted: poll.progress.voted, total: poll.progress.total })}
       </p>
 
-      {/* Тіло картки залежно від типу */}
       {poll.type === 'single_choice' && (
         <SingleView poll={poll} isClosed={isClosed} maxVotes={maxVotes} totalVotes={totalVotes} />
       )}
@@ -95,13 +87,10 @@ export function PollCard({ poll, isAdmin, members, currentUserId }: Props) {
         <LocationView poll={poll} isClosed={isClosed} maxVotes={maxVotes} totalVotes={totalVotes} />
       )}
 
-      {/* Адмін-панель */}
       {isAdmin && <AdminActions poll={poll} />}
     </article>
   );
 }
-
-// === Single-choice view ===
 
 function SingleView({
   poll,
@@ -148,8 +137,6 @@ function SingleView({
   );
 }
 
-// === Multi-choice view (з призначенням) ===
-
 function MultiView({
   poll,
   isClosed,
@@ -165,6 +152,7 @@ function MultiView({
   members: RoomMember[];
   currentUserId: string;
 }) {
+  const { t } = useTranslation();
   const toggleVote = useToggleVote();
   const assign = useAssignOption();
   const [assigningId, setAssigningId] = useState<string | null>(null);
@@ -203,7 +191,6 @@ function MultiView({
               {totalVotes > 0 && <ProgressBar percent={percent} isWinning={isWinning} />}
             </button>
 
-            {/* Закріплення за учасником */}
             {poll.allowAssign && (
               <div className="mt-1.5 pl-6">
                 {opt.assignedTo ? (
@@ -229,7 +216,7 @@ function MultiView({
                     onClick={() => setAssigningId(opt.id === assigningId ? null : opt.id)}
                     className="text-xs text-forest-500 hover:text-forest-700"
                   >
-                    + закріпити за…
+                    {t('polls.assignTo')}
                   </button>
                 )}
 
@@ -252,7 +239,7 @@ function MultiView({
                         onClick={() => handleAssign(opt.id, null)}
                         className="w-full text-left px-2 py-1 text-xs text-red-500 hover:bg-red-50 rounded"
                       >
-                        Зняти призначення
+                        {t('polls.unassign')}
                       </button>
                     )}
                   </div>
@@ -265,8 +252,6 @@ function MultiView({
     </ul>
   );
 }
-
-// === Location view (поки список без карти) ===
 
 function LocationView({
   poll,
@@ -281,7 +266,6 @@ function LocationView({
 }) {
   const vote = useVote();
 
-  // Конвертуємо опції в формат MapPoint для карти
   const mapPoints = poll.options
     .filter((o) => o.latitude !== null && o.longitude !== null)
     .map((o) => ({
@@ -336,9 +320,8 @@ function LocationView({
   );
 }
 
-// === Адмін-дії ===
-
 function AdminActions({ poll }: { poll: PollDetails }) {
+  const { t } = useTranslation();
   const closePoll = useClosePoll();
   const reopenPoll = useReopenPoll();
   const approve = useApprovePoll();
@@ -369,7 +352,7 @@ function AdminActions({ poll }: { poll: PollDetails }) {
             disabled={closePoll.isPending}
             className="flex-1 text-xs bg-forest-50 hover:bg-forest-100 text-forest-700 font-semibold py-1.5 rounded-lg transition"
           >
-            Закрити
+            {t('polls.close')}
           </button>
         </div>
       ) : poll.status === 'closed' ? (
@@ -381,19 +364,19 @@ function AdminActions({ poll }: { poll: PollDetails }) {
                 onClick={() => reopenPoll.mutate(poll.id)}
                 className="flex-1 text-xs bg-forest-50 hover:bg-forest-100 text-forest-700 font-semibold py-1.5 rounded-lg transition"
               >
-                Перевідкрити
+                {t('polls.reopen')}
               </button>
               <button
                 type="button"
                 onClick={() => setPickingWinner(true)}
                 className="flex-1 text-xs bg-ember-500 hover:bg-ember-400 text-white font-semibold py-1.5 rounded-lg transition"
               >
-                Затвердити →
+                {t('polls.approve')}
               </button>
             </div>
           ) : (
             <div className="space-y-1.5">
-              <p className="text-[10px] text-forest-500">Оберіть переможця(-ів):</p>
+              <p className="text-[10px] text-forest-500">{t('polls.pickWinner')}</p>
               <div className="space-y-1">
                 {poll.options.map((opt) => (
                   <button
@@ -420,7 +403,7 @@ function AdminActions({ poll }: { poll: PollDetails }) {
                   }}
                   className="flex-1 text-xs text-forest-500 py-1.5"
                 >
-                  Скасувати
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="button"
@@ -428,7 +411,7 @@ function AdminActions({ poll }: { poll: PollDetails }) {
                   disabled={selectedIds.size === 0 || approve.isPending}
                   className="flex-1 text-xs bg-ember-500 hover:bg-ember-400 disabled:opacity-50 text-white font-semibold py-1.5 rounded-lg transition"
                 >
-                  Затвердити
+                  {t('polls.approveAction')}
                 </button>
               </div>
             </div>
@@ -436,12 +419,11 @@ function AdminActions({ poll }: { poll: PollDetails }) {
         </div>
       ) : (
         <p className="text-[10px] text-ember-500 text-center font-semibold">
-          ⭐ Додано у Фінальний план
+          {t('polls.addedToPlan')}
         </p>
       )}
     </div>
   );
 }
 
-// для TS — щоб не падати на `as const` нагорі, якщо колись приберемо
 type _Option = PollOption;

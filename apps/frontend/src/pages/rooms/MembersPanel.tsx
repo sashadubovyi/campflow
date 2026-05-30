@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import type { RoomMember } from '../../shared/api/rooms.api';
 import { Avatar } from '../../shared/ui/Avatar';
 import { relativeTime } from '../../shared/lib/relativeTime';
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export function MembersPanel({ roomId, members, currentUserId, isAdmin }: Props) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [transferModalOpen, setTransferModalOpen] = useState(false);
   const leave = useLeaveRoom();
@@ -45,16 +47,16 @@ export function MembersPanel({ roomId, members, currentUserId, isAdmin }: Props)
       setTransferModalOpen(true);
       return;
     }
-    if (!confirm('Дійсно вийти з кімнати?')) return;
+    if (!confirm(t('rooms.confirmLeave'))) return;
     const result = await leave.mutateAsync(roomId);
     if (result.deleted) {
-      alert('Кімнату видалено (ви були останнім учасником).');
+      alert(t('rooms.empty'));
     }
     navigate('/rooms');
   }
 
   async function handleRemove(memberId: string, name: string) {
-    if (!confirm(`Видалити ${name} з кімнати?`)) return;
+    if (!confirm(t('rooms.confirmRemove', { name }))) return;
     await remove.mutateAsync({ roomId, memberId });
   }
 
@@ -63,18 +65,23 @@ export function MembersPanel({ roomId, members, currentUserId, isAdmin }: Props)
       <aside className="h-full bg-white border-r border-forest-100 flex flex-col">
         <div className="px-4 py-4 border-b border-forest-100">
           <h2 className="font-display text-sm uppercase tracking-widest text-forest-500">
-            Учасники
+            {t('rooms.members')}
           </h2>
           <p className="font-body text-xs text-forest-700 mt-0.5">
-            {members.length} осіб
-            {onlineCount > 0 && <span className="text-forest-500"> · {onlineCount} онлайн</span>}
+            {t('rooms.membersCount', { count: members.length })}
+            {onlineCount > 0 && (
+              <span className="text-forest-500">
+                {' · '}
+                {onlineCount} {t('rooms.online')}
+              </span>
+            )}
           </p>
         </div>
 
         <div className="flex-1 overflow-y-auto px-2 py-3 space-y-4">
           {admins.length > 0 && (
             <MemberGroup
-              title="Адміністратори"
+              title={t('rooms.admin') + 'и'}
               members={admins}
               currentUserId={currentUserId}
               isAdmin={isAdmin}
@@ -84,7 +91,7 @@ export function MembersPanel({ roomId, members, currentUserId, isAdmin }: Props)
           )}
           {regular.length > 0 && (
             <MemberGroup
-              title="Учасники"
+              title={t('rooms.members')}
               members={regular}
               currentUserId={currentUserId}
               isAdmin={isAdmin}
@@ -100,7 +107,7 @@ export function MembersPanel({ roomId, members, currentUserId, isAdmin }: Props)
             disabled={leave.isPending}
             className="w-full text-xs text-red-500 hover:bg-red-50 disabled:opacity-50 font-semibold py-2 rounded-lg transition"
           >
-            ↩ Вийти з кімнати
+            {t('rooms.leaveRoom')}
           </button>
         </div>
       </aside>
@@ -115,7 +122,7 @@ export function MembersPanel({ roomId, members, currentUserId, isAdmin }: Props)
             setTransferModalOpen(false);
             const result = await leave.mutateAsync(roomId);
             if (result.deleted) {
-              alert('Кімнату видалено.');
+              alert(t('rooms.empty'));
             }
             navigate('/rooms');
           }}
@@ -140,6 +147,8 @@ function MemberGroup({
   onOpen: (username: string) => void;
   onRemove: (memberId: string, name: string) => void;
 }) {
+  const { t } = useTranslation();
+
   return (
     <div>
       <p className="font-body text-xs font-medium text-forest-500 px-2 mb-1.5">{title}</p>
@@ -168,21 +177,23 @@ function MemberGroup({
                     }`}
                   >
                     {m.user.fullName}
-                    {isSelf && <span className="text-forest-500 text-xs"> (ви)</span>}
+                    {isSelf && (
+                      <span className="text-forest-500 text-xs"> ({t('common.you')})</span>
+                    )}
                   </p>
                   {m.role === 'admin' && !m.user.isOnline && (
-                    <p className="font-body text-[10px] text-ember-500">Адмін</p>
+                    <p className="font-body text-[10px] text-ember-500">{t('rooms.admin')}</p>
                   )}
                   {m.role === 'admin' && m.user.isOnline && (
-                    <p className="font-body text-[10px] text-ember-500">Адмін · онлайн</p>
+                    <p className="font-body text-[10px] text-ember-500">{t('rooms.adminOnline')}</p>
                   )}
                   {m.role !== 'admin' && !m.user.isOnline && (
                     <p className="font-body text-[10px] text-forest-500">
-                      був(-ла) {relativeTime(m.user.lastSeenAt)}
+                      {t('rooms.wasOnline', { time: relativeTime(m.user.lastSeenAt) })}
                     </p>
                   )}
                   {m.role !== 'admin' && m.user.isOnline && (
-                    <p className="font-body text-[10px] text-forest-500">онлайн</p>
+                    <p className="font-body text-[10px] text-forest-500">{t('rooms.online')}</p>
                   )}
                 </div>
               </button>
@@ -190,7 +201,7 @@ function MemberGroup({
                 <button
                   onClick={() => onRemove(m.id, m.user.fullName)}
                   className="opacity-0 group-hover:opacity-100 transition text-red-500 hover:bg-red-50 px-2 py-1 rounded text-xs"
-                  title="Видалити з кімнати"
+                  title={t('common.remove')}
                 >
                   ✕
                 </button>
@@ -202,8 +213,6 @@ function MemberGroup({
     </div>
   );
 }
-
-// === Модалка передачі прав адміна ===
 
 function TransferAdminModal({
   roomId,
@@ -218,10 +227,10 @@ function TransferAdminModal({
   onClose: () => void;
   onTransferred: () => void;
 }) {
+  const { t } = useTranslation();
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
   const transfer = useTransferAdmin();
 
-  // Кандидати — всі учасники крім мене, сортуємо за давністю
   const candidates = members
     .filter((m) => m.user.id !== currentUserId)
     .sort((a, b) => new Date(a.joinedAt).getTime() - new Date(b.joinedAt).getTime());
@@ -243,11 +252,9 @@ function TransferAdminModal({
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="font-display text-lg font-bold text-forest-900 mb-1">
-          Передати права адміна
+          {t('rooms.transferAdmin')}
         </h2>
-        <p className="text-sm text-forest-700 mb-5">
-          Ви — останній адміністратор. Оберіть, кому передати права, перш ніж вийти.
-        </p>
+        <p className="text-sm text-forest-700 mb-5">{t('rooms.transferAdminDescription')}</p>
 
         <ul className="space-y-1 mb-4 max-h-60 overflow-y-auto">
           {candidates.map((m, idx) => (
@@ -266,7 +273,7 @@ function TransferAdminModal({
                     {m.user.fullName}
                     {idx === 0 && (
                       <span className="text-forest-500 text-xs font-normal ml-1">
-                        (за замовчуванням)
+                        {t('rooms.defaultChoice')}
                       </span>
                     )}
                   </p>
@@ -277,23 +284,21 @@ function TransferAdminModal({
           ))}
         </ul>
 
-        <p className="text-xs text-forest-500 mb-4 italic">
-          💡 Якщо не оберете — права передадуться найдавнішому учаснику.
-        </p>
+        <p className="text-xs text-forest-500 mb-4 italic">{t('rooms.transferHint')}</p>
 
         <div className="flex gap-2">
           <button
             onClick={onClose}
             className="flex-1 border border-forest-100 text-forest-700 font-semibold py-2.5 rounded-xl hover:bg-forest-50 transition"
           >
-            Скасувати
+            {t('common.cancel')}
           </button>
           <button
             onClick={handleConfirm}
             disabled={transfer.isPending}
             className="flex-1 bg-forest-600 hover:bg-forest-700 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition"
           >
-            {transfer.isPending ? 'Передаю…' : 'Передати і вийти'}
+            {transfer.isPending ? t('rooms.transferring') : t('rooms.transferAndLeave')}
           </button>
         </div>
       </div>

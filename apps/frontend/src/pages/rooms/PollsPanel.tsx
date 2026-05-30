@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { usePolls } from '../../shared/api/polls.hooks';
 import type { RoomMember } from '../../shared/api/rooms.api';
 import { PollCard } from './polls/PollCard';
@@ -12,10 +13,10 @@ interface Props {
 }
 
 export function PollsPanel({ roomId, isAdmin, members, currentUserId }: Props) {
+  const { t } = useTranslation();
   const { data: polls, isLoading } = usePolls(roomId);
   const [showCreate, setShowCreate] = useState(false);
 
-  // Сортуємо: відкриті/перевідкриті — нагору, закриті/затверджені — донизу
   const sorted = [...(polls ?? [])].sort((a, b) => {
     const order: Record<string, number> = {
       open: 0,
@@ -30,34 +31,30 @@ export function PollsPanel({ roomId, isAdmin, members, currentUserId }: Props) {
 
   return (
     <aside className="h-full bg-white border-l border-forest-100 flex flex-col">
-      {/* Шапка */}
       <div className="px-4 py-3 border-b border-forest-100 flex items-center justify-between shrink-0">
         <h2 className="font-display text-sm uppercase tracking-widest text-forest-500">
-          Голосування
+          {t('polls.title')}
         </h2>
         <button
           onClick={() => setShowCreate(true)}
           className="text-xs bg-forest-600 hover:bg-forest-700 text-white font-semibold px-3 py-1 rounded-lg transition"
         >
-          + Створити
+          {t('polls.createNew')}
         </button>
       </div>
 
-      {/* Список */}
       <div className="flex-1 overflow-y-auto px-3 py-3 space-y-3">
         {isLoading && (
           <p className="text-center text-forest-500 font-body text-sm animate-pulse">
-            Завантаження…
+            {t('common.loading')}
           </p>
         )}
 
         {!isLoading && sorted.length === 0 && (
           <div className="text-center text-forest-500 font-body text-sm py-8">
             <p className="text-2xl mb-2">🗳️</p>
-            <p>Поки що порожньо.</p>
-            <p className="text-xs mt-1 text-forest-700">
-              Створіть перше опитування — про дати, локацію або речі.
-            </p>
+            <p>{t('polls.empty')}</p>
+            <p className="text-xs mt-1 text-forest-700">{t('polls.emptyHint')}</p>
           </div>
         )}
 
@@ -72,9 +69,7 @@ export function PollsPanel({ roomId, isAdmin, members, currentUserId }: Props) {
         ))}
       </div>
 
-      {showCreate && (
-        <CreatePollModal roomId={roomId} onClose={() => setShowCreate(false)} />
-      )}
+      {showCreate && <CreatePollModal roomId={roomId} onClose={() => setShowCreate(false)} />}
     </aside>
   );
 }
