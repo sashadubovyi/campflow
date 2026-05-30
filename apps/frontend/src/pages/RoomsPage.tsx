@@ -1,21 +1,30 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../shared/store/useAuth';
 import { useRooms } from '../shared/api/rooms.hooks';
 import type { RoomListItem } from '../shared/api/rooms.api';
 import { CreateRoomModal } from './rooms/CreateRoomModal';
 import { JoinRoomModal } from './rooms/JoinRoomModal';
 import { useUnreadCount } from '../shared/api/notifications.hooks';
+import { LanguageSwitcher } from '../shared/ui/LanguageSwitcher';
 
-function formatDateRange(startsAt: string | null, endsAt: string | null): string | null {
+function formatDateRange(
+  startsAt: string | null,
+  endsAt: string | null,
+  locale: string,
+): string | null {
   if (!startsAt) return null;
+  const localeMap: Record<string, string> = { uk: 'uk-UA', en: 'en-US', ru: 'ru-RU' };
+  const dateLocale = localeMap[locale] ?? 'uk-UA';
   const fmt = (d: string) =>
-    new Date(d).toLocaleDateString('uk-UA', { day: 'numeric', month: 'short' });
+    new Date(d).toLocaleDateString(dateLocale, { day: 'numeric', month: 'short' });
   return endsAt ? `${fmt(startsAt)} — ${fmt(endsAt)}` : fmt(startsAt);
 }
 
 function RoomCard({ room, onOpen }: { room: RoomListItem; onOpen: (id: string) => void }) {
-  const dates = formatDateRange(room.startsAt, room.endsAt);
+  const { i18n } = useTranslation();
+  const dates = formatDateRange(room.startsAt, room.endsAt, i18n.language);
   return (
     <button
       onClick={() => onOpen(room.id)}
@@ -38,6 +47,7 @@ function RoomCard({ room, onOpen }: { room: RoomListItem; onOpen: (id: string) =
 }
 
 export function RoomsPage() {
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { data: rooms, isLoading, isError } = useRooms();
@@ -58,18 +68,19 @@ export function RoomsPage() {
           </h1>
           <div className="flex items-center gap-4">
             <NotificationsBell />
+            <LanguageSwitcher />
             <button
               onClick={() => navigate('/contacts')}
               className="text-sm text-forest-600 hover:text-forest-900 font-medium"
             >
-              📒 Контакти
+              {t('contacts.link')}
             </button>
             <span className="text-forest-700 text-sm">{user?.fullName}</span>
             <button
               onClick={logout}
               className="text-sm text-forest-600 hover:text-forest-900 font-medium"
             >
-              Вийти
+              {t('common.logout')}
             </button>
           </div>
         </div>
@@ -77,42 +88,38 @@ export function RoomsPage() {
 
       <main className="max-w-4xl mx-auto px-6 py-8">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="font-display text-xl font-bold text-forest-900">Мої кімнати</h2>
+          <h2 className="font-display text-xl font-bold text-forest-900">{t('rooms.title')}</h2>
           <div className="flex gap-3">
             <button
               onClick={() => setShowJoin(true)}
               className="text-sm border border-forest-100 text-forest-700 font-semibold px-4 py-2 rounded-xl hover:bg-white transition"
             >
-              Приєднатися
+              {t('rooms.join')}
             </button>
             <button
               onClick={() => setShowCreate(true)}
               className="text-sm bg-forest-600 hover:bg-forest-700 text-white font-semibold px-4 py-2 rounded-xl transition"
             >
-              + Створити
+              {t('rooms.createNew')}
             </button>
           </div>
         </div>
 
-        {isLoading && <p className="text-forest-500 animate-pulse">Завантаження кімнат…</p>}
+        {isLoading && <p className="text-forest-500 animate-pulse">{t('common.loading')}</p>}
 
         {isError && (
-          <p className="text-red-500 bg-red-50 rounded-lg px-4 py-3">
-            Не вдалося завантажити кімнати
-          </p>
+          <p className="text-red-500 bg-red-50 rounded-lg px-4 py-3">{t('common.error')}</p>
         )}
 
         {rooms && rooms.length === 0 && (
           <div className="bg-white rounded-2xl border border-forest-100 border-dashed p-10 text-center">
-            <p className="font-display text-lg text-forest-900 mb-1">Поки що порожньо 🏕️</p>
-            <p className="text-forest-700 text-sm mb-5">
-              Створіть першу кімнату або приєднайтесь за кодом запрошення.
-            </p>
+            <p className="font-display text-lg text-forest-900 mb-1">{t('rooms.empty')} 🏕️</p>
+            <p className="text-forest-700 text-sm mb-5">{t('rooms.emptyHint')}</p>
             <button
               onClick={() => setShowCreate(true)}
               className="bg-forest-600 hover:bg-forest-700 text-white font-semibold px-5 py-2.5 rounded-xl transition"
             >
-              + Створити кімнату
+              {t('rooms.createNew')}
             </button>
           </div>
         )}
@@ -150,6 +157,7 @@ export function RoomsPage() {
 }
 
 function NotificationsBell() {
+  const { t } = useTranslation();
   const { data: count } = useUnreadCount();
   const navigate = useNavigate();
 
@@ -157,7 +165,7 @@ function NotificationsBell() {
     <button
       onClick={() => navigate('/notifications')}
       className="relative text-2xl hover:scale-110 transition"
-      title="Сповіщення"
+      title={t('notifications.title')}
     >
       🔔
       {count !== undefined && count > 0 && (
