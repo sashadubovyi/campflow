@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { PresenceService } from '../presence/presence.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ContactsService } from '../contacts/contacts.service';
+import { BlocksService } from '../blocks/blocks.service';
 
 @Injectable()
 export class UsersService {
@@ -10,6 +11,7 @@ export class UsersService {
     private readonly prisma: PrismaService,
     private readonly presence: PresenceService,
     private readonly contacts: ContactsService,
+    private readonly blocks: BlocksService,
   ) {}
 
   async getProfile(userId: string) {
@@ -77,7 +79,7 @@ export class UsersService {
   }
 
   // === Пошук юзера за username (для майбутніх запрошень) ===
-  async lookupByUsername(username: string) {
+  async lookupByUsername(username: string, viewerId: string) {
     if (!username || username.length < 2) {
       throw new BadRequestException('username is required');
     }
@@ -91,6 +93,11 @@ export class UsersService {
       },
     });
     if (!user) throw new NotFoundException('User not found');
+
+    // Якщо хтось із них заблокував іншого — вдаємо що юзера не існує
+    const blocked = await this.blocks.isBlockedEitherWay(viewerId, user.id);
+    if (blocked) throw new NotFoundException('User not found');
+
     return user;
   }
 
@@ -100,6 +107,11 @@ export class UsersService {
       where: { username: username.toLowerCase() },
     });
     if (!user) throw new NotFoundException('User not found');
+    // Заблоковані не бачать один одного
+    if (user.id !== viewerId) {
+      const blocked = await this.blocks.isBlockedEitherWay(viewerId, user.id);
+      if (blocked) throw new NotFoundException('User not found');
+    }
 
     // Чи viewer є в контактах user'а? (для Блоку 9 — поки завжди false)
     const isContact = await this.contacts.isContact(viewerId, user.id);

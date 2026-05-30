@@ -98,12 +98,22 @@ function InviteCard({
       fullName: string;
       avatarUrl: string | null;
     };
+    currentStatus?: 'pending' | 'accepted' | 'declined' | 'deferred' | 'cancelled';
   };
 
   const accept = useAcceptInvite();
   const decline = useDeclineInvite();
   const defer = useDeferInvite();
   const navigate = useNavigate();
+
+  // Стан інвайта — або з мутації, або з бекенду
+  const status = accept.isSuccess
+    ? 'accepted'
+    : decline.isSuccess
+      ? 'declined'
+      : (payload.currentStatus ?? 'pending');
+
+  const isPending = status === 'pending' || status === 'deferred';
 
   async function handleAccept() {
     onClick();
@@ -122,13 +132,12 @@ function InviteCard({
   }
 
   const loading = accept.isPending || decline.isPending || defer.isPending;
-  const isResolved = accept.isSuccess || decline.isSuccess;
 
   return (
     <li
       className={`bg-white rounded-2xl border shadow-sm p-4 transition ${
-        isUnread ? 'border-ember-500/30 bg-ember-500/5' : 'border-forest-100'
-      } ${isResolved ? 'opacity-50' : ''}`}
+        isUnread && isPending ? 'border-ember-500/30 bg-ember-500/5' : 'border-forest-100'
+      } ${!isPending ? 'opacity-60' : ''}`}
     >
       <div className="flex items-start gap-3">
         <Avatar
@@ -139,7 +148,7 @@ function InviteCard({
         <div className="flex-1 min-w-0">
           <p className="text-sm text-forest-900">
             <span className="font-semibold">{payload.invitedBy.fullName}</span>
-            <span className="text-forest-700"> запрошує тебе в </span>
+            <span className="text-forest-700"> запросив тебе в </span>
             <span className="font-semibold">«{payload.roomName}»</span>
           </p>
           {payload.message && (
@@ -149,7 +158,7 @@ function InviteCard({
           )}
           <p className="text-[10px] text-forest-500 mt-1.5">{relativeTime(n.createdAt)}</p>
 
-          {!isResolved && (
+          {isPending && (
             <div className="mt-3 flex flex-wrap gap-2">
               <button
                 onClick={handleAccept}
@@ -175,10 +184,11 @@ function InviteCard({
             </div>
           )}
 
-          {accept.isSuccess && (
+          {status === 'accepted' && (
             <p className="mt-2 text-xs text-forest-600 font-semibold">✓ Прийнято</p>
           )}
-          {decline.isSuccess && <p className="mt-2 text-xs text-forest-500">Відмовлено</p>}
+          {status === 'declined' && <p className="mt-2 text-xs text-forest-500">✕ Відмовлено</p>}
+          {status === 'cancelled' && <p className="mt-2 text-xs text-forest-500">⊘ Скасовано</p>}
         </div>
       </div>
     </li>

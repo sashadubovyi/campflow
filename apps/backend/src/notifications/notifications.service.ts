@@ -21,10 +21,40 @@ export class NotificationsService {
   }
 
   async list(userId: string) {
-    return this.prisma.notification.findMany({
+    const notifications = await this.prisma.notification.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
       take: 100,
+    });
+
+    // Для invite-сповіщень підтягуємо актуальний статус
+    const inviteIds = notifications
+      .filter((n) => n.kind === 'room_invite' && n.payload && typeof n.payload === 'object')
+      .map((n) => (n.payload as Record<string, unknown>).inviteId)
+      .filter((id): id is string => typeof id === 'string');
+
+    if (inviteIds.length === 0) return notifications;
+
+    const invites = await this.prisma.roomInvite.findMany({
+      where: { id: { in: inviteIds } },
+      select: { id: true, status: true },
+    });
+    const statusMap = new Map(invites.map((i) => [i.id, i.status]));
+
+    return notifications.map((n) => {
+      if (n.kind === 'room_invite' && n.payload && typeof n.payload === 'object') {
+        const inviteId = (n.payload as Record<string, unknown>).inviteId;
+        if (typeof inviteId === 'string') {
+          return {
+            ...n,
+            payload: {
+              ...(n.payload as Record<string, unknown>),
+              currentStatus: statusMap.get(inviteId) ?? null,
+            },
+          };
+        }
+      }
+      return n;
     });
   }
 

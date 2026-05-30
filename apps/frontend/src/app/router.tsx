@@ -9,6 +9,7 @@ import { ProfilePage } from '../pages/ProfilePage';
 import { ProfileSettingsPage } from '../pages/ProfileSettingsPage';
 import { ContactsPage } from '../pages/ContactsPage';
 import { NotificationsPage } from '../pages/NotificationsPage';
+import { BlockedUsersPage } from '../pages/BlockedUsersPage';
 
 export const router: ReturnType<typeof createBrowserRouter> = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -43,6 +44,14 @@ export const router: ReturnType<typeof createBrowserRouter> = createBrowserRoute
     element: (
       <ProtectedRoute>
         <ProfileSettingsPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/settings/blocked',
+    element: (
+      <ProtectedRoute>
+        <BlockedUsersPage />
       </ProtectedRoute>
     ),
   },

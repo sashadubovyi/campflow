@@ -19,8 +19,8 @@ export class UsersController {
 
   // Швидкий пошук юзера за username — для подальших запрошень у кімнати
   @Get('lookup')
-  lookupByUsername(@Query('username') username: string) {
-    return this.usersService.lookupByUsername(username);
+  lookupByUsername(@Query('username') username: string, @CurrentUser() viewer: AuthenticatedUser) {
+    return this.usersService.lookupByUsername(username, viewer.id);
   }
 
   // Публічний профіль за username (з приватністю)

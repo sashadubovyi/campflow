@@ -301,6 +301,18 @@ export function ProfileSettingsPage() {
           </div>
         </Section>
 
+        {/* Безпека */}
+        <Section title="Безпека">
+          <button
+            type="button"
+            onClick={() => navigate('/settings/blocked')}
+            className="w-full text-left px-4 py-3 rounded-xl border-2 border-forest-100 hover:border-forest-500/50 transition"
+          >
+            <p className="text-sm font-semibold text-forest-900">🚫 Заблоковані користувачі</p>
+            <p className="text-xs text-forest-500">Керуйте списком заблокованих</p>
+          </button>
+        </Section>
+
         {/* Збереження */}
         <div className="sticky bottom-4 bg-white rounded-xl shadow-lg shadow-forest-900/10 border border-forest-100 p-3 flex items-center gap-3">
           {saved && <span className="text-xs text-forest-600 font-semibold">✓ Збережено</span>}

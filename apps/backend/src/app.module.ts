@@ -18,6 +18,7 @@ import { PresenceModule } from './presence/presence.module';
 import { ContactsModule } from './contacts/contacts.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { InvitesModule } from './invites/invites.module';
+import { BlocksModule } from './blocks/blocks.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { InvitesModule } from './invites/invites.module';
     ContactsModule,
     NotificationsModule,
     InvitesModule,
+    BlocksModule,
   ],
   controllers: [AppController],
   providers: [

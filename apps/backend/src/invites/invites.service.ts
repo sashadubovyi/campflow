@@ -7,6 +7,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { ContactsService } from '../contacts/contacts.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { BlocksService } from '../blocks/blocks.service';
 
 @Injectable()
 export class InvitesService {
@@ -14,6 +15,7 @@ export class InvitesService {
     private readonly prisma: PrismaService,
     private readonly contacts: ContactsService,
     private readonly notifications: NotificationsService,
+    private readonly blocks: BlocksService,
   ) {}
 
   /**
@@ -29,6 +31,10 @@ export class InvitesService {
 
     // Сам себе не можна
     if (target.id === actorId) return { allowed: false, reason: 'self' as const };
+
+    // Якщо хтось із них заблокував іншого — вдаємо що юзера не існує
+    const blocked = await this.blocks.isBlockedEitherWay(actorId, target.id);
+    if (blocked) return { allowed: false, reason: 'not_found' as const };
 
     // Уже учасник
     const existingMember = await this.prisma.roomMember.findUnique({

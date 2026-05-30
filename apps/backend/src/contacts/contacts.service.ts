@@ -1,17 +1,20 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { PresenceService } from '../presence/presence.service';
+import { BlocksService } from '../blocks/blocks.service';
 
 @Injectable()
 export class ContactsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly presence: PresenceService,
+    private readonly blocks: BlocksService,
   ) {}
 
   /** Перевіряє, чи є userB у контактах userA. */
@@ -35,6 +38,10 @@ export class ContactsService {
 
     const target = await this.prisma.user.findUnique({ where: { id: contactId } });
     if (!target) throw new NotFoundException('User not found');
+
+    // Не можна додати до контактів заблокованого або від кого тебе заблокували
+    const blocked = await this.blocks.isBlockedEitherWay(ownerId, contactId);
+    if (blocked) throw new ForbiddenException('Cannot add this user');
 
     const existing = await this.prisma.contact.findUnique({
       where: { ownerId_contactId: { ownerId, contactId } },

@@ -5,6 +5,7 @@ import { Avatar } from '../shared/ui/Avatar';
 import { relativeTime } from '../shared/lib/relativeTime';
 import type { PublicProfile } from '../shared/api/profile.api';
 import { useAddContact, useRemoveContact } from '../shared/api/contacts.hooks';
+import { useBlockUser } from '../shared/api/blocks.hooks';
 
 const GENDER_LABELS: Record<NonNullable<PublicProfile['gender']>, string> = {
   male: 'Чоловіча',
@@ -262,33 +263,58 @@ function ContactButton({
 }) {
   const add = useAddContact();
   const remove = useRemoveContact();
-  const loading = add.isPending || remove.isPending;
+  const block = useBlockUser();
+  const loading = add.isPending || remove.isPending || block.isPending;
+
+  async function handleBlock() {
+    const reason = prompt("Причина блокування (необов'язково):");
+    if (reason === null) return; // скасовано
+    await block.mutateAsync({ userId: profileId, reason: reason.trim() || undefined });
+    alert('Користувача заблоковано.');
+    window.history.back();
+  }
 
   if (isContact) {
     return (
-      <div className="mt-5 flex gap-2">
-        <div className="flex-1 bg-forest-50 text-forest-700 font-semibold py-2 rounded-xl text-sm text-center flex items-center justify-center gap-1.5">
-          {isMutual ? '🔁 Взаємно в контактах' : '✓ У контактах'}
+      <div className="mt-5 space-y-2">
+        <div className="flex gap-2">
+          <div className="flex-1 bg-forest-50 text-forest-700 font-semibold py-2 rounded-xl text-sm text-center flex items-center justify-center gap-1.5">
+            {isMutual ? '🔁 Взаємно в контактах' : '✓ У контактах'}
+          </div>
+          <button
+            onClick={() => remove.mutate(profileId)}
+            disabled={loading}
+            className="border border-forest-100 text-red-500 hover:bg-red-50 font-semibold py-2 px-4 rounded-xl text-sm transition disabled:opacity-50"
+          >
+            {remove.isPending ? '…' : 'Видалити'}
+          </button>
         </div>
         <button
-          onClick={() => remove.mutate(profileId)}
+          onClick={handleBlock}
           disabled={loading}
-          className="border border-forest-100 text-red-500 hover:bg-red-50 font-semibold py-2 px-4 rounded-xl text-sm transition disabled:opacity-50"
+          className="w-full text-xs text-red-500 hover:bg-red-50 font-semibold py-2 rounded-lg transition disabled:opacity-50"
         >
-          {remove.isPending ? '…' : 'Видалити'}
+          🚫 Заблокувати
         </button>
       </div>
     );
   }
 
   return (
-    <div className="mt-5 flex gap-2">
+    <div className="mt-5 space-y-2">
       <button
         onClick={() => add.mutate(profileId)}
         disabled={loading}
-        className="flex-1 bg-ember-500 hover:bg-ember-400 text-white font-semibold py-2 rounded-xl text-sm transition disabled:opacity-50"
+        className="w-full bg-ember-500 hover:bg-ember-400 text-white font-semibold py-2 rounded-xl text-sm transition disabled:opacity-50"
       >
         {add.isPending ? 'Додаю…' : '+ Додати в контакти'}
+      </button>
+      <button
+        onClick={handleBlock}
+        disabled={loading}
+        className="w-full text-xs text-red-500 hover:bg-red-50 font-semibold py-2 rounded-lg transition disabled:opacity-50"
+      >
+        🚫 Заблокувати
       </button>
     </div>
   );
