@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useNotifications, useMarkRead, useMarkAllRead } from '../shared/api/notifications.hooks';
 import { useAcceptInvite, useDeclineInvite, useDeferInvite } from '../shared/api/invites.hooks';
 import { Avatar } from '../shared/ui/Avatar';
@@ -6,6 +7,7 @@ import { relativeTime } from '../shared/lib/relativeTime';
 import type { NotificationItem } from '../shared/api/notifications.api';
 
 export function NotificationsPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: notifications, isLoading } = useNotifications();
   const markAllRead = useMarkAllRead();
@@ -20,16 +22,18 @@ export function NotificationsPage() {
             onClick={() => navigate(-1)}
             className="text-forest-600 hover:text-forest-900 text-sm font-medium"
           >
-            ← Назад
+            {t('common.back')}
           </button>
-          <span className="font-display text-lg font-bold text-forest-900">Сповіщення</span>
+          <span className="font-display text-lg font-bold text-forest-900">
+            {t('notifications.title')}
+          </span>
           {unreadCount > 0 ? (
             <button
               onClick={() => markAllRead.mutate()}
               disabled={markAllRead.isPending}
               className="text-xs text-forest-600 hover:text-forest-900 font-medium"
             >
-              Прочитати все
+              {t('notifications.markAllRead')}
             </button>
           ) : (
             <span className="w-20" />
@@ -38,15 +42,15 @@ export function NotificationsPage() {
       </header>
 
       <main className="max-w-2xl mx-auto px-6 py-6">
-        {isLoading && <p className="text-forest-500 text-center animate-pulse">Завантаження…</p>}
+        {isLoading && (
+          <p className="text-forest-500 text-center animate-pulse">{t('common.loading')}</p>
+        )}
 
         {!isLoading && notifications && notifications.length === 0 && (
           <div className="bg-white rounded-2xl border border-forest-100 border-dashed p-10 text-center">
             <p className="text-3xl mb-3">🔔</p>
-            <p className="font-display text-lg text-forest-900 mb-1">Сповіщень поки немає</p>
-            <p className="text-forest-700 text-sm">
-              Тут з'являтимуться запрошення в кімнати та інші важливі події.
-            </p>
+            <p className="font-display text-lg text-forest-900 mb-1">{t('notifications.empty')}</p>
+            <p className="text-forest-700 text-sm">{t('notifications.emptyHint')}</p>
           </div>
         )}
 
@@ -70,7 +74,6 @@ function NotificationCard({ n }: { n: NotificationItem }) {
     if (isUnread) markRead.mutate(n.id);
   }
 
-  // Залежно від типу — різний рендер
   if (n.kind === 'room_invite') {
     return <InviteCard n={n} isUnread={isUnread} onClick={handleClick} />;
   }
@@ -87,6 +90,7 @@ function InviteCard({
   isUnread: boolean;
   onClick: () => void;
 }) {
+  const { t } = useTranslation();
   const payload = n.payload as {
     inviteId: string;
     roomId: string;
@@ -106,7 +110,6 @@ function InviteCard({
   const defer = useDeferInvite();
   const navigate = useNavigate();
 
-  // Стан інвайта — або з мутації, або з бекенду
   const status = accept.isSuccess
     ? 'accepted'
     : decline.isSuccess
@@ -148,7 +151,10 @@ function InviteCard({
         <div className="flex-1 min-w-0">
           <p className="text-sm text-forest-900">
             <span className="font-semibold">{payload.invitedBy.fullName}</span>
-            <span className="text-forest-700"> запросив тебе в </span>
+            <span className="text-forest-700">
+              {' '}
+              {t('notifications.inviteText', { name: '' }).trim()}{' '}
+            </span>
             <span className="font-semibold">«{payload.roomName}»</span>
           </p>
           {payload.message && (
@@ -165,30 +171,36 @@ function InviteCard({
                 disabled={loading}
                 className="bg-forest-600 hover:bg-forest-700 disabled:opacity-50 text-white text-xs font-semibold px-4 py-1.5 rounded-lg transition"
               >
-                {accept.isPending ? 'Приймаю…' : '✓ Прийняти'}
+                {accept.isPending ? t('notifications.accepting') : t('notifications.accept')}
               </button>
               <button
                 onClick={handleDefer}
                 disabled={loading}
                 className="bg-forest-50 hover:bg-forest-100 disabled:opacity-50 text-forest-700 text-xs font-semibold px-4 py-1.5 rounded-lg transition"
               >
-                Пізніше
+                {t('notifications.defer')}
               </button>
               <button
                 onClick={handleDecline}
                 disabled={loading}
                 className="text-red-500 hover:text-red-700 disabled:opacity-50 text-xs font-semibold px-3 py-1.5 rounded-lg transition"
               >
-                Відмовитись
+                {t('notifications.decline')}
               </button>
             </div>
           )}
 
           {status === 'accepted' && (
-            <p className="mt-2 text-xs text-forest-600 font-semibold">✓ Прийнято</p>
+            <p className="mt-2 text-xs text-forest-600 font-semibold">
+              {t('notifications.accepted')}
+            </p>
           )}
-          {status === 'declined' && <p className="mt-2 text-xs text-forest-500">✕ Відмовлено</p>}
-          {status === 'cancelled' && <p className="mt-2 text-xs text-forest-500">⊘ Скасовано</p>}
+          {status === 'declined' && (
+            <p className="mt-2 text-xs text-forest-500">{t('notifications.declined')}</p>
+          )}
+          {status === 'cancelled' && (
+            <p className="mt-2 text-xs text-forest-500">{t('notifications.cancelled')}</p>
+          )}
         </div>
       </div>
     </li>
@@ -204,7 +216,7 @@ function SystemCard({
   isUnread: boolean;
   onClick: () => void;
 }) {
-  const text = textForKind(n);
+  const text = useTextForKind(n);
   return (
     <li
       onClick={onClick}
@@ -238,20 +250,22 @@ function iconForKind(kind: NotificationItem['kind']): string {
   return map[kind] ?? '🔔';
 }
 
-function textForKind(n: NotificationItem): string {
+function useTextForKind(n: NotificationItem): string {
+  const { t } = useTranslation();
   const p = n.payload as { roomName?: string };
+  const room = p.roomName ?? '…';
   switch (n.kind) {
     case 'room_invite_accepted':
-      return `Запрошення в «${p.roomName ?? 'кімнату'}» прийнято`;
+      return t('notifications.kinds.inviteAccepted', { room });
     case 'room_invite_declined':
-      return `Запрошення в «${p.roomName ?? 'кімнату'}» не прийнято`;
+      return t('notifications.kinds.inviteDeclined', { room });
     case 'member_removed':
-      return `Вас видалено з кімнати «${p.roomName ?? '...'}»`;
+      return t('notifications.kinds.memberRemoved', { room });
     case 'room_admin_transferred':
-      return `Вас призначено адміністратором кімнати «${p.roomName ?? '...'}»`;
+      return t('notifications.kinds.adminTransferred', { room });
     case 'room_deletion_warning':
-      return `Кімната «${p.roomName ?? '...'}» скоро буде видалена`;
+      return t('notifications.kinds.deletionWarning', { room });
     default:
-      return 'Системне сповіщення';
+      return t('notifications.kinds.system');
   }
 }
