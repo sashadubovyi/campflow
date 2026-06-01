@@ -208,7 +208,10 @@ export function useApprovePoll() {
   return useMutation({
     mutationFn: ({ pollId, optionIds }: { pollId: string; optionIds: string[] }) =>
       pollsApi.approve(pollId, optionIds),
-    onSuccess: (poll) => qc.invalidateQueries({ queryKey: ['polls', poll.roomId] }),
+    onSuccess: (poll) => {
+      qc.invalidateQueries({ queryKey: ['polls', poll.roomId] });
+      qc.invalidateQueries({ queryKey: ['final-plan', poll.roomId] });
+    },
   });
 }
 

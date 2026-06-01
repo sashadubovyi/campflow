@@ -113,6 +113,17 @@
     "pointSelected": "📍 Point picked",
     "addMinPoints": "Add at least 2 points so people have something to vote for.",
     "mapHint": "Click on the map to add a point",
+    "finalPlan": {
+      "tabPolls": "🗳️ Polls",
+      "tabPlan": "📋 Plan",
+      "empty": "Nothing approved yet",
+      "emptyHint": "Admin closes polls and approves winners — they will show up here.",
+      "decisions": "Decisions",
+      "locations": "Locations",
+      "items": "Items",
+      "noAssignee": "unassigned",
+      "approvedAt": "Approved {{time}}"
+    },
     "ai": {
       "generateChecklist": "🤖 Generate with AI",
       "generating": "AI is thinking…",
