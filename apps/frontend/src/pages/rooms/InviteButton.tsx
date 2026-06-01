@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { invitesApi, type CanInviteResult } from '../../shared/api/invites.api';
 import { useCreateInvite } from '../../shared/api/invites.hooks';
 import { Avatar } from '../../shared/ui/Avatar';
@@ -11,6 +12,7 @@ interface Props {
 type Tab = 'username' | 'link';
 
 export function InviteButton({ roomId, inviteCode }: Props) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<Tab>('username');
   const [copied, setCopied] = useState<'code' | 'link' | null>(null);
@@ -38,7 +40,7 @@ export function InviteButton({ roomId, inviteCode }: Props) {
         onClick={() => setOpen(true)}
         className="text-sm bg-ember-500 hover:bg-ember-400 text-white font-semibold px-4 py-1.5 rounded-xl transition"
       >
-        Запросити
+        {t('rooms.invite')}
       </button>
 
       {open && (
@@ -51,13 +53,10 @@ export function InviteButton({ roomId, inviteCode }: Props) {
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="font-display text-xl font-bold text-forest-900 mb-1">
-              Запросити учасників
+              {t('rooms.inviteUsers')}
             </h2>
-            <p className="text-sm text-forest-700 mb-4">
-              Знайдіть людину за username або поділіться посиланням.
-            </p>
+            <p className="text-sm text-forest-700 mb-4">{t('invites.shareHint')}</p>
 
-            {/* Вкладки */}
             <div className="flex gap-1 mb-5 bg-forest-50 p-1 rounded-xl">
               <button
                 onClick={() => setTab('username')}
@@ -67,7 +66,7 @@ export function InviteButton({ roomId, inviteCode }: Props) {
                     : 'text-forest-700 hover:text-forest-900'
                 }`}
               >
-                👤 По username
+                {t('invites.byUsername')}
               </button>
               <button
                 onClick={() => setTab('link')}
@@ -77,7 +76,7 @@ export function InviteButton({ roomId, inviteCode }: Props) {
                     : 'text-forest-700 hover:text-forest-900'
                 }`}
               >
-                🔗 Посилання
+                {t('invites.byLink')}
               </button>
             </div>
 
@@ -99,9 +98,8 @@ export function InviteButton({ roomId, inviteCode }: Props) {
   );
 }
 
-// === Вкладка 1: запросити по username ===
-
 function InviteByUsername({ roomId, onDone }: { roomId: string; onDone: () => void }) {
+  const { t } = useTranslation();
   const [username, setUsername] = useState('');
   const [message, setMessage] = useState('');
   const [check, setCheck] = useState<CanInviteResult | null>(null);
@@ -109,7 +107,6 @@ function InviteByUsername({ roomId, onDone }: { roomId: string; onDone: () => vo
   const [sent, setSent] = useState(false);
   const create = useCreateInvite();
 
-  // Debounce-перевірка можливості запросити (через 500мс після останнього вводу)
   useEffect(() => {
     if (!username || username.length < 2) {
       setCheck(null);
@@ -144,20 +141,22 @@ function InviteByUsername({ roomId, onDone }: { roomId: string; onDone: () => vo
     }
   }
 
-  const reasonLabels: Record<string, string> = {
-    not_found: 'Користувача з таким username не знайдено',
-    self: 'Не можна запросити самого себе',
-    already_member: 'Цей користувач вже в кімнаті',
-    already_invited: 'Запрошення вже надіслано',
-    blocked_by_policy: 'Користувач заборонив надсилати йому запрошення',
+  const reasonKey: Record<string, string> = {
+    not_found: 'notFound',
+    self: 'self',
+    already_member: 'alreadyMember',
+    already_invited: 'alreadyInvited',
+    blocked_by_policy: 'blockedByPolicy',
   };
 
   if (sent) {
     return (
       <div className="bg-forest-50 rounded-xl p-6 text-center">
         <p className="text-3xl mb-2">📬</p>
-        <p className="font-semibold text-forest-900">Запрошення надіслано!</p>
-        <p className="text-xs text-forest-700 mt-1">{check?.target?.fullName} отримає сповіщення</p>
+        <p className="font-semibold text-forest-900">{t('invites.sent')}</p>
+        <p className="text-xs text-forest-700 mt-1">
+          {t('invites.sentHint', { name: check?.target?.fullName ?? '' })}
+        </p>
       </div>
     );
   }
@@ -165,7 +164,9 @@ function InviteByUsername({ roomId, onDone }: { roomId: string; onDone: () => vo
   return (
     <div className="space-y-3">
       <div>
-        <label className="block text-xs font-medium text-forest-700 mb-1.5">Username</label>
+        <label className="block text-xs font-medium text-forest-700 mb-1.5">
+          {t('profile.fields.username')}
+        </label>
         <div className="flex items-center gap-1">
           <span className="text-forest-500 font-mono">@</span>
           <input
@@ -181,8 +182,7 @@ function InviteByUsername({ roomId, onDone }: { roomId: string; onDone: () => vo
         </div>
       </div>
 
-      {/* Результат перевірки */}
-      {checking && <p className="text-xs text-forest-500 italic">Перевіряємо…</p>}
+      {checking && <p className="text-xs text-forest-500 italic">{t('invites.checking')}</p>}
 
       {check && !checking && (
         <div
@@ -205,44 +205,42 @@ function InviteByUsername({ roomId, onDone }: { roomId: string; onDone: () => vo
                 </p>
                 <p className="text-xs text-forest-500">@{check.target.username}</p>
               </div>
-              <span className="text-forest-600 text-xs font-semibold">✓ Можна</span>
+              <span className="text-forest-600 text-xs font-semibold">
+                {t('invites.canInvite')}
+              </span>
             </div>
           ) : (
             <p className="text-xs text-red-700">
-              {reasonLabels[check.reason ?? ''] ?? 'Не можна запросити'}
+              {t(`invites.reasons.${reasonKey[check.reason ?? ''] ?? 'notFound'}`)}
             </p>
           )}
         </div>
       )}
 
-      {/* Повідомлення (необов'язкове) */}
       <div>
         <label className="block text-xs font-medium text-forest-700 mb-1.5">
-          Повідомлення <span className="text-forest-500 font-normal">(необов'язково)</span>
+          {t('invites.messageOptional')}
         </label>
         <textarea
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           rows={2}
           maxLength={500}
-          placeholder="Привіт! Приєднуйся до нашої поїздки 🏕️"
+          placeholder={t('invites.messagePlaceholder')}
           className="w-full px-3 py-2 rounded-lg border border-forest-100 focus:border-forest-500 outline-none text-sm resize-none"
         />
       </div>
 
-      {/* Кнопка */}
       <button
         onClick={handleSend}
         disabled={!check?.allowed || create.isPending}
         className="w-full bg-forest-600 hover:bg-forest-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-xl transition text-sm"
       >
-        {create.isPending ? 'Надсилаю…' : 'Надіслати запрошення'}
+        {create.isPending ? t('common.sending') : t('invites.send')}
       </button>
     </div>
   );
 }
-
-// === Вкладка 2: запросити за посиланням ===
 
 function InviteByLink({
   inviteCode,
@@ -257,9 +255,12 @@ function InviteByLink({
   onCopy: (value: string, what: 'code' | 'link') => void;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <>
-      <label className="block text-xs font-medium text-forest-500 mb-1.5">Код запрошення</label>
+      <label className="block text-xs font-medium text-forest-500 mb-1.5">
+        {t('rooms.inviteCode')}
+      </label>
       <div className="flex gap-2 mb-4">
         <div className="flex-1 px-4 py-2.5 rounded-xl border border-forest-100 bg-forest-50 font-mono tracking-widest text-forest-900 text-center">
           {inviteCode}
@@ -268,12 +269,12 @@ function InviteByLink({
           onClick={() => onCopy(inviteCode, 'code')}
           className="px-4 rounded-xl border border-forest-100 text-forest-700 font-semibold hover:bg-forest-50 transition text-sm"
         >
-          {copied === 'code' ? '✓' : 'Копі'}
+          {copied === 'code' ? t('common.copied') : t('common.copy')}
         </button>
       </div>
 
       <label className="block text-xs font-medium text-forest-500 mb-1.5">
-        Посилання-запрошення
+        {t('invites.linkLabel')}
       </label>
       <div className="flex gap-2 mb-5">
         <div className="flex-1 px-4 py-2.5 rounded-xl border border-forest-100 bg-forest-50 text-forest-700 text-sm truncate">
@@ -283,7 +284,7 @@ function InviteByLink({
           onClick={() => onCopy(inviteLink, 'link')}
           className="px-4 rounded-xl border border-forest-100 text-forest-700 font-semibold hover:bg-forest-50 transition text-sm"
         >
-          {copied === 'link' ? '✓' : 'Копі'}
+          {copied === 'link' ? t('common.copied') : t('common.copy')}
         </button>
       </div>
 
@@ -291,7 +292,7 @@ function InviteByLink({
         onClick={onClose}
         className="w-full bg-forest-600 hover:bg-forest-700 text-white font-semibold py-2.5 rounded-xl transition"
       >
-        Готово
+        {t('common.done')}
       </button>
     </>
   );

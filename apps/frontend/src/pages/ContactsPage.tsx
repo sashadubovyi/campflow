@@ -1,9 +1,11 @@
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useContacts, useRemoveContact } from '../shared/api/contacts.hooks';
 import { Avatar } from '../shared/ui/Avatar';
 import { relativeTime } from '../shared/lib/relativeTime';
 
 export function ContactsPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: contacts, isLoading } = useContacts();
   const remove = useRemoveContact();
@@ -16,23 +18,25 @@ export function ContactsPage() {
             onClick={() => navigate(-1)}
             className="text-forest-600 hover:text-forest-900 text-sm font-medium"
           >
-            ← Назад
+            {t('common.back')}
           </button>
-          <span className="font-display text-lg font-bold text-forest-900">Мої контакти</span>
+          <span className="font-display text-lg font-bold text-forest-900">
+            {t('contacts.title')}
+          </span>
           <span className="w-16" />
         </div>
       </header>
 
       <main className="max-w-2xl mx-auto px-6 py-6">
-        {isLoading && <p className="text-forest-500 text-center animate-pulse">Завантаження…</p>}
+        {isLoading && (
+          <p className="text-forest-500 text-center animate-pulse">{t('common.loading')}</p>
+        )}
 
         {!isLoading && contacts && contacts.length === 0 && (
           <div className="bg-white rounded-2xl border border-forest-100 border-dashed p-10 text-center">
             <p className="text-3xl mb-3">📒</p>
-            <p className="font-display text-lg text-forest-900 mb-1">Контактів немає</p>
-            <p className="text-forest-700 text-sm">
-              Додавайте людей з їхніх профілів — кнопка «+ Додати в контакти».
-            </p>
+            <p className="font-display text-lg text-forest-900 mb-1">{t('contacts.empty')}</p>
+            <p className="text-forest-700 text-sm">{t('contacts.emptyHint')}</p>
           </div>
         )}
 
@@ -54,7 +58,7 @@ export function ContactsPage() {
                   <div className="min-w-0 flex-1">
                     <p className="font-medium text-forest-900 truncate flex items-center gap-1.5">
                       {c.user.fullName}
-                      {c.isMutual && <span title="Взаємно">🔁</span>}
+                      {c.isMutual && <span title="🔁">🔁</span>}
                     </p>
                     <p className="text-xs text-forest-500 truncate">
                       @{c.user.username}
@@ -62,7 +66,7 @@ export function ContactsPage() {
                     </p>
                     {!c.user.isOnline && (
                       <p className="text-[10px] text-forest-500 mt-0.5">
-                        був(-ла) {relativeTime(c.user.lastSeenAt)}
+                        {t('profile.wasOnline', { time: relativeTime(c.user.lastSeenAt) })}
                       </p>
                     )}
                   </div>
@@ -71,7 +75,7 @@ export function ContactsPage() {
                   onClick={() => remove.mutate(c.user.id)}
                   disabled={remove.isPending}
                   className="text-red-500 hover:text-red-700 text-xs font-medium px-3 py-1.5 rounded-lg hover:bg-red-50 transition disabled:opacity-50"
-                  title="Видалити з контактів"
+                  title={t('common.remove')}
                 >
                   ✕
                 </button>
@@ -82,8 +86,7 @@ export function ContactsPage() {
 
         {contacts && contacts.length > 0 && (
           <p className="text-xs text-forest-500 text-center mt-4">
-            {contacts.length} {contacts.length === 1 ? 'контакт' : 'контактів'} · 🔁 — взаємно
-            додані
+            {t('contacts.count', { count: contacts.length })} · {t('contacts.mutual')}
           </p>
         )}
       </main>

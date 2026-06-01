@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useMyProfile, useUpdateMyProfile } from '../shared/api/profile.hooks';
 import type { Visibility, Gender, MyProfile } from '../shared/api/profile.api';
 
@@ -21,26 +22,16 @@ const HOBBY_TAGS = [
   '☕ Кава',
 ];
 
-const VIS_LABELS: Record<Visibility, string> = {
-  public: 'Всі',
-  contacts: 'Контакти',
-  hidden: 'Сховано',
-};
-
-const GENDER_OPTIONS: { value: Gender; label: string }[] = [
-  { value: 'male', label: 'Чоловіча' },
-  { value: 'female', label: 'Жіноча' },
-  { value: 'unspecified', label: 'Не вказано' },
-];
+const GENDER_VALUES: Gender[] = ['male', 'female', 'unspecified'];
 
 export function ProfileSettingsPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: profile, isLoading } = useMyProfile();
   const update = useUpdateMyProfile();
   const [form, setForm] = useState<Partial<MyProfile>>({});
   const [saved, setSaved] = useState(false);
 
-  // Ініціалізуємо форму при першому завантаженні
   useEffect(() => {
     if (profile && !form.id) setForm(profile);
   }, [profile, form.id]);
@@ -48,7 +39,7 @@ export function ProfileSettingsPage() {
   if (isLoading || !profile) {
     return (
       <div className="min-h-screen bg-forest-50 flex items-center justify-center">
-        <p className="font-display text-xl text-forest-900 animate-pulse">Завантаження…</p>
+        <p className="font-display text-xl text-forest-900 animate-pulse">{t('common.loading')}</p>
       </div>
     );
   }
@@ -106,33 +97,32 @@ export function ProfileSettingsPage() {
             onClick={() => navigate(-1)}
             className="text-forest-600 hover:text-forest-900 text-sm font-medium"
           >
-            ← Назад
+            {t('common.back')}
           </button>
           <span className="font-display text-lg font-bold text-forest-900">
-            Налаштування профілю
+            {t('profile.settings')}
           </span>
           <span className="w-16" />
         </div>
       </header>
 
       <main className="max-w-2xl mx-auto px-6 py-6 space-y-4">
-        {/* Базова інформація */}
-        <Section title="Базова інформація">
-          <Field label="Ім'я">
+        <Section title={t('profile.sections.basic')}>
+          <Field label={t('profile.fields.name')}>
             <input
               value={form.fullName ?? ''}
               onChange={(e) => set('fullName', e.target.value)}
               className={inputCls}
             />
           </Field>
-          <Field label="Username" hint="Можна змінювати раз на 30 днів (поки що недоступно)">
+          <Field label={t('profile.fields.username')} hint={t('profile.fields.usernameHint')}>
             <input
               value={profile.username}
               disabled
               className={`${inputCls} bg-forest-50 text-forest-500`}
             />
           </Field>
-          <Field label="Місто">
+          <Field label={t('profile.fields.city')}>
             <input
               value={form.city ?? ''}
               onChange={(e) => set('city', e.target.value || null)}
@@ -140,7 +130,7 @@ export function ProfileSettingsPage() {
               placeholder="Київ"
             />
           </Field>
-          <Field label="Дата народження">
+          <Field label={t('profile.fields.birthDate')}>
             <input
               type="date"
               value={birthDateInput}
@@ -148,43 +138,41 @@ export function ProfileSettingsPage() {
               className={inputCls}
             />
           </Field>
-          <Field label="Стать">
+          <Field label={t('profile.fields.gender')}>
             <div className="flex gap-2">
-              {GENDER_OPTIONS.map((opt) => (
+              {GENDER_VALUES.map((gender) => (
                 <button
-                  key={opt.value}
+                  key={gender}
                   type="button"
-                  onClick={() => set('gender', opt.value)}
+                  onClick={() => set('gender', gender)}
                   className={`flex-1 px-3 py-2 rounded-xl border-2 text-sm transition ${
-                    form.gender === opt.value
+                    form.gender === gender
                       ? 'border-forest-500 bg-forest-50 text-forest-900'
                       : 'border-forest-100 text-forest-700 hover:border-forest-500/50'
                   }`}
                 >
-                  {opt.label}
+                  {t(`profile.gender.${gender}`)}
                 </button>
               ))}
             </div>
           </Field>
         </Section>
 
-        {/* Про себе */}
-        <Section title="Про себе">
-          <Field label="Bio">
+        <Section title={t('profile.sections.about')}>
+          <Field label={t('profile.fields.bio')}>
             <textarea
               value={form.bio ?? ''}
               onChange={(e) => set('bio', e.target.value || null)}
               rows={4}
               maxLength={2000}
               className={`${inputCls} resize-none`}
-              placeholder="Кілька слів про себе…"
+              placeholder={t('profile.fields.bioPlaceholder')}
             />
           </Field>
         </Section>
 
-        {/* Хоббі */}
-        <Section title="Хоббі">
-          <p className="text-xs text-forest-500 mb-3">Оберіть з пропонованих або додайте свої.</p>
+        <Section title={t('profile.sections.hobbies')}>
+          <p className="text-xs text-forest-500 mb-3">{t('profile.fields.hobbiesHint')}</p>
           <div className="flex flex-wrap gap-2 mb-3">
             {HOBBY_TAGS.map((tag) => {
               const active = form.hobbies?.includes(tag);
@@ -204,22 +192,19 @@ export function ProfileSettingsPage() {
               );
             })}
           </div>
-          <Field label="Інше (через кому)">
+          <Field label={t('profile.fields.hobbiesCustom')}>
             <input
               value={form.hobbiesCustom ?? ''}
               onChange={(e) => set('hobbiesCustom', e.target.value || null)}
               className={inputCls}
-              placeholder="Скелелазіння, гончарство…"
+              placeholder={t('profile.fields.hobbiesCustomPlaceholder')}
               maxLength={200}
             />
           </Field>
         </Section>
 
-        {/* Контакти + видимість */}
-        <Section title="Контакти">
-          <p className="text-xs text-forest-500 mb-3">
-            Для кожного контакту обери, хто його бачить.
-          </p>
+        <Section title={t('profile.sections.contacts')}>
+          <p className="text-xs text-forest-500 mb-3">{t('profile.visibility.title')}</p>
 
           <ContactRow
             label="Email"
@@ -230,7 +215,7 @@ export function ProfileSettingsPage() {
             onVisibilityChange={(v) => set('emailVisibility', v)}
           />
           <ContactRow
-            label="Телефон"
+            label={t('auth.phone')}
             icon="📱"
             value={form.phone ?? ''}
             onChange={(v) => set('phone', v || null)}
@@ -275,62 +260,57 @@ export function ProfileSettingsPage() {
           />
         </Section>
 
-        {/* Приватність запрошень */}
-        <Section title="Запрошення в кімнати">
-          <p className="text-xs text-forest-500 mb-3">Хто може запрошувати вас у нові кімнати?</p>
+        <Section title={t('profile.sections.invites')}>
+          <p className="text-xs text-forest-500 mb-3">{t('profile.inviteFrom.title')}</p>
           <div className="space-y-2">
-            {[
-              { value: 'all', label: 'Всі', hint: 'Будь-хто з вашим username' },
-              { value: 'contacts', label: 'Тільки контакти', hint: 'Лише ті, кого я додав' },
-              { value: 'none', label: 'Ніхто', hint: 'Ніхто не може запросити' },
-            ].map((opt) => (
+            {(['all', 'contacts', 'none'] as const).map((opt) => (
               <button
-                key={opt.value}
+                key={opt}
                 type="button"
-                onClick={() => set('inviteFrom', opt.value as MyProfile['inviteFrom'])}
+                onClick={() => set('inviteFrom', opt)}
                 className={`w-full text-left px-4 py-3 rounded-xl border-2 transition ${
-                  form.inviteFrom === opt.value
+                  form.inviteFrom === opt
                     ? 'border-forest-500 bg-forest-50'
                     : 'border-forest-100 hover:border-forest-500/50'
                 }`}
               >
-                <p className="text-sm font-semibold text-forest-900">{opt.label}</p>
-                <p className="text-xs text-forest-500">{opt.hint}</p>
+                <p className="text-sm font-semibold text-forest-900">
+                  {t(`profile.inviteFrom.${opt}`)}
+                </p>
+                <p className="text-xs text-forest-500">{t(`profile.inviteFrom.${opt}Hint`)}</p>
               </button>
             ))}
           </div>
         </Section>
 
-        {/* Безпека */}
-        <Section title="Безпека">
+        <Section title={t('profile.sections.security')}>
           <button
             type="button"
             onClick={() => navigate('/settings/blocked')}
             className="w-full text-left px-4 py-3 rounded-xl border-2 border-forest-100 hover:border-forest-500/50 transition"
           >
-            <p className="text-sm font-semibold text-forest-900">🚫 Заблоковані користувачі</p>
-            <p className="text-xs text-forest-500">Керуйте списком заблокованих</p>
+            <p className="text-sm font-semibold text-forest-900">{t('profile.security.blocked')}</p>
+            <p className="text-xs text-forest-500">{t('profile.security.blockedHint')}</p>
           </button>
         </Section>
 
-        {/* Збереження */}
         <div className="sticky bottom-4 bg-white rounded-xl shadow-lg shadow-forest-900/10 border border-forest-100 p-3 flex items-center gap-3">
-          {saved && <span className="text-xs text-forest-600 font-semibold">✓ Збережено</span>}
-          {update.isError && <span className="text-xs text-red-500">Помилка збереження</span>}
+          {saved && (
+            <span className="text-xs text-forest-600 font-semibold">{t('common.saved')}</span>
+          )}
+          {update.isError && <span className="text-xs text-red-500">{t('common.error')}</span>}
           <button
             onClick={handleSave}
             disabled={update.isPending}
             className="ml-auto bg-forest-600 hover:bg-forest-700 disabled:opacity-60 text-white font-semibold px-6 py-2.5 rounded-xl transition"
           >
-            {update.isPending ? 'Збереження…' : 'Зберегти'}
+            {update.isPending ? t('common.saving') : t('common.save')}
           </button>
         </div>
       </main>
     </div>
   );
 }
-
-// === Допоміжні компоненти ===
 
 const inputCls =
   'w-full px-4 py-2.5 rounded-xl border border-forest-100 focus:border-forest-500 focus:ring-2 focus:ring-forest-500/20 outline-none transition text-sm';
@@ -383,6 +363,7 @@ function ContactRow({
   placeholder?: string;
   disabled?: boolean;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center gap-2 mb-2">
       <span className="text-lg shrink-0">{icon}</span>
@@ -398,9 +379,9 @@ function ContactRow({
         onChange={(e) => onVisibilityChange(e.target.value as Visibility)}
         className="px-2 py-2.5 rounded-xl border border-forest-100 text-xs font-medium text-forest-700 bg-white focus:border-forest-500 outline-none shrink-0"
       >
-        <option value="public">{VIS_LABELS.public}</option>
-        <option value="contacts">{VIS_LABELS.contacts}</option>
-        <option value="hidden">{VIS_LABELS.hidden}</option>
+        <option value="public">{t('profile.visibility.public')}</option>
+        <option value="contacts">{t('profile.visibility.contacts')}</option>
+        <option value="hidden">{t('profile.visibility.hidden')}</option>
       </select>
     </div>
   );
