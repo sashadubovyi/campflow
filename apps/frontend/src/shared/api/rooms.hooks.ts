@@ -35,3 +35,17 @@ export function useRoom(id: string) {
     enabled: !!id,
   });
 }
+
+export function useCloseRoom(roomId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => roomsApi.close(roomId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['rooms'] });
+      qc.invalidateQueries({ queryKey: ['room', roomId] });
+      qc.invalidateQueries({ queryKey: ['polls', roomId] });
+      qc.invalidateQueries({ queryKey: ['final-plan', roomId] });
+      qc.invalidateQueries({ queryKey: ['messages', roomId] });
+    },
+  });
+}

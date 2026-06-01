@@ -10,6 +10,8 @@ export interface RoomListItem {
   endsAt: string | null;
   ownerId: string;
   memberCount: number;
+  status?: 'open' | 'closed';
+  closedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -46,19 +48,19 @@ export const roomsApi = {
     const { data } = await api.get<RoomListItem[]>('/rooms');
     return data;
   },
-
   async create(payload: CreateRoomPayload): Promise<RoomListItem> {
     const { data } = await api.post<RoomListItem>('/rooms', payload);
     return data;
   },
-
   async join(inviteCode: string): Promise<RoomDetails> {
     const { data } = await api.post<RoomDetails>('/rooms/join', { inviteCode });
     return data;
   },
-
   async get(id: string): Promise<RoomDetails> {
     const { data } = await api.get<RoomDetails>(`/rooms/${id}`);
     return data;
+  },
+  async close(id: string): Promise<void> {
+    await api.post(`/rooms/${id}/close`);
   },
 };

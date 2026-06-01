@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useRoom } from '../../shared/api/rooms.hooks';
@@ -6,6 +7,7 @@ import { MembersPanel } from './MembersPanel';
 import { ChatPanel } from './ChatPanel';
 import { PollsPanel } from './PollsPanel';
 import { InviteButton } from './InviteButton';
+import { CloseRoomModal } from './CloseRoomModal';
 import { usePresence } from '../../shared/api/usePresence';
 
 export function RoomPage() {
@@ -14,6 +16,7 @@ export function RoomPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { data: room, isLoading, isError } = useRoom(id ?? '');
+  const [showCloseModal, setShowCloseModal] = useState(false);
   usePresence(id ?? '');
 
   if (isLoading) {
@@ -38,6 +41,9 @@ export function RoomPage() {
     );
   }
 
+  const isAdmin = room.currentUserRole === 'admin';
+  const isClosed = room.status === 'closed';
+
   return (
     <div className="h-[100dvh] flex flex-col bg-forest-50 overflow-hidden">
       <header className="bg-white border-b border-forest-100 shrink-0">
@@ -55,6 +61,14 @@ export function RoomPage() {
           </div>
           <div className="flex items-center gap-4">
             <InviteButton roomId={room.id} inviteCode={room.inviteCode} />
+            {isAdmin && !isClosed && (
+              <button
+                onClick={() => setShowCloseModal(true)}
+                className="border border-ember-500 text-ember-500 hover:bg-ember-500 hover:text-white font-body text-sm font-medium px-3 py-1.5 rounded-lg transition"
+              >
+                {t('polls.ai.closeRoom')}
+              </button>
+            )}
             <span className="font-body text-sm text-forest-700">{user?.fullName}</span>
           </div>
         </div>
@@ -65,16 +79,25 @@ export function RoomPage() {
           roomId={room.id}
           members={room.members}
           currentUserId={user?.id ?? ''}
-          isAdmin={room.currentUserRole === 'admin'}
+          isAdmin={isAdmin}
         />
         <ChatPanel roomId={room.id} roomName={room.name} />
         <PollsPanel
           roomId={room.id}
-          isAdmin={room.currentUserRole === 'admin'}
+          isAdmin={isAdmin}
           members={room.members}
           currentUserId={user?.id ?? ''}
         />
       </div>
+
+      {showCloseModal && (
+        <CloseRoomModal
+          roomId={room.id}
+          roomName={room.name}
+          onClose={() => setShowCloseModal(false)}
+          onClosed={() => navigate('/rooms')}
+        />
+      )}
     </div>
   );
 }
