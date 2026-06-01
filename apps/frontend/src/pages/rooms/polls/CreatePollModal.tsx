@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import {
@@ -6,7 +6,7 @@ import {
   useCreateMultiPoll,
   useCreateLocationPoll,
 } from '../../../shared/api/polls.hooks';
-import { useGenerateChecklist } from '../../../shared/api/ai.hooks';
+import { useGenerateChecklist, useCheckDuplicate } from '../../../shared/api/ai.hooks';
 import type { PollType } from '../../../shared/api/polls.api';
 import { MapPicker, type PickedLocation } from '../../../shared/ui/map/MapPicker';
 
@@ -44,17 +44,23 @@ export function CreatePollModal({ roomId, onClose }: Props) {
   const [showAiInput, setShowAiInput] = useState(false);
   const [aiDescription, setAiDescription] = useState('');
   const [aiSource, setAiSource] = useState<'ai' | 'fallback' | null>(null);
+  const [duplicateWarning, setDuplicateWarning] = useState<{
+    isDuplicate: boolean;
+    similarTo: string | null;
+  } | null>(null);
 
   const createSingle = useCreateSinglePoll();
   const createMulti = useCreateMultiPoll();
   const createLocation = useCreateLocationPoll();
   const generateChecklist = useGenerateChecklist();
+  const checkDuplicate = useCheckDuplicate();
 
   const {
     register,
     handleSubmit,
     control,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<BaseFormValues>({
     defaultValues: {
@@ -66,6 +72,38 @@ export function CreatePollModal({ roomId, onClose }: Props) {
   });
 
   const { fields, append, remove, replace } = useFieldArray({ control, name: 'options' });
+  const titleValue = watch('title');
+
+  // Дебаунс перевірки дублікатів через AI
+  useEffect(() => {
+    // Не перевіряємо якщо заголовок занадто короткий або це location-опитування
+    if (!titleValue || titleValue.trim().length < 5 || type === 'location') {
+      setDuplicateWarning(null);
+      return;
+    }
+
+    const handle = setTimeout(async () => {
+      try {
+        const result = await checkDuplicate.mutateAsync({
+          roomId,
+          title: titleValue.trim(),
+        });
+        if (result.isDuplicate) {
+          setDuplicateWarning({
+            isDuplicate: true,
+            similarTo: result.similarTo,
+          });
+        } else {
+          setDuplicateWarning(null);
+        }
+      } catch {
+        setDuplicateWarning(null);
+      }
+    }, 2000); // 2 секунди після останнього натискання клавіші
+
+    return () => clearTimeout(handle);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [titleValue, type, roomId]);
 
   const isLoading = createSingle.isPending || createMulti.isPending || createLocation.isPending;
 
@@ -221,6 +259,18 @@ export function CreatePollModal({ roomId, onClose }: Props) {
               })}
             />
             {errors.title && <p className="text-red-500 text-xs mt-1">{t('polls.question')}</p>}
+            {duplicateWarning && duplicateWarning.isDuplicate && (
+              <div className="mt-2 bg-ember-500/10 border border-ember-500/30 rounded-lg px-3 py-2">
+                <p className="text-xs font-semibold text-ember-500">
+                  {t('polls.ai.duplicateWarning')}
+                </p>
+                {duplicateWarning.similarTo && (
+                  <p className="text-xs text-forest-700 mt-0.5">
+                    {t('polls.ai.duplicateBody', { title: duplicateWarning.similarTo })}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
 
           <div>
