@@ -154,6 +154,14 @@
   },
   "profile": {
     "edit": "✎ Edit profile",
+    "editShort": "Edit profile",
+    "menu": {
+      "personal": "Personal info",
+      "contacts": "Contacts",
+      "calendar": "Calendar",
+      "privacy": "Privacy & security",
+      "logout": "Log out"
+    },
     "settings": "Profile settings",
     "addToContacts": "+ Add to contacts",
     "adding": "Adding…",
