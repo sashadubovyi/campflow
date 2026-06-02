@@ -83,7 +83,8 @@
     "typing": "{{name}} is typing…",
     "typingMultiple": "Several people are typing…",
     "noMessages": "It's quiet here. Say hi first!",
-    "noRoom": "No rooms to chat in yet"
+    "noRoom": "No rooms to chat in yet",
+    "openRoom": "Open room"
   },
   "polls": {
     "title": "Polls",
