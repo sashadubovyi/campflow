@@ -1,13 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '../shared/store/useAuth';
 import { useRooms } from '../shared/api/rooms.hooks';
 import type { RoomListItem } from '../shared/api/rooms.api';
 import { CreateRoomModal } from './rooms/CreateRoomModal';
 import { JoinRoomModal } from './rooms/JoinRoomModal';
-import { useUnreadCount } from '../shared/api/notifications.hooks';
-import { LanguageSwitcher } from '../shared/ui/LanguageSwitcher';
 
 function formatDateRange(
   startsAt: string | null,
@@ -28,27 +25,26 @@ function RoomCard({ room, onOpen }: { room: RoomListItem; onOpen: (id: string) =
   return (
     <button
       onClick={() => onOpen(room.id)}
-      className="text-left bg-white rounded-2xl border border-forest-100 shadow-sm hover:shadow-md hover:border-forest-500/30 transition p-5 group"
+      className="text-left bg-white rounded-card shadow-card hover:shadow-card-lg transition p-5 group"
     >
       <div className="flex items-start justify-between gap-3">
-        <h3 className="font-display text-lg font-semibold text-forest-900 group-hover:text-forest-600 transition">
+        <h3 className="text-lg font-semibold text-neutral-900 group-hover:text-accent-600 transition">
           {room.name}
         </h3>
-        <span className="shrink-0 text-xs bg-forest-50 text-forest-600 rounded-full px-2.5 py-1 font-medium">
+        <span className="shrink-0 text-xs bg-neutral-100 text-neutral-600 rounded-full px-2.5 py-1 font-medium">
           {room.memberCount} 👤
         </span>
       </div>
       {room.description && (
-        <p className="text-sm text-forest-700 mt-2 line-clamp-2">{room.description}</p>
+        <p className="text-sm text-neutral-600 mt-2 line-clamp-2">{room.description}</p>
       )}
-      {dates && <p className="text-xs text-forest-500 mt-3">📅 {dates}</p>}
+      {dates && <p className="text-xs text-neutral-400 mt-3">📅 {dates}</p>}
     </button>
   );
 }
 
 export function RoomsPage() {
   const { t } = useTranslation();
-  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { data: rooms, isLoading, isError } = useRooms();
   const [showCreate, setShowCreate] = useState(false);
@@ -59,65 +55,39 @@ export function RoomsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-forest-50 font-body">
-      {/* Хедер */}
-      <header className="bg-white border-b border-forest-100">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-          <h1 className="font-display text-2xl font-bold text-forest-900">
-            Camp<span className="text-ember-500">Flow</span>
-          </h1>
-          <div className="flex items-center gap-4">
-            <NotificationsBell />
-            <LanguageSwitcher />
-            <button
-              onClick={() => navigate('/contacts')}
-              className="text-sm text-forest-600 hover:text-forest-900 font-medium"
-            >
-              {t('contacts.link')}
-            </button>
-            <span className="text-forest-700 text-sm">{user?.fullName}</span>
-            <button
-              onClick={logout}
-              className="text-sm text-forest-600 hover:text-forest-900 font-medium"
-            >
-              {t('common.logout')}
-            </button>
-          </div>
-        </div>
-      </header>
-
+    <div className="h-full overflow-y-auto bg-neutral-50">
       <main className="max-w-4xl mx-auto px-6 py-8">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="font-display text-xl font-bold text-forest-900">{t('rooms.title')}</h2>
+          <h2 className="text-xl font-bold text-neutral-900">{t('rooms.title')}</h2>
           <div className="flex gap-3">
             <button
               onClick={() => setShowJoin(true)}
-              className="text-sm border border-forest-100 text-forest-700 font-semibold px-4 py-2 rounded-xl hover:bg-white transition"
+              className="text-sm bg-white text-neutral-700 border border-neutral-200 font-semibold px-4 py-2 rounded-xl hover:bg-neutral-50 transition"
             >
               {t('rooms.join')}
             </button>
             <button
               onClick={() => setShowCreate(true)}
-              className="text-sm bg-forest-600 hover:bg-forest-700 text-white font-semibold px-4 py-2 rounded-xl transition"
+              className="text-sm bg-accent-500 hover:bg-accent-600 text-white font-semibold px-4 py-2 rounded-xl transition"
             >
               {t('rooms.createNew')}
             </button>
           </div>
         </div>
 
-        {isLoading && <p className="text-forest-500 animate-pulse">{t('common.loading')}</p>}
+        {isLoading && <p className="text-neutral-400 animate-pulse">{t('common.loading')}</p>}
 
         {isError && (
-          <p className="text-red-500 bg-red-50 rounded-lg px-4 py-3">{t('common.error')}</p>
+          <p className="text-danger-700 bg-danger-100 rounded-lg px-4 py-3">{t('common.error')}</p>
         )}
 
         {rooms && rooms.length === 0 && (
-          <div className="bg-white rounded-2xl border border-forest-100 border-dashed p-10 text-center">
-            <p className="font-display text-lg text-forest-900 mb-1">{t('rooms.empty')} 🏕️</p>
-            <p className="text-forest-700 text-sm mb-5">{t('rooms.emptyHint')}</p>
+          <div className="bg-white rounded-card shadow-card p-10 text-center">
+            <p className="text-lg text-neutral-900 mb-1">{t('rooms.empty')} 🏕️</p>
+            <p className="text-neutral-600 text-sm mb-5">{t('rooms.emptyHint')}</p>
             <button
               onClick={() => setShowCreate(true)}
-              className="bg-forest-600 hover:bg-forest-700 text-white font-semibold px-5 py-2.5 rounded-xl transition"
+              className="bg-accent-500 hover:bg-accent-600 text-white font-semibold px-5 py-2.5 rounded-xl transition"
             >
               {t('rooms.createNew')}
             </button>
@@ -153,26 +123,5 @@ export function RoomsPage() {
         />
       )}
     </div>
-  );
-}
-
-function NotificationsBell() {
-  const { t } = useTranslation();
-  const { data: count } = useUnreadCount();
-  const navigate = useNavigate();
-
-  return (
-    <button
-      onClick={() => navigate('/notifications')}
-      className="relative text-2xl hover:scale-110 transition"
-      title={t('notifications.title')}
-    >
-      🔔
-      {count !== undefined && count > 0 && (
-        <span className="absolute -top-1 -right-1 bg-ember-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center">
-          {count > 99 ? '99+' : count}
-        </span>
-      )}
-    </button>
   );
 }

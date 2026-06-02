@@ -81,6 +81,7 @@ export class AuthService {
       user: {
         id: user.id,
         email: user.email,
+        username: user.username,
         fullName: user.fullName,
         avatarUrl: user.avatarUrl,
         locale: user.locale,

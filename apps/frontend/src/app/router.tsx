@@ -3,6 +3,7 @@ import { LoginPage } from '../pages/auth/LoginPage';
 import { RegisterPage } from '../pages/auth/RegisterPage';
 import { RoomsPage } from '../pages/RoomsPage';
 import { ProtectedRoute } from './ProtectedRoute';
+import { AppShell } from './AppShell';
 import { RoomPage } from '../pages/rooms/RoomPage';
 import { JoinByLinkPage } from '../pages/JoinByLinkPage';
 import { ProfilePage } from '../pages/ProfilePage';
@@ -10,66 +11,28 @@ import { ProfileSettingsPage } from '../pages/ProfileSettingsPage';
 import { ContactsPage } from '../pages/ContactsPage';
 import { NotificationsPage } from '../pages/NotificationsPage';
 import { BlockedUsersPage } from '../pages/BlockedUsersPage';
+import { CalendarPage } from '../pages/CalendarPage';
 
 export const router: ReturnType<typeof createBrowserRouter> = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
   { path: '/register', element: <RegisterPage /> },
   { path: '/join/:code', element: <JoinByLinkPage /> },
   {
-    path: '/rooms',
     element: (
       <ProtectedRoute>
-        <RoomsPage />
+        <AppShell />
       </ProtectedRoute>
     ),
-  },
-  {
-    path: '/rooms/:id',
-    element: (
-      <ProtectedRoute>
-        <RoomPage />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: '/u/:username',
-    element: (
-      <ProtectedRoute>
-        <ProfilePage />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: '/settings/profile',
-    element: (
-      <ProtectedRoute>
-        <ProfileSettingsPage />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: '/settings/blocked',
-    element: (
-      <ProtectedRoute>
-        <BlockedUsersPage />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: '/contacts',
-    element: (
-      <ProtectedRoute>
-        <ContactsPage />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: '/notifications',
-    element: (
-      <ProtectedRoute>
-        <NotificationsPage />
-      </ProtectedRoute>
-    ),
+    children: [
+      { path: '/rooms', element: <RoomsPage /> },
+      { path: '/rooms/:id', element: <RoomPage /> },
+      { path: '/u/:username', element: <ProfilePage /> },
+      { path: '/settings/profile', element: <ProfileSettingsPage /> },
+      { path: '/settings/blocked', element: <BlockedUsersPage /> },
+      { path: '/contacts', element: <ContactsPage /> },
+      { path: '/calendar', element: <CalendarPage /> },
+      { path: '/notifications', element: <NotificationsPage /> },
+    ],
   },
   { path: '/', element: <Navigate to="/rooms" replace /> },
   { path: '*', element: <Navigate to="/rooms" replace /> },
