@@ -9,6 +9,8 @@ import {
 import { useGenerateChecklist, useCheckDuplicate } from '../../../shared/api/ai.hooks';
 import type { PollType } from '../../../shared/api/polls.api';
 import { MapPicker, type PickedLocation } from '../../../shared/ui/map/MapPicker';
+import { Sparkles, CircleDot, ListChecks, MapPin } from 'lucide-react';
+import { cn } from '../../../shared/ui';
 
 interface Props {
   roomId: string;
@@ -207,6 +209,12 @@ export function CreatePollModal({ roomId, onClose }: Props) {
 
   const pollTypes: PollType[] = ['single_choice', 'multi_choice', 'location'];
 
+  const TYPE_ICON: Record<PollType, typeof CircleDot> = {
+    single_choice: CircleDot,
+    multi_choice: ListChecks,
+    location: MapPin,
+  };
+
   return (
     <div
       className="fixed inset-0 bg-neutral-900/40 flex items-center justify-center px-4 z-50"
@@ -220,27 +228,32 @@ export function CreatePollModal({ roomId, onClose }: Props) {
           {t('polls.newPoll')}
         </h2>
 
-        <div className="grid grid-cols-3 gap-2 mb-5">
-          {pollTypes.map((pt) => (
-            <button
-              key={pt}
-              type="button"
-              onClick={() => {
-                setType(pt);
-                setAiSource(null);
-              }}
-              className={`p-3 rounded-xl border-2 transition text-left ${
-                type === pt
-                  ? 'border-accent-500 bg-neutral-50'
-                  : 'border-neutral-100 hover:border-accent-500/50'
-              }`}
-            >
-              <div className="text-xl mb-1">{TYPE_EMOJI[pt]}</div>
-              <div className="text-xs font-semibold text-neutral-900">
-                {t(`polls.types.${getTypeLabel(pt)}`)}
-              </div>
-            </button>
-          ))}
+        <div className="grid grid-cols-3 gap-2 mb-3">
+          {pollTypes.map((pt) => {
+            const Icon = TYPE_ICON[pt];
+            const active = type === pt;
+            return (
+              <button
+                key={pt}
+                type="button"
+                onClick={() => {
+                  setType(pt);
+                  setAiSource(null);
+                }}
+                className={cn(
+                  'flex flex-col items-center justify-center gap-1.5 py-3 rounded-xl border transition',
+                  active
+                    ? 'border-accent-500 bg-accent-500 text-white shadow-card'
+                    : 'border-neutral-200 text-neutral-500 hover:border-accent-500/40 hover:text-neutral-700',
+                )}
+              >
+                <Icon size={20} />
+                <span className="text-xs font-semibold">
+                  {t(`polls.types.${getTypeLabel(pt)}`)}
+                </span>
+              </button>
+            );
+          })}
         </div>
         <p className="text-xs text-neutral-400 mb-5 italic">
           {t(`polls.types.${getTypeLabel(type)}Hint`)}
@@ -307,9 +320,10 @@ export function CreatePollModal({ roomId, onClose }: Props) {
             <button
               type="button"
               onClick={() => setShowAiInput(true)}
-              className="w-full bg-gradient-to-r from-accent-500/10 to-accent-400/10 hover:from-accent-500/20 hover:to-accent-400/20 border border-accent-500/30 text-neutral-900 font-semibold py-2.5 rounded-xl text-sm transition"
+              className="ai-border w-full rounded-xl py-2.5 flex items-center justify-center gap-2 text-sm font-semibold text-neutral-900 bg-gradient-to-br from-white/70 to-accent-50/50 backdrop-blur-md hover:from-white/90 transition"
             >
-              {t('polls.ai.generateChecklist')}
+              <Sparkles size={16} className="text-[#655adc]" />
+              {t('polls.ai.assist')}
             </button>
           )}
 

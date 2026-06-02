@@ -134,6 +134,7 @@
       "approvedAt": "Утверждено {{time}}"
     },
     "ai": {
+      "assist": "AI-помощник",
       "generateChecklist": "🤖 Сгенерировать с AI",
       "generating": "AI думает…",
       "describePrompt": "Опишите поездку — AI создаст чек-лист",

@@ -33,3 +33,33 @@ body {
 .scrollbar-thin::-webkit-scrollbar-track {
   background: transparent;
 }
+
+@keyframes ai-hue {
+  to {
+    filter: hue-rotate(1turn);
+  }
+}
+
+.ai-border {
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
+}
+.ai-border::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 2.5px;
+  border-radius: inherit;
+  background: conic-gradient(#488cfb, #29dbbc, #ddf505, #ff9f0e, #e440bb, #655adc, #488cfb);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: destination-out;
+  mask-composite: exclude;
+  animation: ai-hue 4s linear infinite;
+  pointer-events: none;
+}

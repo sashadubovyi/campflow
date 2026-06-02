@@ -134,6 +134,7 @@
       "approvedAt": "Approved {{time}}"
     },
     "ai": {
+      "assist": "AI assistant",
       "generateChecklist": "🤖 Generate with AI",
       "generating": "AI is thinking…",
       "describePrompt": "Describe your trip — AI will build a checklist",
