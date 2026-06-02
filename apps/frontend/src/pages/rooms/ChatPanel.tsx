@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Send } from 'lucide-react';
 import { useRoomChat } from '../../shared/api/useRoomChat';
 import { useAuth } from '../../shared/store/useAuth';
 import { Avatar } from '../../shared/ui/Avatar';
@@ -55,23 +56,24 @@ export function ChatPanel({ roomId, roomName }: Props) {
   const othersTyping = [...typingUsers].filter((id) => id !== user?.id);
 
   return (
-    <section className="h-full flex flex-col bg-forest-50">
-      <div className="px-6 py-4 border-b border-forest-100 bg-white shrink-0">
-        <h2 className="font-display text-lg font-bold text-forest-900">{roomName}</h2>
+    <section className="h-full flex flex-col bg-neutral-50 min-h-0">
+      {/* Заголовок — лише на десктопі (на мобайлі назва в хедері RoomPage) */}
+      <div className="hidden md:block px-6 py-4 border-b border-neutral-100 bg-white shrink-0">
+        <h2 className="text-lg font-bold text-neutral-900">{roomName}</h2>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
+      <div className="flex-1 overflow-y-auto scrollbar-thin px-4 md:px-6 py-4 space-y-3">
         {isLoading && (
-          <p className="text-center text-forest-500 font-body text-sm animate-pulse">
+          <p className="text-center text-neutral-400 text-sm animate-pulse">
             {t('common.loading')}
           </p>
         )}
 
         {!isLoading && messages.length === 0 && (
           <div className="h-full flex items-center justify-center">
-            <div className="text-center text-forest-500 font-body">
-              <p className="text-2xl mb-2">💬</p>
-              <p>{t('chat.noMessages')}</p>
+            <div className="text-center text-neutral-400">
+              <p className="text-3xl mb-2">💬</p>
+              <p className="text-sm">{t('chat.noMessages')}</p>
             </div>
           </div>
         )}
@@ -88,29 +90,30 @@ export function ChatPanel({ roomId, roomName }: Props) {
         <div ref={bottomRef} />
       </div>
 
-      <div className="h-5 px-6 shrink-0">
+      <div className="h-5 px-4 md:px-6 shrink-0">
         {othersTyping.length > 0 && (
-          <p className="font-body text-xs text-forest-500 animate-pulse">
+          <p className="text-xs text-neutral-400 animate-pulse">
             {othersTyping.length === 1 ? t('chat.typing', { name: '…' }) : t('chat.typingMultiple')}
           </p>
         )}
       </div>
 
-      <div className="px-6 py-4 border-t border-forest-100 bg-white shrink-0">
-        <div className="flex gap-2">
+      <div className="px-4 md:px-6 py-3 border-t border-neutral-100 bg-white shrink-0">
+        <div className="flex items-center gap-2">
           <input
             value={text}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
             placeholder={t('chat.placeholder')}
-            className="flex-1 px-4 py-2.5 rounded-xl border border-forest-100 focus:border-forest-500 focus:ring-2 focus:ring-forest-500/20 outline-none transition font-body"
+            className="flex-1 h-11 px-4 rounded-xl bg-neutral-50 border border-neutral-200 text-neutral-900 placeholder:text-neutral-400 focus:bg-white focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 outline-none transition"
           />
           <button
             onClick={handleSend}
             disabled={!text.trim()}
-            className="bg-forest-600 hover:bg-forest-700 disabled:opacity-40 text-white font-semibold px-5 rounded-xl transition"
+            className="w-11 h-11 shrink-0 flex items-center justify-center rounded-xl bg-accent-500 text-white hover:bg-accent-600 disabled:opacity-40 disabled:hover:bg-accent-500 transition"
+            aria-label="Send"
           >
-            ➤
+            <Send size={18} />
           </button>
         </div>
       </div>
@@ -130,7 +133,7 @@ function MessageBubble({
   if (message.type === 'system') {
     return (
       <div className="flex justify-center">
-        <p className="font-body text-xs text-forest-500 bg-forest-100/60 rounded-full px-3 py-1">
+        <p className="text-xs text-neutral-500 bg-neutral-100 rounded-full px-3 py-1">
           {message.content}
         </p>
       </div>
@@ -139,27 +142,27 @@ function MessageBubble({
 
   return (
     <div className={`flex gap-2.5 ${isOwn ? 'flex-row-reverse' : ''}`}>
-      <Avatar
-        fullName={message.author?.fullName ?? '?'}
-        avatarUrl={message.author?.avatarUrl}
-        size={32}
-      />
-      <div className={`max-w-[70%] ${isOwn ? 'items-end' : 'items-start'} flex flex-col`}>
-        <div className="flex items-baseline gap-2">
+      {!isOwn && (
+        <Avatar
+          fullName={message.author?.fullName ?? '?'}
+          avatarUrl={message.author?.avatarUrl}
+          size={32}
+        />
+      )}
+      <div className={`max-w-[75%] flex flex-col ${isOwn ? 'items-end' : 'items-start'}`}>
+        <div className="flex items-baseline gap-2 px-1">
           {!isOwn && (
-            <span className="font-body text-xs font-medium text-forest-700">
-              {message.author?.fullName}
-            </span>
+            <span className="text-xs font-medium text-neutral-700">{message.author?.fullName}</span>
           )}
-          <span className="font-body text-[10px] text-forest-500">
+          <span className="text-[10px] text-neutral-400">
             {formatTime(message.createdAt, locale)}
           </span>
         </div>
         <div
-          className={`mt-0.5 px-3.5 py-2 rounded-2xl font-body text-sm ${
+          className={`mt-0.5 px-3.5 py-2 text-sm leading-relaxed ${
             isOwn
-              ? 'bg-forest-600 text-white rounded-tr-sm'
-              : 'bg-white text-forest-900 border border-forest-100 rounded-tl-sm'
+              ? 'bg-accent-500 text-white rounded-2xl rounded-tr-md'
+              : 'bg-white text-neutral-900 shadow-card rounded-2xl rounded-tl-md'
           }`}
         >
           {message.content}
