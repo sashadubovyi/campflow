@@ -52,6 +52,7 @@
     "startsAt": "Дата початку",
     "endsAt": "Дата закінчення",
     "members": "Учасники",
+    "info": "Інфо кімнати",
     "membersCount": "{{count}} осіб",
     "online": "онлайн",
     "admin": "Адмін",

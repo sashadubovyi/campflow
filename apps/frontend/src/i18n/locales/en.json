@@ -52,6 +52,7 @@
     "startsAt": "Start date",
     "endsAt": "End date",
     "members": "Members",
+    "info": "Room info",
     "membersCount": "{{count}} people",
     "online": "online",
     "admin": "Admin",
