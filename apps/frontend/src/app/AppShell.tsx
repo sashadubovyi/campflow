@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { DesktopNav } from './DesktopNav';
+import { MobileTabBar } from './MobileTabBar';
 import { CreateRoomModal } from '../pages/rooms/CreateRoomModal';
 
 export function AppShell() {
@@ -10,9 +11,10 @@ export function AppShell() {
   return (
     <div className="flex h-[100dvh] bg-neutral-50 overflow-hidden">
       <DesktopNav onCreateRoom={() => setShowCreate(true)} />
-      <main className="flex-1 min-w-0 overflow-hidden">
+      <main className="flex-1 min-w-0 overflow-hidden pb-16 md:pb-0">
         <Outlet />
       </main>
+      <MobileTabBar />
       {showCreate && (
         <CreateRoomModal
           onClose={() => setShowCreate(false)}

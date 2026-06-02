@@ -12,6 +12,8 @@ import { ContactsPage } from '../pages/ContactsPage';
 import { NotificationsPage } from '../pages/NotificationsPage';
 import { BlockedUsersPage } from '../pages/BlockedUsersPage';
 import { CalendarPage } from '../pages/CalendarPage';
+import { ChatPage } from '../pages/ChatPage';
+import { MapPage } from '../pages/MapPage';
 
 export const router: ReturnType<typeof createBrowserRouter> = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -32,6 +34,8 @@ export const router: ReturnType<typeof createBrowserRouter> = createBrowserRoute
       { path: '/contacts', element: <ContactsPage /> },
       { path: '/calendar', element: <CalendarPage /> },
       { path: '/notifications', element: <NotificationsPage /> },
+      { path: '/chat', element: <ChatPage /> },
+      { path: '/map', element: <MapPage /> },
     ],
   },
   { path: '/', element: <Navigate to="/rooms" replace /> },

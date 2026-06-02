@@ -71,11 +71,18 @@
     "defaultChoice": "(default)",
     "transferHint": "💡 If you don't choose — rights go to the oldest member."
   },
+  "nav": {
+    "home": "Rooms",
+    "chat": "Chat",
+    "map": "Map",
+    "profile": "Profile"
+  },
   "chat": {
     "placeholder": "Type a message",
     "typing": "{{name}} is typing…",
     "typingMultiple": "Several people are typing…",
-    "noMessages": "It's quiet here. Say hi first!"
+    "noMessages": "It's quiet here. Say hi first!",
+    "noRoom": "No rooms to chat in yet"
   },
   "polls": {
     "title": "Polls",
