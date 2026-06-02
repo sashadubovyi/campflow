@@ -209,14 +209,14 @@ export function CreatePollModal({ roomId, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 bg-forest-900/40 flex items-center justify-center px-4 z-50"
+      className="fixed inset-0 bg-neutral-900/40 flex items-center justify-center px-4 z-50"
       onClick={onClose}
     >
       <div
         className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 font-body max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="font-display text-xl font-bold text-forest-900 mb-4">
+        <h2 className="font-display text-xl font-bold text-neutral-900 mb-4">
           {t('polls.newPoll')}
         </h2>
 
@@ -231,28 +231,28 @@ export function CreatePollModal({ roomId, onClose }: Props) {
               }}
               className={`p-3 rounded-xl border-2 transition text-left ${
                 type === pt
-                  ? 'border-forest-500 bg-forest-50'
-                  : 'border-forest-100 hover:border-forest-500/50'
+                  ? 'border-accent-500 bg-neutral-50'
+                  : 'border-neutral-100 hover:border-accent-500/50'
               }`}
             >
               <div className="text-xl mb-1">{TYPE_EMOJI[pt]}</div>
-              <div className="text-xs font-semibold text-forest-900">
+              <div className="text-xs font-semibold text-neutral-900">
                 {t(`polls.types.${getTypeLabel(pt)}`)}
               </div>
             </button>
           ))}
         </div>
-        <p className="text-xs text-forest-500 mb-5 italic">
+        <p className="text-xs text-neutral-400 mb-5 italic">
           {t(`polls.types.${getTypeLabel(type)}Hint`)}
         </p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-forest-700 mb-1.5">
+            <label className="block text-sm font-medium text-neutral-700 mb-1.5">
               {t('polls.question')}
             </label>
             <input
-              className="w-full px-4 py-2.5 rounded-xl border border-forest-100 focus:border-forest-500 focus:ring-2 focus:ring-forest-500/20 outline-none transition"
+              className="w-full px-4 py-2.5 rounded-xl border border-neutral-100 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 outline-none transition"
               {...register('title', {
                 required: true,
                 minLength: { value: 2, message: '' },
@@ -260,12 +260,12 @@ export function CreatePollModal({ roomId, onClose }: Props) {
             />
             {errors.title && <p className="text-red-500 text-xs mt-1">{t('polls.question')}</p>}
             {duplicateWarning && duplicateWarning.isDuplicate && (
-              <div className="mt-2 bg-ember-500/10 border border-ember-500/30 rounded-lg px-3 py-2">
-                <p className="text-xs font-semibold text-ember-500">
+              <div className="mt-2 bg-accent-500/10 border border-accent-500/30 rounded-lg px-3 py-2">
+                <p className="text-xs font-semibold text-accent-600">
                   {t('polls.ai.duplicateWarning')}
                 </p>
                 {duplicateWarning.similarTo && (
-                  <p className="text-xs text-forest-700 mt-0.5">
+                  <p className="text-xs text-neutral-700 mt-0.5">
                     {t('polls.ai.duplicateBody', { title: duplicateWarning.similarTo })}
                   </p>
                 )}
@@ -274,12 +274,12 @@ export function CreatePollModal({ roomId, onClose }: Props) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-forest-700 mb-1.5">
+            <label className="block text-sm font-medium text-neutral-700 mb-1.5">
               {t('rooms.descriptionOptional')}
             </label>
             <textarea
               rows={2}
-              className="w-full px-4 py-2.5 rounded-xl border border-forest-100 focus:border-forest-500 focus:ring-2 focus:ring-forest-500/20 outline-none transition resize-none"
+              className="w-full px-4 py-2.5 rounded-xl border border-neutral-100 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 outline-none transition resize-none"
               {...register('description')}
             />
           </div>
@@ -294,11 +294,11 @@ export function CreatePollModal({ roomId, onClose }: Props) {
                     type="checkbox"
                     checked={field.value}
                     onChange={field.onChange}
-                    className="w-4 h-4 accent-forest-600"
+                    className="w-4 h-4 accent-accent-500"
                   />
                 )}
               />
-              <span className="text-sm text-forest-700">{t('polls.allowAssign')}</span>
+              <span className="text-sm text-neutral-700">{t('polls.allowAssign')}</span>
             </label>
           )}
 
@@ -307,22 +307,22 @@ export function CreatePollModal({ roomId, onClose }: Props) {
             <button
               type="button"
               onClick={() => setShowAiInput(true)}
-              className="w-full bg-gradient-to-r from-ember-500/10 to-forest-500/10 hover:from-ember-500/20 hover:to-forest-500/20 border border-ember-500/30 text-forest-900 font-semibold py-2.5 rounded-xl text-sm transition"
+              className="w-full bg-gradient-to-r from-accent-500/10 to-accent-400/10 hover:from-accent-500/20 hover:to-accent-400/20 border border-accent-500/30 text-neutral-900 font-semibold py-2.5 rounded-xl text-sm transition"
             >
               {t('polls.ai.generateChecklist')}
             </button>
           )}
 
           {type === 'multi_choice' && showAiInput && (
-            <div className="bg-gradient-to-br from-ember-500/5 to-forest-500/5 border border-ember-500/30 rounded-xl p-4 space-y-3">
+            <div className="bg-gradient-to-br from-accent-500/5 to-accent-400/5 border border-accent-500/30 rounded-xl p-4 space-y-3">
               <div className="flex items-start justify-between gap-2">
-                <label className="text-sm font-semibold text-forest-900">
+                <label className="text-sm font-semibold text-neutral-900">
                   {t('polls.ai.describePrompt')}
                 </label>
                 <button
                   type="button"
                   onClick={() => setShowAiInput(false)}
-                  className="text-forest-500 hover:text-forest-700 text-xs"
+                  className="text-neutral-400 hover:text-neutral-700 text-xs"
                 >
                   ✕
                 </button>
@@ -332,13 +332,13 @@ export function CreatePollModal({ roomId, onClose }: Props) {
                 onChange={(e) => setAiDescription(e.target.value)}
                 rows={2}
                 placeholder={t('polls.ai.describePlaceholder')}
-                className="w-full px-3 py-2 rounded-lg border border-forest-100 focus:border-forest-500 outline-none text-sm resize-none"
+                className="w-full px-3 py-2 rounded-lg border border-neutral-100 focus:border-accent-500 outline-none text-sm resize-none"
               />
               <button
                 type="button"
                 onClick={handleAiGenerate}
                 disabled={generateChecklist.isPending || aiDescription.trim().length < 5}
-                className="w-full bg-ember-500 hover:bg-ember-400 disabled:opacity-50 text-white font-semibold py-2 rounded-lg text-sm transition"
+                className="w-full bg-accent-500 hover:bg-accent-600 disabled:opacity-50 text-white font-semibold py-2 rounded-lg text-sm transition"
               >
                 {generateChecklist.isPending ? t('polls.ai.generating') : t('polls.ai.generate')}
               </button>
@@ -349,8 +349,8 @@ export function CreatePollModal({ roomId, onClose }: Props) {
             <div
               className={`text-xs font-medium px-3 py-1.5 rounded-lg inline-block ${
                 aiSource === 'ai'
-                  ? 'bg-ember-500/10 text-ember-500'
-                  : 'bg-forest-100 text-forest-700'
+                  ? 'bg-accent-500/10 text-accent-600'
+                  : 'bg-neutral-100 text-neutral-700'
               }`}
             >
               {aiSource === 'ai' ? t('polls.ai.fromAi') : t('polls.ai.fromFallback')}
@@ -360,11 +360,11 @@ export function CreatePollModal({ roomId, onClose }: Props) {
           {type !== 'location' && (
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="text-sm font-medium text-forest-700">{t('polls.options')}</label>
+                <label className="text-sm font-medium text-neutral-700">{t('polls.options')}</label>
                 <button
                   type="button"
                   onClick={() => append({ label: '' })}
-                  className="text-xs text-forest-600 hover:text-forest-900 font-semibold"
+                  className="text-xs text-accent-600 hover:text-neutral-900 font-semibold"
                 >
                   {t('polls.addOption')}
                 </button>
@@ -374,7 +374,7 @@ export function CreatePollModal({ roomId, onClose }: Props) {
                   <div key={field.id} className="flex gap-2">
                     <input
                       placeholder={`${idx + 1}`}
-                      className="flex-1 px-3 py-2 rounded-lg border border-forest-100 focus:border-forest-500 outline-none text-sm"
+                      className="flex-1 px-3 py-2 rounded-lg border border-neutral-100 focus:border-accent-500 outline-none text-sm"
                       {...register(`options.${idx}.label` as const)}
                     />
                     {fields.length > 2 && (
@@ -394,29 +394,29 @@ export function CreatePollModal({ roomId, onClose }: Props) {
 
           {type === 'location' && (
             <div className="space-y-3">
-              <label className="text-sm font-medium text-forest-700">{t('polls.mapHint')}</label>
+              <label className="text-sm font-medium text-neutral-700">{t('polls.mapHint')}</label>
               <MapPicker onPick={handleMapPick} />
 
               {pendingPick && (
-                <div className="bg-forest-50 rounded-xl p-3 space-y-2">
-                  <p className="text-xs text-forest-700">
+                <div className="bg-neutral-50 rounded-xl p-3 space-y-2">
+                  <p className="text-xs text-neutral-700">
                     {t('polls.pointSelected')}: {pendingPick.latitude.toFixed(4)},{' '}
                     {pendingPick.longitude.toFixed(4)}
                   </p>
                   {pendingPick.address && (
-                    <p className="text-[10px] text-forest-500 truncate">{pendingPick.address}</p>
+                    <p className="text-[10px] text-neutral-400 truncate">{pendingPick.address}</p>
                   )}
                   <div className="flex gap-2">
                     <input
                       value={pendingLabel}
                       onChange={(e) => setPendingLabel(e.target.value)}
                       placeholder={t('polls.pointName')}
-                      className="flex-1 px-3 py-2 rounded-lg border border-forest-100 focus:border-forest-500 outline-none text-sm"
+                      className="flex-1 px-3 py-2 rounded-lg border border-neutral-100 focus:border-accent-500 outline-none text-sm"
                     />
                     <button
                       type="button"
                       onClick={confirmLocationDraft}
-                      className="bg-forest-600 hover:bg-forest-700 text-white font-semibold px-4 rounded-lg text-sm transition"
+                      className="bg-accent-500 hover:bg-accent-600 text-white font-semibold px-4 rounded-lg text-sm transition"
                     >
                       {t('polls.addPoint')}
                     </button>
@@ -429,11 +429,11 @@ export function CreatePollModal({ roomId, onClose }: Props) {
                   {locationDrafts.map((d, idx) => (
                     <li
                       key={idx}
-                      className="flex items-center justify-between gap-2 bg-white border border-forest-100 rounded-lg px-3 py-2"
+                      className="flex items-center justify-between gap-2 bg-white border border-neutral-100 rounded-lg px-3 py-2"
                     >
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm text-forest-900 truncate">{d.label}</p>
-                        <p className="text-[10px] text-forest-500 font-mono">
+                        <p className="text-sm text-neutral-900 truncate">{d.label}</p>
+                        <p className="text-[10px] text-neutral-400 font-mono">
                           {d.latitude.toFixed(4)}, {d.longitude.toFixed(4)}
                         </p>
                       </div>
@@ -450,7 +450,7 @@ export function CreatePollModal({ roomId, onClose }: Props) {
               )}
 
               {locationDrafts.length < 2 && (
-                <p className="text-xs text-forest-500 italic">{t('polls.addMinPoints')}</p>
+                <p className="text-xs text-neutral-400 italic">{t('polls.addMinPoints')}</p>
               )}
             </div>
           )}
@@ -459,14 +459,14 @@ export function CreatePollModal({ roomId, onClose }: Props) {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 border border-forest-100 text-forest-700 font-semibold py-2.5 rounded-xl hover:bg-forest-50 transition"
+              className="flex-1 border border-neutral-100 text-neutral-700 font-semibold py-2.5 rounded-xl hover:bg-neutral-50 transition"
             >
               {t('common.cancel')}
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="flex-1 bg-forest-600 hover:bg-forest-700 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition"
+              className="flex-1 bg-accent-500 hover:bg-accent-600 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition"
             >
               {isLoading ? t('common.creating') : t('common.create')}
             </button>

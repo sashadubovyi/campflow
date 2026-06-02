@@ -23,10 +23,10 @@ interface Props {
 function StatusBadge({ status }: { status: PollDetails['status'] }) {
   const { t } = useTranslation();
   const styles: Record<PollDetails['status'], string> = {
-    open: 'bg-forest-50 text-forest-700',
-    reopened: 'bg-forest-50 text-forest-700',
-    closed: 'bg-forest-100 text-forest-500',
-    approved: 'bg-ember-500/10 text-ember-500',
+    open: 'bg-neutral-50 text-neutral-700',
+    reopened: 'bg-neutral-50 text-neutral-700',
+    closed: 'bg-neutral-100 text-neutral-400',
+    approved: 'bg-accent-500/10 text-accent-600',
   };
   return (
     <span className={`text-[10px] font-semibold rounded-full px-2 py-0.5 ${styles[status]}`}>
@@ -37,9 +37,9 @@ function StatusBadge({ status }: { status: PollDetails['status'] }) {
 
 function ProgressBar({ percent, isWinning }: { percent: number; isWinning: boolean }) {
   return (
-    <div className="h-1.5 bg-forest-50 rounded-full overflow-hidden mt-1">
+    <div className="h-1.5 bg-neutral-50 rounded-full overflow-hidden mt-1">
       <div
-        className={`h-full ${isWinning ? 'bg-ember-500' : 'bg-forest-500'} transition-all`}
+        className={`h-full ${isWinning ? 'bg-accent-500' : 'bg-neutral-500'} transition-all`}
         style={{ width: `${percent}%` }}
       />
     </div>
@@ -53,20 +53,20 @@ export function PollCard({ poll, isAdmin, members, currentUserId }: Props) {
   const maxVotes = Math.max(...poll.options.map((o) => o.votes), 0);
 
   return (
-    <article className="bg-white rounded-xl border border-forest-100 p-3 shadow-sm">
+    <article className="bg-white rounded-xl border border-neutral-100 p-3 shadow-sm">
       <header className="flex items-start justify-between gap-2 mb-2">
         <div className="min-w-0 flex-1">
-          <h3 className="font-display text-sm font-semibold text-forest-900 leading-tight">
+          <h3 className="font-display text-sm font-semibold text-neutral-900 leading-tight">
             {poll.title}
           </h3>
           {poll.description && (
-            <p className="text-xs text-forest-700 mt-0.5 line-clamp-2">{poll.description}</p>
+            <p className="text-xs text-neutral-700 mt-0.5 line-clamp-2">{poll.description}</p>
           )}
         </div>
         <StatusBadge status={poll.status} />
       </header>
 
-      <p className="text-[10px] text-forest-500 font-medium mb-3">
+      <p className="text-[10px] text-neutral-400 font-medium mb-3">
         {t('polls.voted', { voted: poll.progress.voted, total: poll.progress.total })}
       </p>
 
@@ -120,13 +120,13 @@ function SingleView({
               onClick={() => vote.mutate({ pollId: poll.id, optionId: opt.id })}
               className={`w-full text-left px-3 py-2 rounded-lg border transition disabled:cursor-default ${
                 isChosen
-                  ? 'border-forest-500 bg-forest-50'
-                  : 'border-forest-100 hover:border-forest-500/50'
+                  ? 'border-accent-500 bg-neutral-50'
+                  : 'border-neutral-100 hover:border-accent-500/50'
               }`}
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="text-sm text-forest-900 truncate">{opt.label}</span>
-                <span className="text-xs text-forest-700 font-semibold shrink-0">{opt.votes}</span>
+                <span className="text-sm text-neutral-900 truncate">{opt.label}</span>
+                <span className="text-xs text-neutral-700 font-semibold shrink-0">{opt.votes}</span>
               </div>
               {totalVotes > 0 && <ProgressBar percent={percent} isWinning={isWinning} />}
             </button>
@@ -170,7 +170,7 @@ function MultiView({
         const percent = totalVotes > 0 ? (opt.votes / totalVotes) * 100 : 0;
 
         return (
-          <li key={opt.id} className="bg-forest-50 rounded-lg p-2">
+          <li key={opt.id} className="bg-neutral-50 rounded-lg p-2">
             <button
               type="button"
               disabled={isClosed || toggleVote.isPending}
@@ -180,13 +180,13 @@ function MultiView({
               <div className="flex items-center gap-2">
                 <span
                   className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 ${
-                    isChosen ? 'border-forest-500 bg-forest-500' : 'border-forest-100 bg-white'
+                    isChosen ? 'border-accent-500 bg-neutral-500' : 'border-neutral-100 bg-white'
                   }`}
                 >
                   {isChosen && <span className="text-white text-[10px]">✓</span>}
                 </span>
-                <span className="text-sm text-forest-900 flex-1 truncate">{opt.label}</span>
-                <span className="text-xs text-forest-700 font-semibold shrink-0">{opt.votes}</span>
+                <span className="text-sm text-neutral-900 flex-1 truncate">{opt.label}</span>
+                <span className="text-xs text-neutral-700 font-semibold shrink-0">{opt.votes}</span>
               </div>
               {totalVotes > 0 && <ProgressBar percent={percent} isWinning={isWinning} />}
             </button>
@@ -201,7 +201,7 @@ function MultiView({
                         ? handleAssign(opt.id, null)
                         : setAssigningId(opt.id === assigningId ? null : opt.id)
                     }
-                    className="flex items-center gap-1.5 text-xs text-forest-700 hover:text-forest-900 transition"
+                    className="flex items-center gap-1.5 text-xs text-neutral-700 hover:text-neutral-900 transition"
                   >
                     <Avatar
                       fullName={opt.assignedTo.fullName}
@@ -214,23 +214,23 @@ function MultiView({
                   <button
                     type="button"
                     onClick={() => setAssigningId(opt.id === assigningId ? null : opt.id)}
-                    className="text-xs text-forest-500 hover:text-forest-700"
+                    className="text-xs text-neutral-400 hover:text-neutral-700"
                   >
                     {t('polls.assignTo')}
                   </button>
                 )}
 
                 {assigningId === opt.id && (
-                  <div className="mt-1.5 bg-white border border-forest-100 rounded-lg p-1.5 space-y-0.5">
+                  <div className="mt-1.5 bg-white border border-neutral-100 rounded-lg p-1.5 space-y-0.5">
                     {members.map((m) => (
                       <button
                         key={m.id}
                         type="button"
                         onClick={() => handleAssign(opt.id, m.user.id)}
-                        className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-forest-50 transition text-left"
+                        className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-neutral-50 transition text-left"
                       >
                         <Avatar fullName={m.user.fullName} avatarUrl={m.user.avatarUrl} size={20} />
-                        <span className="text-xs text-forest-900">{m.user.fullName}</span>
+                        <span className="text-xs text-neutral-900">{m.user.fullName}</span>
                       </button>
                     ))}
                     {opt.assignedTo && (
@@ -295,18 +295,18 @@ function LocationView({
                 onClick={() => vote.mutate({ pollId: poll.id, optionId: opt.id })}
                 className={`w-full text-left px-3 py-2 rounded-lg border transition disabled:cursor-default ${
                   isChosen
-                    ? 'border-forest-500 bg-forest-50'
-                    : 'border-forest-100 hover:border-forest-500/50'
+                    ? 'border-accent-500 bg-neutral-50'
+                    : 'border-neutral-100 hover:border-accent-500/50'
                 }`}
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="text-sm text-forest-900 truncate">📍 {opt.label}</p>
+                    <p className="text-sm text-neutral-900 truncate">📍 {opt.label}</p>
                     {opt.address && (
-                      <p className="text-[10px] text-forest-500 truncate">{opt.address}</p>
+                      <p className="text-[10px] text-neutral-400 truncate">{opt.address}</p>
                     )}
                   </div>
-                  <span className="text-xs text-forest-700 font-semibold shrink-0">
+                  <span className="text-xs text-neutral-700 font-semibold shrink-0">
                     {opt.votes}
                   </span>
                 </div>
@@ -343,14 +343,14 @@ function AdminActions({ poll }: { poll: PollDetails }) {
   }
 
   return (
-    <div className="mt-3 pt-3 border-t border-forest-100">
+    <div className="mt-3 pt-3 border-t border-neutral-100">
       {poll.status === 'open' || poll.status === 'reopened' ? (
         <div className="flex gap-2">
           <button
             type="button"
             onClick={() => closePoll.mutate(poll.id)}
             disabled={closePoll.isPending}
-            className="flex-1 text-xs bg-forest-50 hover:bg-forest-100 text-forest-700 font-semibold py-1.5 rounded-lg transition"
+            className="flex-1 text-xs bg-neutral-50 hover:bg-neutral-100 text-neutral-700 font-semibold py-1.5 rounded-lg transition"
           >
             {t('polls.close')}
           </button>
@@ -362,21 +362,21 @@ function AdminActions({ poll }: { poll: PollDetails }) {
               <button
                 type="button"
                 onClick={() => reopenPoll.mutate(poll.id)}
-                className="flex-1 text-xs bg-forest-50 hover:bg-forest-100 text-forest-700 font-semibold py-1.5 rounded-lg transition"
+                className="flex-1 text-xs bg-neutral-50 hover:bg-neutral-100 text-neutral-700 font-semibold py-1.5 rounded-lg transition"
               >
                 {t('polls.reopen')}
               </button>
               <button
                 type="button"
                 onClick={() => setPickingWinner(true)}
-                className="flex-1 text-xs bg-ember-500 hover:bg-ember-400 text-white font-semibold py-1.5 rounded-lg transition"
+                className="flex-1 text-xs bg-accent-500 hover:bg-accent-600 text-white font-semibold py-1.5 rounded-lg transition"
               >
                 {t('polls.approve')}
               </button>
             </div>
           ) : (
             <div className="space-y-1.5">
-              <p className="text-[10px] text-forest-500">{t('polls.pickWinner')}</p>
+              <p className="text-[10px] text-neutral-400">{t('polls.pickWinner')}</p>
               <div className="space-y-1">
                 {poll.options.map((opt) => (
                   <button
@@ -385,8 +385,8 @@ function AdminActions({ poll }: { poll: PollDetails }) {
                     onClick={() => toggleSelect(opt.id)}
                     className={`w-full text-left px-2 py-1 rounded text-xs transition ${
                       selectedIds.has(opt.id)
-                        ? 'bg-ember-500/10 text-ember-500 font-semibold'
-                        : 'bg-forest-50 text-forest-700 hover:bg-forest-100'
+                        ? 'bg-accent-500/10 text-accent-600 font-semibold'
+                        : 'bg-neutral-50 text-neutral-700 hover:bg-neutral-100'
                     }`}
                   >
                     {selectedIds.has(opt.id) ? '✓ ' : ''}
@@ -401,7 +401,7 @@ function AdminActions({ poll }: { poll: PollDetails }) {
                     setPickingWinner(false);
                     setSelectedIds(new Set());
                   }}
-                  className="flex-1 text-xs text-forest-500 py-1.5"
+                  className="flex-1 text-xs text-neutral-400 py-1.5"
                 >
                   {t('common.cancel')}
                 </button>
@@ -409,7 +409,7 @@ function AdminActions({ poll }: { poll: PollDetails }) {
                   type="button"
                   onClick={handleApprove}
                   disabled={selectedIds.size === 0 || approve.isPending}
-                  className="flex-1 text-xs bg-ember-500 hover:bg-ember-400 disabled:opacity-50 text-white font-semibold py-1.5 rounded-lg transition"
+                  className="flex-1 text-xs bg-accent-500 hover:bg-accent-600 disabled:opacity-50 text-white font-semibold py-1.5 rounded-lg transition"
                 >
                   {t('polls.approveAction')}
                 </button>
@@ -418,7 +418,7 @@ function AdminActions({ poll }: { poll: PollDetails }) {
           )}
         </div>
       ) : (
-        <p className="text-[10px] text-ember-500 text-center font-semibold">
+        <p className="text-[10px] text-accent-600 text-center font-semibold">
           {t('polls.addedToPlan')}
         </p>
       )}
