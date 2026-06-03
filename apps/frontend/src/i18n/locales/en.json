@@ -40,7 +40,7 @@
     "emailInUse": "Email already in use"
   },
   "rooms": {
-    "title": "My rooms",
+    "title": "Upcoming events",
     "createNew": "+ Create room",
     "join": "Join",
     "joinByCode": "Join by code",

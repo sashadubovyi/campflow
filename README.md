@@ -1,10 +1,10 @@
 <div align="center">
 
-# Wroop
+# &u
 
 ### Plans made easy.
 
-Wroop is a collaborative trip‑planning platform. Create a room, invite your friends, chat in real time, run polls to agree on dates, places and what to pack — and let AI turn the conversation into a clear final plan.
+**&u** (and you) is a collaborative event-planning platform. Create an event, invite your people, chat in real time, run polls to agree on dates, places and what to pack — and let AI turn the conversation into a clear final plan.
 
 </div>
 
@@ -12,16 +12,16 @@ Wroop is a collaborative trip‑planning platform. Create a room, invite your fr
 
 ## ✨ Features
 
-- **Rooms** — create a space for a trip or event, invite people by code or link, manage members and admins.
-- **Real‑time chat** — instant messaging per room over WebSockets, typing indicators and presence (online / last seen).
+- **Events** — create a space for a trip or event, invite people by code or link, manage members and admins.
+- **Real‑time chat** — instant messaging per event over WebSockets.
 - **Polls** — three poll types to reach decisions together:
   - **Single choice** — pick one option (e.g. a date).
   - **Checklist** — multi‑select with optional per‑item owner (great for "who brings what").
   - **Location** — propose points, vote, admin approves.
-- **AI assistant (Gemini)** — generate a packing/to‑do checklist from a short description, with duplicate‑poll detection while you type.
-- **Final plan** — when the admin closes a room, AI summarises everything into a final plan and saves a short memory of the event to each participant's profile.
-- **Profiles & contacts** — rich profiles (bio, hobbies, socials), contacts, granular privacy controls and blocking.
-- **Notifications** — room invites and important events.
+- **AI assistant (Gemini)** — generate a checklist from a short description, with duplicate‑poll detection.
+- **Final plan** — when the admin closes an event, AI summarises everything into a final plan and saves a memory of the event to each participant's profile.
+- **Profiles & contacts** — rich profiles (bio, hobbies with gradient tags, socials), contacts, privacy controls and blocking.
+- **Notifications** — event invites and important updates.
 - **i18n** — Ukrainian, Russian and English out of the box.
 - **Responsive, mobile‑first UI** — bottom tab navigation on mobile, sidebar + multi‑column layout on desktop.
 
@@ -39,7 +39,7 @@ Wroop is a collaborative trip‑planning platform. Create a room, invite your fr
 ## 📁 Repository structure
 
 ```
-wroop/
+andu/
 ├─ apps/
 │  ├─ backend/     # NestJS API (auth, rooms, chat, polls, room lifecycle, AI)
 │  └─ frontend/    # React + Vite client
@@ -72,7 +72,7 @@ docker compose up -d
 Create `apps/backend/.env.local`:
 
 ```env
-DATABASE_URL="postgresql://wroop:wroop@localhost:5432/wroop"
+DATABASE_URL="postgresql://campflow:campflow@localhost:5432/campflow"
 REDIS_URL="redis://localhost:6379"
 JWT_ACCESS_SECRET="change-me"
 JWT_REFRESH_SECRET="change-me"
@@ -96,10 +96,10 @@ cd ../..
 
 ```bash
 # Backend (terminal 1)
-pnpm --filter @wroop/backend dev
+pnpm --filter @campflow/backend dev
 
 # Frontend (terminal 2)
-pnpm --filter @wroop/frontend dev
+pnpm --filter @campflow/frontend dev
 ```
 
 - API: http://localhost:3001/api
@@ -120,10 +120,11 @@ pnpm --filter @wroop/frontend dev
 
 ## 🗺️ Roadmap
 
-- Map view with room locations
+- Map view with event locations
 - Email verification
-- Profile statistics, "My events" history and shareable profile QR
+- Profile statistics, "My past events" history and shareable profile QR
 - Mobile app wrapper
+- Full rebrand to `@andu/*` packages
 
 ## 📄 License
 
@@ -131,6 +132,6 @@ Private project — all rights reserved.
 
 <div align="center">
 
-**Wroop. Plans made easy.**
+**&u — and you.**
 
 </div>
