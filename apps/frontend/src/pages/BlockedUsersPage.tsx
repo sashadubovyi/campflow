@@ -4,6 +4,7 @@ import { useBlockedUsers, useUnblockUser } from '../shared/api/blocks.hooks';
 import { Avatar } from '../shared/ui/Avatar';
 import { relativeTime } from '../shared/lib/relativeTime';
 import { BackButton } from '../shared/ui';
+import { ShieldOff } from 'lucide-react';
 
 export function BlockedUsersPage() {
   const { t } = useTranslation();
@@ -29,10 +30,10 @@ export function BlockedUsersPage() {
         )}
 
         {!isLoading && blocked && blocked.length === 0 && (
-          <div className="bg-white rounded-2xl border border-neutral-100 border-dashed p-10 text-center">
-            <p className="text-3xl mb-3">✨</p>
+          <div className="bg-white rounded-2xl border border-neutral-100 border-dashed p-10 text-center flex flex-col items-center">
+            <ShieldOff size={40} className="text-neutral-300 mb-3" />
             <p className="font-display text-lg text-neutral-900 mb-1">{t('blocked.empty')}</p>
-            <p className="text-neutral-700 text-sm">{t('blocked.emptyHint')}</p>
+            <p className="text-neutral-400 text-sm">{t('blocked.emptyHint')}</p>
           </div>
         )}
 

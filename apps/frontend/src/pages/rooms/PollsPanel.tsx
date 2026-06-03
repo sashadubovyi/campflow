@@ -7,7 +7,7 @@ import { CreatePollModal } from './polls/CreatePollModal';
 import { FinalPlanPanel } from './FinalPlanPanel';
 import { cn } from '../../shared/ui';
 import { Plus } from 'lucide-react';
-import { BarChart2 } from 'lucide-react';
+import { BarChart2, ClipboardList } from 'lucide-react';
 
 interface Props {
   roomId: string;
@@ -33,7 +33,7 @@ export function PollsPanel({ roomId, isAdmin, members, currentUserId }: Props) {
 
   const tabCls = (active: boolean) =>
     cn(
-      'flex-1 text-xs font-semibold py-1.5 rounded-lg transition',
+      'flex-1 text-xs font-semibold py-1.5 rounded-lg transition flex items-center justify-center gap-1.5',
       active ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500 hover:text-neutral-700',
     );
 
@@ -42,9 +42,11 @@ export function PollsPanel({ roomId, isAdmin, members, currentUserId }: Props) {
       <div className="px-2 pt-2 shrink-0 border-b border-neutral-100">
         <div className="flex gap-1 bg-neutral-100 p-1 rounded-xl mb-2">
           <button onClick={() => setTab('polls')} className={tabCls(tab === 'polls')}>
+            <BarChart2 size={14} />
             {t('polls.finalPlan.tabPolls')}
           </button>
           <button onClick={() => setTab('plan')} className={tabCls(tab === 'plan')}>
+            <ClipboardList size={14} />
             {t('polls.finalPlan.tabPlan')}
           </button>
         </div>
