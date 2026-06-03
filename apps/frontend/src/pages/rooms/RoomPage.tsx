@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ChevronLeft, Users, Info } from 'lucide-react';
+import { ChevronLeft, Users, Info, ChevronDown, ChevronUp } from 'lucide-react';
 import { useRoom } from '../../shared/api/rooms.hooks';
 import { useAuth } from '../../shared/store/useAuth';
 import { useMediaQuery } from '../../shared/lib/useMediaQuery';
@@ -12,6 +12,7 @@ import { PollsPanel } from './PollsPanel';
 import { InviteButton } from './InviteButton';
 import { CloseRoomModal } from './CloseRoomModal';
 import { usePresence } from '../../shared/api/usePresence';
+import { BackButton } from '../../shared/ui';
 
 export function RoomPage() {
   const { t } = useTranslation();
@@ -24,6 +25,7 @@ export function RoomPage() {
   const [infoOpen, setInfoOpen] = useState(false);
   const isDesktop = useMediaQuery('(min-width: 768px)');
   usePresence(id ?? '');
+  const [showMembers, setShowMembers] = useState(false);
 
   if (isLoading) {
     return (
@@ -37,12 +39,6 @@ export function RoomPage() {
     return (
       <div className="h-full flex flex-col items-center justify-center gap-4 px-6 text-center">
         <p className="text-neutral-600">{t('rooms.empty')}</p>
-        <button
-          onClick={() => navigate('/rooms')}
-          className="bg-brand-gradient hover:bg-brand-gradient-hover text-white font-semibold px-5 py-2.5 rounded-xl transition"
-        >
-          {t('common.back')}
-        </button>
       </div>
     );
   }
@@ -95,12 +91,7 @@ export function RoomPage() {
       <div className="h-full flex flex-col bg-neutral-50 overflow-hidden">
         <header className="bg-white border-b border-neutral-100 shrink-0 px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3 min-w-0">
-            <button
-              onClick={() => navigate('/rooms')}
-              className="text-neutral-500 hover:text-neutral-900 text-sm font-medium"
-            >
-              {t('common.back')}
-            </button>
+            <BackButton />
             <h1 className="text-lg font-bold text-neutral-900 truncate">{room.name}</h1>
           </div>
           <div className="flex items-center gap-3">
@@ -108,10 +99,26 @@ export function RoomPage() {
             {closeBtn}
           </div>
         </header>
-        <div className="flex-1 grid grid-cols-[22%_56%_22%] min-h-0 overflow-hidden">
-          <div className="border-r border-neutral-100 min-h-0 overflow-hidden">{members}</div>
+        <div className="flex-1 grid grid-cols-[1fr_22%] min-h-0 overflow-hidden">
           <div className="min-h-0 overflow-hidden">{chat}</div>
-          <div className="border-l border-neutral-100 min-h-0 overflow-hidden">{polls}</div>
+          <div className="border-l border-neutral-100 min-h-0 overflow-hidden flex flex-col">
+            <div className={`min-h-0 overflow-hidden ${showMembers ? 'h-1/2' : 'flex-1'}`}>
+              {polls}
+            </div>
+            {showMembers && (
+              <div className="h-1/2 border-t border-neutral-100 min-h-0 overflow-hidden">
+                {members}
+              </div>
+            )}
+            <button
+              onClick={() => setShowMembers((v) => !v)}
+              className="shrink-0 border-t border-neutral-100 py-3.5 text-sm font-semibold text-neutral-500 hover:bg-neutral-50 hover:text-neutral-700 transition flex items-center justify-center gap-1.5"
+            >
+              <Users size={14} />
+              {t('rooms.members')}
+              {showMembers ? <ChevronDown size={13} /> : <ChevronUp size={13} />}
+            </button>
+          </div>
         </div>
         {modal}
       </div>

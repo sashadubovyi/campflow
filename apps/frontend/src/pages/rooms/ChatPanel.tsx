@@ -57,11 +57,6 @@ export function ChatPanel({ roomId, roomName }: Props) {
 
   return (
     <section className="h-full flex flex-col bg-neutral-50 min-h-0">
-      {/* Заголовок — лише на десктопі (на мобайлі назва в хедері RoomPage) */}
-      <div className="hidden md:block px-6 py-4 border-b border-neutral-100 bg-white shrink-0">
-        <h2 className="text-lg font-bold text-neutral-900">{roomName}</h2>
-      </div>
-
       <div className="flex-1 overflow-y-auto scrollbar-thin px-4 md:px-6 py-4 space-y-3">
         {isLoading && (
           <p className="text-center text-neutral-400 text-sm animate-pulse">
