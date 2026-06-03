@@ -3,7 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMyProfile, useUpdateMyProfile } from '../shared/api/profile.hooks';
 import type { Visibility, Gender, MyProfile } from '../shared/api/profile.api';
-import { Mail, Phone, Send, MessageCircle, Camera, Users, type LucideIcon } from 'lucide-react';
+import {
+  Mail,
+  Phone,
+  Send,
+  MessageCircle,
+  Camera,
+  Users,
+  ChevronLeft,
+  type LucideIcon,
+} from 'lucide-react';
 
 const HOBBY_GRADIENTS = [
   'linear-gradient(135deg,#598dff,#2d6ff8)', // синій
@@ -108,9 +117,10 @@ export function ProfileSettingsPage() {
         <div className="max-w-2xl mx-auto px-6 py-3 flex items-center justify-between">
           <button
             onClick={() => navigate(-1)}
-            className="text-accent-600 hover:text-neutral-900 text-sm font-medium"
+            className="flex items-center gap-1.5 text-sm font-medium text-neutral-500 hover:text-neutral-900 transition"
           >
-            {t('common.back')}
+            <ChevronLeft size={18} />
+            <span className="hidden sm:inline">{t('common.back')}</span>
           </button>
           <span className="font-display text-lg font-bold text-neutral-900">
             {t('profile.settings')}
