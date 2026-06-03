@@ -4,6 +4,7 @@ import L from 'leaflet';
 import { useEffect } from 'react';
 import { useMapPoints } from '../shared/api/map.hooks';
 import type { MapPoint } from '../shared/api/map.api';
+import { BackButton } from '../shared/ui';
 
 delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -39,63 +40,71 @@ export function MapPage() {
   const { t } = useTranslation();
   const { data: points = [], isLoading } = useMapPoints();
 
-  if (isLoading) {
-    return (
-      <div className="h-full flex items-center justify-center text-neutral-400 animate-pulse">
-        {t('common.loading')}
-      </div>
-    );
-  }
-
-  if (points.length === 0) {
-    return (
-      <div className="h-full flex flex-col items-center justify-center gap-3 text-neutral-400 px-6 text-center">
-        <svg
-          width="48"
-          height="48"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        >
-          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
-          <circle cx="12" cy="9" r="2.5" />
-        </svg>
-        <p className="text-lg font-medium text-neutral-600">{t('map.empty')}</p>
-        <p className="text-sm">{t('map.emptyHint')}</p>
-      </div>
-    );
-  }
-
-  const center: [number, number] = [points[0]!.latitude, points[0]!.longitude];
-
   return (
-    <div className="h-full">
-      <MapContainer
-        center={center}
-        zoom={11}
-        scrollWheelZoom={true}
-        style={{ height: '100%', width: '100%' }}
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        <FitBounds points={points} />
-        {points.map((p) => (
-          <Marker key={p.id} position={[p.latitude, p.longitude]} icon={pointIcon()}>
-            <Popup>
-              <div style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px' }}>
-                <p style={{ fontWeight: 700, marginBottom: 2 }}>{p.label}</p>
-                <p style={{ color: '#6b7280', fontSize: '11px' }}>{p.roomName}</p>
-                {p.address && (
-                  <p style={{ color: '#9ca3af', fontSize: '11px', marginTop: 4 }}>{p.address}</p>
-                )}
-              </div>
-            </Popup>
-          </Marker>
-        ))}
-      </MapContainer>
+    <div className="h-full flex flex-col overflow-hidden">
+      <header className="relative bg-white border-b border-neutral-100 shrink-0 px-4 py-3 flex items-center justify-between">
+        <BackButton />
+        <h1 className="text-lg font-bold text-neutral-900 absolute left-1/2 -translate-x-1/2">
+          {t('nav.map')}
+        </h1>
+        <span className="w-16" />
+      </header>
+
+      {isLoading && (
+        <div className="flex-1 flex items-center justify-center text-neutral-400 animate-pulse">
+          {t('common.loading')}
+        </div>
+      )}
+
+      {!isLoading && points.length === 0 && (
+        <div className="flex-1 flex flex-col items-center justify-center gap-3 text-neutral-400 px-6 text-center">
+          <svg
+            width="48"
+            height="48"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+          >
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+            <circle cx="12" cy="9" r="2.5" />
+          </svg>
+          <p className="text-lg font-medium text-neutral-600">{t('map.empty')}</p>
+          <p className="text-sm">{t('map.emptyHint')}</p>
+        </div>
+      )}
+
+      {!isLoading && points.length > 0 && (
+        <div className="flex-1 min-h-0">
+          <MapContainer
+            center={[points[0]!.latitude, points[0]!.longitude]}
+            zoom={11}
+            scrollWheelZoom={true}
+            style={{ height: '100%', width: '100%' }}
+          >
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <FitBounds points={points} />
+            {points.map((p) => (
+              <Marker key={p.id} position={[p.latitude, p.longitude]} icon={pointIcon()}>
+                <Popup>
+                  <div style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px' }}>
+                    <p style={{ fontWeight: 700, marginBottom: 2 }}>{p.label}</p>
+                    <p style={{ color: '#6b7280', fontSize: '11px' }}>{p.roomName}</p>
+                    {p.address && (
+                      <p style={{ color: '#9ca3af', fontSize: '11px', marginTop: 4 }}>
+                        {p.address}
+                      </p>
+                    )}
+                  </div>
+                </Popup>
+              </Marker>
+            ))}
+          </MapContainer>
+        </div>
+      )}
     </div>
   );
 }

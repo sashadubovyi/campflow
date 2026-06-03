@@ -22,6 +22,7 @@ export function RoomPage() {
   const { data: room, isLoading, isError } = useRoom(id ?? '');
   const [showCloseModal, setShowCloseModal] = useState(false);
   const [membersOpen, setMembersOpen] = useState(false);
+  const [mobileView, setMobileView] = useState<'chat' | 'members' | 'info'>('chat');
   const [infoOpen, setInfoOpen] = useState(false);
   const isDesktop = useMediaQuery('(min-width: 768px)');
   usePresence(id ?? '');
@@ -70,7 +71,7 @@ export function RoomPage() {
         setInfoOpen(false);
         setShowCloseModal(true);
       }}
-      className="bg-danger-gradient hover:bg-danger-gradient-hover text-white text-sm font-medium px-3 py-1.5 rounded-lg transition shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]"
+      className="w-full text-xs font-semibold py-1.5 rounded-lg transition bg-danger-gradient text-white"
     >
       {t('polls.ai.closeRoom')}
     </button>
@@ -130,7 +131,7 @@ export function RoomPage() {
     <div className="h-full flex flex-col bg-neutral-50 overflow-hidden">
       <header className="bg-white border-b border-neutral-100 shrink-0 px-2 py-2 flex items-center gap-1">
         <button
-          onClick={() => navigate('/rooms')}
+          onClick={() => (mobileView !== 'chat' ? setMobileView('chat') : navigate('/rooms'))}
           className="p-2 text-neutral-500 hover:text-neutral-900 rounded-lg"
         >
           <ChevronLeft size={20} />
@@ -139,44 +140,63 @@ export function RoomPage() {
           {room.name}
         </h1>
         <button
-          onClick={() => setMembersOpen(true)}
-          className="p-2 text-neutral-500 hover:text-accent-600 rounded-lg"
-          title={t('rooms.members')}
+          onClick={() => setMobileView((v) => (v === 'members' ? 'chat' : 'members'))}
+          className={`p-2 rounded-lg transition ${mobileView === 'members' ? 'text-accent-600 bg-accent-50' : 'text-neutral-500 hover:text-accent-600'}`}
         >
           <Users size={20} />
         </button>
         <button
-          onClick={() => setInfoOpen(true)}
-          className="p-2 text-neutral-500 hover:text-accent-600 rounded-lg"
-          title={t('rooms.info')}
+          onClick={() => setMobileView((v) => (v === 'info' ? 'chat' : 'info'))}
+          className={`p-2 rounded-lg transition ${mobileView === 'info' ? 'text-accent-600 bg-accent-50' : 'text-neutral-500 hover:text-accent-600'}`}
         >
           <Info size={20} />
         </button>
       </header>
 
-      <div className="flex-1 min-h-0 overflow-hidden">{chat}</div>
+      <div className="flex-1 min-h-0 overflow-hidden relative">
+        {/* Чат — завжди рендериться позаду */}
+        {chat}
 
-      {/* Учасники — шторка зліва */}
-      <Drawer open={membersOpen} onClose={() => setMembersOpen(false)} side="left">
-        {members}
-      </Drawer>
+        {/* Затемнення */}
+        <div
+          onClick={() => setMobileView('chat')}
+          className={`absolute inset-0 bg-neutral-900/40 z-10 transition-opacity duration-300 ${
+            mobileView !== 'chat' ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
+        />
 
-      {/* Інфо кімнати + опитування — шторка справа */}
-      <Drawer open={infoOpen} onClose={() => setInfoOpen(false)} side="right">
-        <div className="flex flex-col h-full min-h-0">
-          <div className="p-4 border-b border-neutral-100 shrink-0">
-            <h2 className="text-lg font-bold text-neutral-900">{room.name}</h2>
-            {room.description && (
-              <p className="text-sm text-neutral-600 mt-1">{room.description}</p>
-            )}
-            <div className="mt-3 flex flex-col gap-2">
-              <InviteButton roomId={room.id} inviteCode={room.inviteCode} />
-              {closeBtn}
+        {/* Учасники */}
+        <div
+          className={`absolute top-0 right-0 bottom-0 z-20 w-[60vw] bg-white shadow-card-lg flex flex-col transition-transform duration-300 ease-out ${
+            mobileView === 'members' ? 'translate-x-0' : 'translate-x-full'
+          }`}
+        >
+          {members}
+        </div>
+
+        {/* Інфо + опитування */}
+        <div
+          className={`absolute top-0 right-0 bottom-0 z-20 w-[60vw] bg-white shadow-card-lg flex flex-col transition-transform duration-300 ease-out ${
+            mobileView === 'info' ? 'translate-x-0' : 'translate-x-full'
+          }`}
+        >
+          <div className="border-b border-neutral-100 shrink-0">
+            <div className="px-4 pt-4 pb-3">
+              <h2 className="text-lg font-bold text-neutral-900">{room.name}</h2>
+              {room.description && (
+                <p className="text-sm text-neutral-600 mt-1">{room.description}</p>
+              )}
+            </div>
+            <div className="flex gap-1 bg-neutral-100 mx-2 mb-2 p-1 rounded-xl">
+              <div className="flex-1">
+                <InviteButton roomId={room.id} inviteCode={room.inviteCode} />
+              </div>
+              {closeBtn && <div className="flex-1">{closeBtn}</div>}
             </div>
           </div>
           <div className="flex-1 min-h-0 overflow-hidden">{polls}</div>
         </div>
-      </Drawer>
+      </div>
 
       {modal}
     </div>
