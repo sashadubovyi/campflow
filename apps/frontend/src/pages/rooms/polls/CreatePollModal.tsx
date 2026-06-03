@@ -243,7 +243,7 @@ export function CreatePollModal({ roomId, onClose }: Props) {
                 className={cn(
                   'flex flex-col items-center justify-center gap-1.5 py-3 rounded-xl border transition',
                   active
-                    ? 'border-accent-500 bg-accent-500 text-white shadow-card'
+                    ? 'border-transparent bg-brand-gradient text-white shadow-card'
                     : 'border-neutral-200 text-neutral-500 hover:border-accent-500/40 hover:text-neutral-700',
                 )}
               >
@@ -352,7 +352,7 @@ export function CreatePollModal({ roomId, onClose }: Props) {
                 type="button"
                 onClick={handleAiGenerate}
                 disabled={generateChecklist.isPending || aiDescription.trim().length < 5}
-                className="w-full bg-accent-500 hover:bg-accent-600 disabled:opacity-50 text-white font-semibold py-2 rounded-lg text-sm transition"
+                className="w-full bg-brand-gradient hover:bg-brand-gradient-hover disabled:opacity-50 text-white font-semibold py-2 rounded-lg text-sm transition"
               >
                 {generateChecklist.isPending ? t('polls.ai.generating') : t('polls.ai.generate')}
               </button>
@@ -430,7 +430,7 @@ export function CreatePollModal({ roomId, onClose }: Props) {
                     <button
                       type="button"
                       onClick={confirmLocationDraft}
-                      className="bg-accent-500 hover:bg-accent-600 text-white font-semibold px-4 rounded-lg text-sm transition"
+                      className="bg-brand-gradient hover:bg-brand-gradient-hover text-white font-semibold px-4 rounded-lg text-sm transition"
                     >
                       {t('polls.addPoint')}
                     </button>
@@ -480,7 +480,7 @@ export function CreatePollModal({ roomId, onClose }: Props) {
             <button
               type="submit"
               disabled={isLoading}
-              className="flex-1 bg-accent-500 hover:bg-accent-600 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition"
+              className="flex-1 bg-brand-gradient hover:bg-brand-gradient-hover disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition"
             >
               {isLoading ? t('common.creating') : t('common.create')}
             </button>

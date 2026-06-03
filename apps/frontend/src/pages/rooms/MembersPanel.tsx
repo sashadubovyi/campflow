@@ -294,7 +294,7 @@ function TransferAdminModal({
           <button
             onClick={handleConfirm}
             disabled={transfer.isPending}
-            className="flex-1 bg-accent-500 hover:bg-accent-600 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition"
+            className="flex-1 bg-brand-gradient hover:bg-brand-gradient-hover disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition"
           >
             {transfer.isPending ? t('rooms.transferring') : t('rooms.transferAndLeave')}
           </button>

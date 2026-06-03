@@ -39,7 +39,7 @@ export function RoomPage() {
         <p className="text-neutral-600">{t('rooms.empty')}</p>
         <button
           onClick={() => navigate('/rooms')}
-          className="bg-accent-500 hover:bg-accent-600 text-white font-semibold px-5 py-2.5 rounded-xl transition"
+          className="bg-brand-gradient hover:bg-brand-gradient-hover text-white font-semibold px-5 py-2.5 rounded-xl transition"
         >
           {t('common.back')}
         </button>

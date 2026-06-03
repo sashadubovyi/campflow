@@ -113,7 +113,7 @@ export function DesktopNav({ onCreateRoom }: Props) {
         <div className="relative">
           <Bell size={20} />
           {unread !== undefined && unread > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 bg-accent-500 text-white text-[9px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center">
+            <span className="absolute -top-1.5 -right-1.5 bg-brand-gradient hover:bg-brand-gradient-hover text-white text-[9px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center">
               {unread > 99 ? '99+' : unread}
             </span>
           )}
@@ -124,7 +124,7 @@ export function DesktopNav({ onCreateRoom }: Props) {
       <button
         onClick={onCreateRoom}
         title="Створити кімнату"
-        className="w-11 h-11 rounded-xl bg-accent-500 text-white flex items-center justify-center hover:bg-accent-600 transition-colors shadow-fab my-1"
+        className="w-11 h-11 rounded-xl bg-brand-gradient hover:bg-brand-gradient-hover text-white flex items-center justify-center hover:bg-accent-600 transition-colors shadow-fab my-1"
       >
         <Plus size={22} />
       </button>

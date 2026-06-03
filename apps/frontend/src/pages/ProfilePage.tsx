@@ -70,7 +70,7 @@ export function ProfilePage() {
         <p className="text-lg font-semibold text-neutral-900">{t('profile.notFound')}</p>
         <button
           onClick={() => navigate('/rooms')}
-          className="bg-accent-500 hover:bg-accent-600 text-white font-semibold px-5 py-2.5 rounded-xl transition"
+          className="bg-brand-gradient hover:bg-brand-gradient-hover text-white font-semibold px-5 py-2.5 rounded-xl transition"
         >
           {t('common.back')}
         </button>
@@ -365,7 +365,7 @@ function ContactButton({
         <button
           onClick={() => add.mutate(profileId)}
           disabled={loading}
-          className="w-full bg-accent-500 hover:bg-accent-600 text-white font-semibold py-2.5 rounded-xl text-sm transition disabled:opacity-50"
+          className="w-full bg-brand-gradient hover:bg-brand-gradient-hover text-white font-semibold py-2.5 rounded-xl text-sm transition disabled:opacity-50"
         >
           {add.isPending ? t('profile.adding') : t('profile.addToContacts')}
         </button>

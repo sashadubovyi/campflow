@@ -55,6 +55,10 @@ export default {
         'card-lg': '0 4px 24px rgba(16,21,33,0.08), 0 8px 40px rgba(16,21,33,0.05)',
         fab: '0 8px 24px rgba(45,111,248,0.35)',
       },
+      backgroundImage: {
+        'brand-gradient': 'linear-gradient(135deg, #598dff 0%, #2d6ff8 50%, #1a56e0 100%)',
+        'brand-gradient-hover': 'linear-gradient(135deg, #2d6ff8 0%, #1a56e0 50%, #1543b4 100%)',
+      },
       borderRadius: {
         card: '20px',
         'card-lg': '24px',

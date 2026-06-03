@@ -68,7 +68,7 @@ export function RoomsPage() {
             </button>
             <button
               onClick={() => setShowCreate(true)}
-              className="text-sm bg-accent-500 hover:bg-accent-600 text-white font-semibold px-4 py-2 rounded-xl transition"
+              className="text-sm bg-brand-gradient hover:bg-brand-gradient-hover text-white font-semibold px-4 py-2 rounded-xl transition"
             >
               {t('rooms.createNew')}
             </button>
@@ -87,7 +87,7 @@ export function RoomsPage() {
             <p className="text-neutral-600 text-sm mb-5">{t('rooms.emptyHint')}</p>
             <button
               onClick={() => setShowCreate(true)}
-              className="bg-accent-500 hover:bg-accent-600 text-white font-semibold px-5 py-2.5 rounded-xl transition"
+              className="bg-brand-gradient hover:bg-brand-gradient-hover text-white font-semibold px-5 py-2.5 rounded-xl transition"
             >
               {t('rooms.createNew')}
             </button>

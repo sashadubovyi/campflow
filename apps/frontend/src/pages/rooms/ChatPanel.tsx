@@ -110,7 +110,7 @@ export function ChatPanel({ roomId, roomName }: Props) {
           <button
             onClick={handleSend}
             disabled={!text.trim()}
-            className="w-11 h-11 shrink-0 flex items-center justify-center rounded-xl bg-accent-500 text-white hover:bg-accent-600 disabled:opacity-40 disabled:hover:bg-accent-500 transition"
+            className="w-11 h-11 shrink-0 flex items-center justify-center rounded-xl bg-brand-gradient hover:bg-brand-gradient-hover text-white  disabled:opacity-40 disabled:hover:bg-brand-gradient-hover transition"
             aria-label="Send"
           >
             <Send size={18} />
@@ -161,8 +161,8 @@ function MessageBubble({
         <div
           className={`mt-0.5 px-3.5 py-2 text-sm leading-relaxed ${
             isOwn
-              ? 'bg-accent-500 text-white rounded-2xl rounded-tr-md'
-              : 'bg-white text-neutral-900 shadow-card rounded-2xl rounded-tl-md'
+              ? 'bg-gradient-to-br from-accent-400 to-accent-600 text-white rounded-2xl rounded-tr-md shadow-sm'
+              : 'bg-gradient-to-br from-white to-neutral-100 text-neutral-900 shadow-card rounded-2xl rounded-tl-md'
           }`}
         >
           {message.content}

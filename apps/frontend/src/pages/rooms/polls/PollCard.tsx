@@ -39,7 +39,7 @@ function ProgressBar({ percent, isWinning }: { percent: number; isWinning: boole
   return (
     <div className="h-1.5 bg-neutral-50 rounded-full overflow-hidden mt-1">
       <div
-        className={`h-full ${isWinning ? 'bg-accent-500' : 'bg-neutral-500'} transition-all`}
+        className={`h-full ${isWinning ? 'bg-brand-gradient' : 'bg-neutral-300'} transition-all`}
         style={{ width: `${percent}%` }}
       />
     </div>
@@ -369,7 +369,7 @@ function AdminActions({ poll }: { poll: PollDetails }) {
               <button
                 type="button"
                 onClick={() => setPickingWinner(true)}
-                className="flex-1 text-xs bg-accent-500 hover:bg-accent-600 text-white font-semibold py-1.5 rounded-lg transition"
+                className="flex-1 text-xs bg-brand-gradient hover:bg-brand-gradient-hover text-white font-semibold py-1.5 rounded-lg transition"
               >
                 {t('polls.approve')}
               </button>
@@ -409,7 +409,7 @@ function AdminActions({ poll }: { poll: PollDetails }) {
                   type="button"
                   onClick={handleApprove}
                   disabled={selectedIds.size === 0 || approve.isPending}
-                  className="flex-1 text-xs bg-accent-500 hover:bg-accent-600 disabled:opacity-50 text-white font-semibold py-1.5 rounded-lg transition"
+                  className="flex-1 text-xs bg-brand-gradient hover:bg-brand-gradient-hover disabled:opacity-50 text-white font-semibold py-1.5 rounded-lg transition"
                 >
                   {t('polls.approveAction')}
                 </button>
