@@ -286,5 +286,9 @@
     "uk": "Українська",
     "en": "English",
     "ru": "Русский"
+  },
+  "map": {
+    "empty": "No locations yet",
+    "emptyHint": "Approve locations in polls — they will appear here"
   }
 }
