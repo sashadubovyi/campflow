@@ -169,7 +169,7 @@
     "addToContacts": "+ Add to contacts",
     "adding": "Adding…",
     "inContacts": "✓ In contacts",
-    "mutualContacts": "🔁 Mutual contacts",
+    "mutualContacts": "Mutual contacts",
     "block": "Block",
     "blockReason": "Reason for blocking (optional):",
     "blocked": "User blocked.",
@@ -177,7 +177,7 @@
     "online": "● online",
     "wasOnline": "last seen {{time}}",
     "empty": "This user hasn't filled their profile or hid the info.",
-    "emptySelf": "Your profile is empty 🌱",
+    "emptySelf": "Your profile is empty",
     "emptySelfHint": "Tell about yourself, add hobbies and contacts — it helps friends find what you have in common.",
     "sections": {
       "basic": "Basic info",
@@ -227,11 +227,11 @@
   },
   "contacts": {
     "title": "My contacts",
-    "link": "📒 Contacts",
+    "link": "Contacts",
     "empty": "No contacts yet",
     "emptyHint": "Add people from their profiles — the «+ Add to contacts» button.",
     "count": "{{count}} contacts",
-    "mutual": "🔁 — mutually added"
+    "mutual": "— mutually added"
   },
   "invites": {
     "byUsername": "By username",
