@@ -6,6 +6,7 @@ import { Avatar } from '../shared/ui/Avatar';
 import { relativeTime } from '../shared/lib/relativeTime';
 import type { NotificationItem } from '../shared/api/notifications.api';
 import { BackButton } from '../shared/ui';
+import { Bell } from 'lucide-react';
 
 export function NotificationsPage() {
   const { t } = useTranslation();
@@ -43,10 +44,10 @@ export function NotificationsPage() {
         )}
 
         {!isLoading && notifications && notifications.length === 0 && (
-          <div className="bg-white rounded-2xl border border-neutral-100 border-dashed p-10 text-center">
-            <p className="text-3xl mb-3">🔔</p>
+          <div className="bg-white rounded-2xl border border-neutral-100 border-dashed p-10 text-center flex flex-col items-center">
+            <Bell size={40} className="text-neutral-300 mb-3" />
             <p className="font-display text-lg text-neutral-900 mb-1">{t('notifications.empty')}</p>
-            <p className="text-neutral-700 text-sm">{t('notifications.emptyHint')}</p>
+            <p className="text-neutral-400 text-sm">{t('notifications.emptyHint')}</p>
           </div>
         )}
 

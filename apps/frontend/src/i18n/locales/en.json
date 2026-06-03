@@ -234,12 +234,12 @@
     "mutual": "🔁 — mutually added"
   },
   "invites": {
-    "byUsername": "👤 By username",
-    "byLink": "🔗 Link",
+    "byUsername": "By username",
+    "byLink": "Link",
     "shareHint": "Find someone by username or share the link.",
     "linkLabel": "Invitation link",
     "messageOptional": "Message (optional)",
-    "messagePlaceholder": "Hey! Join our trip 🏕️",
+    "messagePlaceholder": "Hey! Join our trip",
     "send": "Send invitation",
     "checking": "Checking…",
     "canInvite": "✓ Can invite",

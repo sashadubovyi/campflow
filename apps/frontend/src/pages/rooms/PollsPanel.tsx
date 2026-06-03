@@ -7,6 +7,7 @@ import { CreatePollModal } from './polls/CreatePollModal';
 import { FinalPlanPanel } from './FinalPlanPanel';
 import { cn } from '../../shared/ui';
 import { Plus } from 'lucide-react';
+import { BarChart2 } from 'lucide-react';
 
 interface Props {
   roomId: string;
@@ -74,8 +75,8 @@ export function PollsPanel({ roomId, isAdmin, members, currentUserId }: Props) {
             )}
 
             {!isLoading && sorted.length === 0 && (
-              <div className="text-center text-neutral-400 text-sm py-8">
-                <p className="text-2xl mb-2">🗳️</p>
+              <div className="text-center text-neutral-400 text-sm py-8 flex flex-col items-center">
+                <BarChart2 size={36} className="text-neutral-300 mb-2" />
                 <p>{t('polls.empty')}</p>
                 <p className="text-xs mt-1 text-neutral-500">{t('polls.emptyHint')}</p>
               </div>

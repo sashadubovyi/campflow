@@ -234,12 +234,12 @@
     "mutual": "🔁 — взаємно додані"
   },
   "invites": {
-    "byUsername": "👤 По username",
-    "byLink": "🔗 Посилання",
+    "byUsername": "По username",
+    "byLink": "Посилання",
     "shareHint": "Знайдіть людину за username або поділіться посиланням.",
     "linkLabel": "Посилання-запрошення",
     "messageOptional": "Повідомлення (необов'язково)",
-    "messagePlaceholder": "Привіт! Приєднуйся до нашої поїздки 🏕️",
+    "messagePlaceholder": "Привіт! Приєднуйся до нашої поїздки",
     "send": "Надіслати запрошення",
     "checking": "Перевіряємо…",
     "canInvite": "✓ Можна",

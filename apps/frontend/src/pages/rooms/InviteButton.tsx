@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { invitesApi, type CanInviteResult } from '../../shared/api/invites.api';
 import { useCreateInvite } from '../../shared/api/invites.hooks';
 import { Avatar } from '../../shared/ui/Avatar';
+import { UserSearch, Link } from 'lucide-react';
 
 interface Props {
   roomId: string;
@@ -60,22 +61,24 @@ export function InviteButton({ roomId, inviteCode }: Props) {
             <div className="flex gap-1 mb-5 bg-neutral-50 p-1 rounded-xl">
               <button
                 onClick={() => setTab('username')}
-                className={`flex-1 text-sm font-semibold py-2 rounded-lg transition ${
+                className={`flex-1 flex items-center justify-center gap-1.5 text-sm font-semibold py-2 rounded-lg transition ${
                   tab === 'username'
                     ? 'bg-white text-neutral-900 shadow-sm'
                     : 'text-neutral-700 hover:text-neutral-900'
                 }`}
               >
+                <UserSearch size={15} />
                 {t('invites.byUsername')}
               </button>
               <button
                 onClick={() => setTab('link')}
-                className={`flex-1 text-sm font-semibold py-2 rounded-lg transition ${
+                className={`flex-1 flex items-center justify-center gap-1.5 text-sm font-semibold py-2 rounded-lg transition ${
                   tab === 'link'
                     ? 'bg-white text-neutral-900 shadow-sm'
                     : 'text-neutral-700 hover:text-neutral-900'
                 }`}
               >
+                <Link size={15} />
                 {t('invites.byLink')}
               </button>
             </div>

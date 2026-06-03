@@ -234,12 +234,12 @@
     "mutual": "🔁 — взаимно добавлены"
   },
   "invites": {
-    "byUsername": "👤 По username",
-    "byLink": "🔗 Ссылка",
+    "byUsername": "По username",
+    "byLink": "Ссылка",
     "shareHint": "Найдите человека по username или поделитесь ссылкой.",
     "linkLabel": "Ссылка-приглашение",
     "messageOptional": "Сообщение (необязательно)",
-    "messagePlaceholder": "Привет! Присоединяйся к нашей поездке 🏕️",
+    "messagePlaceholder": "Привет! Присоединяйся к нашей поездке",
     "send": "Отправить приглашение",
     "checking": "Проверяем…",
     "canInvite": "✓ Можно",

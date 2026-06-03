@@ -3,6 +3,7 @@ import { useFinalPlan } from '../../shared/api/final-plan.hooks';
 import type { FinalPlanItem } from '../../shared/api/final-plan.api';
 import { Avatar } from '../../shared/ui/Avatar';
 import { relativeTime } from '../../shared/lib/relativeTime';
+import { ClipboardList } from 'lucide-react';
 
 interface Props {
   roomId: string;
@@ -29,7 +30,7 @@ export function FinalPlanPanel({ roomId }: Props) {
   if (isEmpty) {
     return (
       <div className="p-6 text-center text-neutral-400 font-body">
-        <p className="text-3xl mb-3">📋</p>
+        <ClipboardList size={40} className="text-neutral-300 mb-3" />
         <p className="font-display text-base text-neutral-900 mb-1">{t('polls.finalPlan.empty')}</p>
         <p className="text-xs text-neutral-700">{t('polls.finalPlan.emptyHint')}</p>
       </div>
