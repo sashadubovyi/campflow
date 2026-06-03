@@ -51,7 +51,7 @@ export function RegisterPage() {
       </div>
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="font-display text-4xl font-bold text-neutral-900">
+          <h1 className="font-display text-lg font-bold text-neutral-900">
             Camp<span className="text-accent-600">Flow</span>
           </h1>
           <p className="font-body text-neutral-700 mt-2">{t('auth.registerTitle')}</p>

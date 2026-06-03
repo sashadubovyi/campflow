@@ -44,7 +44,7 @@ export function MapPage() {
     <div className="h-full flex flex-col overflow-hidden">
       <header className="relative bg-white border-b border-neutral-100 shrink-0 px-4 py-3 flex items-center justify-between">
         <BackButton />
-        <h1 className="text-lg font-bold text-neutral-900 absolute left-1/2 -translate-x-1/2">
+        <h1 className="font-display text-lg font-bold text-neutral-900 absolute left-1/2 -translate-x-1/2">
           {t('nav.map')}
         </h1>
         <span className="w-16" />

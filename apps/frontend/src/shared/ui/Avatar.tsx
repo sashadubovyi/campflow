@@ -6,7 +6,13 @@ interface AvatarProps {
   showStatus?: boolean;
 }
 
-const COLORS = ['bg-forest-500', 'bg-ember-500', 'bg-forest-700', 'bg-ember-400', 'bg-forest-600'];
+const COLORS = [
+  'bg-accent-500', // синій #2D6FF8
+  'bg-violet-500', // фіолетовий
+  'bg-teal-500', // бірюзовий
+  'bg-rose-500', // рожевий
+  'bg-amber-500', // жовтогарячий
+];
 
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/);
@@ -31,11 +37,10 @@ export function Avatar({
   isOnline,
   showStatus = false,
 }: AvatarProps) {
-  // Обводка та яскравість: якщо showStatus вимкнено — нейтральний вигляд
   const ringClass = showStatus
     ? isOnline
-      ? 'ring-2 ring-forest-500'
-      : 'ring-2 ring-forest-100'
+      ? 'ring-2 ring-accent-500'
+      : 'ring-2 ring-neutral-200'
     : '';
 
   const opacityClass = showStatus && !isOnline ? 'opacity-60' : 'opacity-100';

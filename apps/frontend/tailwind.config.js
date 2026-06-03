@@ -5,7 +5,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['"Inter Variable"', 'Inter', 'system-ui', 'sans-serif'],
-        display: ['"Inter Variable"', 'Inter', 'system-ui', 'sans-serif'],
+        display: ['Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
         body: ['"Inter Variable"', 'Inter', 'system-ui', 'sans-serif'],
       },
       colors: {

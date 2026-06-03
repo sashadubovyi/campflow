@@ -41,7 +41,7 @@ export function JoinByLinkPage() {
   return (
     <div className="min-h-screen bg-neutral-50 flex items-center justify-center px-6">
       <div className="text-center font-body">
-        <h1 className="font-display text-3xl font-bold text-neutral-900 mb-4">
+        <h1 className="font-display text-lg font-bold text-neutral-900 mb-4">
           Camp<span className="text-accent-600">Flow</span>
         </h1>
         {!error ? (
