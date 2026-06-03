@@ -8,3 +8,4 @@ export { Modal } from './Modal';
 export { Skeleton } from './Skeleton';
 export { SegmentedControl } from './SegmentedControl';
 export { Drawer } from './Drawer';
+export { BackButton } from './BackButton';
