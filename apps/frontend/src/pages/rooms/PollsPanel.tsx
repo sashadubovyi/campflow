@@ -55,7 +55,7 @@ export function PollsPanel({ roomId, isAdmin, members, currentUserId }: Props) {
             </h2>
             <button
               onClick={() => setShowCreate(true)}
-              className="w-7 h-7 flex items-center justify-center bg-brand-gradient hover:bg-brand-gradient-hover text-white rounded-lg transition shrink-0"
+              className="w-16 h-7 flex items-center justify-center bg-brand-gradient hover:bg-brand-gradient-hover text-white rounded-lg transition shrink-0"
               title={t('polls.createNew')}
             >
               <Plus size={16} />

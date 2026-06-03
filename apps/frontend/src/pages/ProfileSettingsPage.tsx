@@ -4,22 +4,33 @@ import { useTranslation } from 'react-i18next';
 import { useMyProfile, useUpdateMyProfile } from '../shared/api/profile.hooks';
 import type { Visibility, Gender, MyProfile } from '../shared/api/profile.api';
 
+const HOBBY_GRADIENTS = [
+  'linear-gradient(135deg,#598dff,#2d6ff8)', // синій
+  'linear-gradient(135deg,#f472b6,#ec4899)', // рожевий
+  'linear-gradient(135deg,#a78bfa,#7c3aed)', // фіолетовий
+  'linear-gradient(135deg,#22d3ee,#0891b2)', // бірюзовий
+  'linear-gradient(135deg,#fde047,#f59e0b)', // жовтий
+  'linear-gradient(135deg,#fb923c,#ea580c)', // помаранчевий
+  'linear-gradient(135deg,#4ade80,#16a34a)', // зелений
+  'linear-gradient(135deg,#818cf8,#4f46e5)', // індиго
+];
+
 const HOBBY_TAGS = [
-  '🏕️ Походи',
-  '🚴 Велосипед',
-  '🏃 Біг',
-  '🎒 Подорожі',
-  '🎸 Музика',
-  '📷 Фото',
-  '🎨 Малювання',
-  '📚 Книги',
-  '🎬 Кіно',
-  '🍳 Кулінарія',
-  '🧘 Йога',
-  '⚽ Футбол',
-  '🏊 Плавання',
-  '🎮 Ігри',
-  '☕ Кава',
+  'Походи',
+  'Велосипед',
+  'Біг',
+  'Подорожі',
+  'Музика',
+  'Фото',
+  'Малювання',
+  'Книги',
+  'Кіно',
+  'Кулінарія',
+  'Йога',
+  'Футбол',
+  'Плавання',
+  'Ігри',
+  'Кава',
 ];
 
 const GENDER_VALUES: Gender[] = ['male', 'female', 'unspecified'];
@@ -31,6 +42,7 @@ export function ProfileSettingsPage() {
   const update = useUpdateMyProfile();
   const [form, setForm] = useState<Partial<MyProfile>>({});
   const [saved, setSaved] = useState(false);
+  const isDirty = profile ? JSON.stringify(form) !== JSON.stringify(profile) : false;
 
   useEffect(() => {
     if (profile && !form.id) setForm(profile);
@@ -38,7 +50,7 @@ export function ProfileSettingsPage() {
 
   if (isLoading || !profile) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+      <div className="h-full bg-neutral-50 flex items-center justify-center">
         <p className="font-display text-xl text-neutral-900 animate-pulse">{t('common.loading')}</p>
       </div>
     );
@@ -90,7 +102,7 @@ export function ProfileSettingsPage() {
   const birthDateInput = form.birthDate ? form.birthDate.slice(0, 10) : '';
 
   return (
-    <div className="min-h-screen bg-neutral-50 font-body pb-20">
+    <div className="h-full overflow-y-auto bg-neutral-50 font-body pb-20">
       <header className="bg-white border-b border-neutral-100 sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-6 py-3 flex items-center justify-between">
           <button
@@ -102,7 +114,17 @@ export function ProfileSettingsPage() {
           <span className="font-display text-lg font-bold text-neutral-900">
             {t('profile.settings')}
           </span>
-          <span className="w-16" />
+          <button
+            onClick={handleSave}
+            disabled={!isDirty || update.isPending}
+            className={`text-sm font-semibold px-4 py-1.5 rounded-xl transition ${
+              isDirty && !update.isPending
+                ? 'bg-brand-gradient text-white'
+                : 'bg-neutral-100 text-neutral-400 cursor-default'
+            }`}
+          >
+            {update.isPending ? t('common.saving') : t('common.save')}
+          </button>
         </div>
       </header>
 
@@ -174,17 +196,22 @@ export function ProfileSettingsPage() {
         <Section title={t('profile.sections.hobbies')}>
           <p className="text-xs text-neutral-400 mb-3">{t('profile.fields.hobbiesHint')}</p>
           <div className="flex flex-wrap gap-2 mb-3">
-            {HOBBY_TAGS.map((tag) => {
+            {HOBBY_TAGS.map((tag, index) => {
               const active = form.hobbies?.includes(tag);
               return (
                 <button
                   key={tag}
                   type="button"
                   onClick={() => toggleHobby(tag)}
+                  style={
+                    active
+                      ? { background: HOBBY_GRADIENTS[index % HOBBY_GRADIENTS.length] }
+                      : undefined
+                  }
                   className={`text-xs font-medium px-3 py-1.5 rounded-full transition ${
                     active
-                      ? 'bg-brand-gradient text-white'
-                      : 'bg-neutral-50 text-neutral-700 hover:bg-neutral-100'
+                      ? 'text-white shadow-sm'
+                      : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
                   }`}
                 >
                   {tag}
@@ -289,24 +316,12 @@ export function ProfileSettingsPage() {
             onClick={() => navigate('/settings/blocked')}
             className="w-full text-left px-4 py-3 rounded-xl border-2 border-neutral-100 hover:border-accent-500/50 transition"
           >
-            <p className="text-sm font-semibold text-neutral-900">{t('profile.security.blocked')}</p>
+            <p className="text-sm font-semibold text-neutral-900">
+              {t('profile.security.blocked')}
+            </p>
             <p className="text-xs text-neutral-400">{t('profile.security.blockedHint')}</p>
           </button>
         </Section>
-
-        <div className="sticky bottom-4 bg-white rounded-xl shadow-lg shadow-neutral-900/10 border border-neutral-100 p-3 flex items-center gap-3">
-          {saved && (
-            <span className="text-xs text-accent-600 font-semibold">{t('common.saved')}</span>
-          )}
-          {update.isError && <span className="text-xs text-red-500">{t('common.error')}</span>}
-          <button
-            onClick={handleSave}
-            disabled={update.isPending}
-            className="ml-auto bg-brand-gradient hover:bg-brand-gradient-hover disabled:opacity-60 text-white font-semibold px-6 py-2.5 rounded-xl transition"
-          >
-            {update.isPending ? t('common.saving') : t('common.save')}
-          </button>
-        </div>
       </main>
     </div>
   );
