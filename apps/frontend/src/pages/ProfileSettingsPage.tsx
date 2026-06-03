@@ -38,8 +38,8 @@ export function ProfileSettingsPage() {
 
   if (isLoading || !profile) {
     return (
-      <div className="min-h-screen bg-forest-50 flex items-center justify-center">
-        <p className="font-display text-xl text-forest-900 animate-pulse">{t('common.loading')}</p>
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <p className="font-display text-xl text-neutral-900 animate-pulse">{t('common.loading')}</p>
       </div>
     );
   }
@@ -90,16 +90,16 @@ export function ProfileSettingsPage() {
   const birthDateInput = form.birthDate ? form.birthDate.slice(0, 10) : '';
 
   return (
-    <div className="min-h-screen bg-forest-50 font-body pb-20">
-      <header className="bg-white border-b border-forest-100 sticky top-0 z-10">
+    <div className="min-h-screen bg-neutral-50 font-body pb-20">
+      <header className="bg-white border-b border-neutral-100 sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-6 py-3 flex items-center justify-between">
           <button
             onClick={() => navigate(-1)}
-            className="text-forest-600 hover:text-forest-900 text-sm font-medium"
+            className="text-accent-600 hover:text-neutral-900 text-sm font-medium"
           >
             {t('common.back')}
           </button>
-          <span className="font-display text-lg font-bold text-forest-900">
+          <span className="font-display text-lg font-bold text-neutral-900">
             {t('profile.settings')}
           </span>
           <span className="w-16" />
@@ -119,7 +119,7 @@ export function ProfileSettingsPage() {
             <input
               value={profile.username}
               disabled
-              className={`${inputCls} bg-forest-50 text-forest-500`}
+              className={`${inputCls} bg-neutral-50 text-neutral-400`}
             />
           </Field>
           <Field label={t('profile.fields.city')}>
@@ -147,8 +147,8 @@ export function ProfileSettingsPage() {
                   onClick={() => set('gender', gender)}
                   className={`flex-1 px-3 py-2 rounded-xl border-2 text-sm transition ${
                     form.gender === gender
-                      ? 'border-forest-500 bg-forest-50 text-forest-900'
-                      : 'border-forest-100 text-forest-700 hover:border-forest-500/50'
+                      ? 'border-accent-500 bg-neutral-50 text-neutral-900'
+                      : 'border-neutral-100 text-neutral-700 hover:border-accent-500/50'
                   }`}
                 >
                   {t(`profile.gender.${gender}`)}
@@ -172,7 +172,7 @@ export function ProfileSettingsPage() {
         </Section>
 
         <Section title={t('profile.sections.hobbies')}>
-          <p className="text-xs text-forest-500 mb-3">{t('profile.fields.hobbiesHint')}</p>
+          <p className="text-xs text-neutral-400 mb-3">{t('profile.fields.hobbiesHint')}</p>
           <div className="flex flex-wrap gap-2 mb-3">
             {HOBBY_TAGS.map((tag) => {
               const active = form.hobbies?.includes(tag);
@@ -183,8 +183,8 @@ export function ProfileSettingsPage() {
                   onClick={() => toggleHobby(tag)}
                   className={`text-xs font-medium px-3 py-1.5 rounded-full transition ${
                     active
-                      ? 'bg-forest-600 text-white'
-                      : 'bg-forest-50 text-forest-700 hover:bg-forest-100'
+                      ? 'bg-brand-gradient text-white'
+                      : 'bg-neutral-50 text-neutral-700 hover:bg-neutral-100'
                   }`}
                 >
                   {tag}
@@ -204,7 +204,7 @@ export function ProfileSettingsPage() {
         </Section>
 
         <Section title={t('profile.sections.contacts')}>
-          <p className="text-xs text-forest-500 mb-3">{t('profile.visibility.title')}</p>
+          <p className="text-xs text-neutral-400 mb-3">{t('profile.visibility.title')}</p>
 
           <ContactRow
             label="Email"
@@ -261,7 +261,7 @@ export function ProfileSettingsPage() {
         </Section>
 
         <Section title={t('profile.sections.invites')}>
-          <p className="text-xs text-forest-500 mb-3">{t('profile.inviteFrom.title')}</p>
+          <p className="text-xs text-neutral-400 mb-3">{t('profile.inviteFrom.title')}</p>
           <div className="space-y-2">
             {(['all', 'contacts', 'none'] as const).map((opt) => (
               <button
@@ -270,14 +270,14 @@ export function ProfileSettingsPage() {
                 onClick={() => set('inviteFrom', opt)}
                 className={`w-full text-left px-4 py-3 rounded-xl border-2 transition ${
                   form.inviteFrom === opt
-                    ? 'border-forest-500 bg-forest-50'
-                    : 'border-forest-100 hover:border-forest-500/50'
+                    ? 'border-accent-500 bg-neutral-50'
+                    : 'border-neutral-100 hover:border-accent-500/50'
                 }`}
               >
-                <p className="text-sm font-semibold text-forest-900">
+                <p className="text-sm font-semibold text-neutral-900">
                   {t(`profile.inviteFrom.${opt}`)}
                 </p>
-                <p className="text-xs text-forest-500">{t(`profile.inviteFrom.${opt}Hint`)}</p>
+                <p className="text-xs text-neutral-400">{t(`profile.inviteFrom.${opt}Hint`)}</p>
               </button>
             ))}
           </div>
@@ -287,22 +287,22 @@ export function ProfileSettingsPage() {
           <button
             type="button"
             onClick={() => navigate('/settings/blocked')}
-            className="w-full text-left px-4 py-3 rounded-xl border-2 border-forest-100 hover:border-forest-500/50 transition"
+            className="w-full text-left px-4 py-3 rounded-xl border-2 border-neutral-100 hover:border-accent-500/50 transition"
           >
-            <p className="text-sm font-semibold text-forest-900">{t('profile.security.blocked')}</p>
-            <p className="text-xs text-forest-500">{t('profile.security.blockedHint')}</p>
+            <p className="text-sm font-semibold text-neutral-900">{t('profile.security.blocked')}</p>
+            <p className="text-xs text-neutral-400">{t('profile.security.blockedHint')}</p>
           </button>
         </Section>
 
-        <div className="sticky bottom-4 bg-white rounded-xl shadow-lg shadow-forest-900/10 border border-forest-100 p-3 flex items-center gap-3">
+        <div className="sticky bottom-4 bg-white rounded-xl shadow-lg shadow-neutral-900/10 border border-neutral-100 p-3 flex items-center gap-3">
           {saved && (
-            <span className="text-xs text-forest-600 font-semibold">{t('common.saved')}</span>
+            <span className="text-xs text-accent-600 font-semibold">{t('common.saved')}</span>
           )}
           {update.isError && <span className="text-xs text-red-500">{t('common.error')}</span>}
           <button
             onClick={handleSave}
             disabled={update.isPending}
-            className="ml-auto bg-forest-600 hover:bg-forest-700 disabled:opacity-60 text-white font-semibold px-6 py-2.5 rounded-xl transition"
+            className="ml-auto bg-brand-gradient hover:bg-brand-gradient-hover disabled:opacity-60 text-white font-semibold px-6 py-2.5 rounded-xl transition"
           >
             {update.isPending ? t('common.saving') : t('common.save')}
           </button>
@@ -313,12 +313,12 @@ export function ProfileSettingsPage() {
 }
 
 const inputCls =
-  'w-full px-4 py-2.5 rounded-xl border border-forest-100 focus:border-forest-500 focus:ring-2 focus:ring-forest-500/20 outline-none transition text-sm';
+  'w-full px-4 py-2.5 rounded-xl border border-neutral-100 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 outline-none transition text-sm';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="bg-white rounded-2xl border border-forest-100 shadow-sm p-5">
-      <h2 className="font-display text-sm uppercase tracking-widest text-forest-500 mb-4">
+    <section className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-5">
+      <h2 className="font-display text-sm uppercase tracking-widest text-neutral-400 mb-4">
         {title}
       </h2>
       <div className="space-y-3">{children}</div>
@@ -337,9 +337,9 @@ function Field({
 }) {
   return (
     <div>
-      <label className="block text-xs font-medium text-forest-700 mb-1.5">{label}</label>
+      <label className="block text-xs font-medium text-neutral-700 mb-1.5">{label}</label>
       {children}
-      {hint && <p className="text-[10px] text-forest-500 mt-1">{hint}</p>}
+      {hint && <p className="text-[10px] text-neutral-400 mt-1">{hint}</p>}
     </div>
   );
 }
@@ -372,12 +372,12 @@ function ContactRow({
         onChange={(e) => onChange?.(e.target.value)}
         disabled={disabled}
         placeholder={placeholder ?? label}
-        className={`${inputCls} ${disabled ? 'bg-forest-50 text-forest-500' : ''} flex-1`}
+        className={`${inputCls} ${disabled ? 'bg-neutral-50 text-neutral-400' : ''} flex-1`}
       />
       <select
         value={visibility ?? 'hidden'}
         onChange={(e) => onVisibilityChange(e.target.value as Visibility)}
-        className="px-2 py-2.5 rounded-xl border border-forest-100 text-xs font-medium text-forest-700 bg-white focus:border-forest-500 outline-none shrink-0"
+        className="px-2 py-2.5 rounded-xl border border-neutral-100 text-xs font-medium text-neutral-700 bg-white focus:border-accent-500 outline-none shrink-0"
       >
         <option value="public">{t('profile.visibility.public')}</option>
         <option value="contacts">{t('profile.visibility.contacts')}</option>

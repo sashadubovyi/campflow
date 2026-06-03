@@ -57,6 +57,8 @@ export default {
       },
       backgroundImage: {
         'brand-gradient': 'linear-gradient(135deg, #598dff 0%, #2d6ff8 50%, #1a56e0 100%)',
+        'warm-gradient': 'linear-gradient(135deg, #fde047 0%, #f59e0b 60%, #ef4444 100%)',
+        'warm-gradient-hover': 'linear-gradient(135deg, #facc15 0%, #ea580c 60%, #dc2626 100%)',
         'brand-gradient-hover': 'linear-gradient(135deg, #2d6ff8 0%, #1a56e0 50%, #1543b4 100%)',
       },
       borderRadius: {

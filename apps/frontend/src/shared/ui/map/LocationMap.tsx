@@ -78,7 +78,7 @@ export function LocationMap({ points, height = 240, fitBounds = true }: Props) {
     : [50.4501, 30.5234];
 
   return (
-    <div className="rounded-xl overflow-hidden border border-forest-100" style={{ height }}>
+    <div className="rounded-xl overflow-hidden border border-neutral-100" style={{ height }}>
       <MapContainer
         center={initialCenter}
         zoom={11}
@@ -98,9 +98,9 @@ export function LocationMap({ points, height = 240, fitBounds = true }: Props) {
           >
             <Popup>
               <div className="font-body text-sm">
-                <p className="font-semibold text-forest-900">{p.label}</p>
-                {p.address && <p className="text-forest-700 text-xs mt-1">{p.address}</p>}
-                <p className="text-forest-500 text-xs mt-1.5">
+                <p className="font-semibold text-neutral-900">{p.label}</p>
+                {p.address && <p className="text-neutral-700 text-xs mt-1">{p.address}</p>}
+                <p className="text-neutral-400 text-xs mt-1.5">
                   {p.votes} {p.votes === 1 ? 'голос' : 'голосів'}
                 </p>
               </div>

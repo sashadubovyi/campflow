@@ -38,32 +38,32 @@ export function InviteButton({ roomId, inviteCode }: Props) {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="text-sm bg-ember-500 hover:bg-ember-400 text-white font-semibold px-4 py-1.5 rounded-xl transition"
+        className="text-sm bg-warm-gradient hover:bg-warm-gradient-hover text-white font-semibold px-4 py-1.5 rounded-xl transition"
       >
         {t('rooms.invite')}
       </button>
 
       {open && (
         <div
-          className="fixed inset-0 bg-forest-900/40 flex items-center justify-center px-4 z-50"
+          className="fixed inset-0 bg-neutral-900/40 flex items-center justify-center px-4 z-50"
           onClick={handleClose}
         >
           <div
             className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 font-body"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="font-display text-xl font-bold text-forest-900 mb-1">
+            <h2 className="font-display text-xl font-bold text-neutral-900 mb-1">
               {t('rooms.inviteUsers')}
             </h2>
-            <p className="text-sm text-forest-700 mb-4">{t('invites.shareHint')}</p>
+            <p className="text-sm text-neutral-700 mb-4">{t('invites.shareHint')}</p>
 
-            <div className="flex gap-1 mb-5 bg-forest-50 p-1 rounded-xl">
+            <div className="flex gap-1 mb-5 bg-neutral-50 p-1 rounded-xl">
               <button
                 onClick={() => setTab('username')}
                 className={`flex-1 text-sm font-semibold py-2 rounded-lg transition ${
                   tab === 'username'
-                    ? 'bg-white text-forest-900 shadow-sm'
-                    : 'text-forest-700 hover:text-forest-900'
+                    ? 'bg-white text-neutral-900 shadow-sm'
+                    : 'text-neutral-700 hover:text-neutral-900'
                 }`}
               >
                 {t('invites.byUsername')}
@@ -72,8 +72,8 @@ export function InviteButton({ roomId, inviteCode }: Props) {
                 onClick={() => setTab('link')}
                 className={`flex-1 text-sm font-semibold py-2 rounded-lg transition ${
                   tab === 'link'
-                    ? 'bg-white text-forest-900 shadow-sm'
-                    : 'text-forest-700 hover:text-forest-900'
+                    ? 'bg-white text-neutral-900 shadow-sm'
+                    : 'text-neutral-700 hover:text-neutral-900'
                 }`}
               >
                 {t('invites.byLink')}
@@ -151,10 +151,10 @@ function InviteByUsername({ roomId, onDone }: { roomId: string; onDone: () => vo
 
   if (sent) {
     return (
-      <div className="bg-forest-50 rounded-xl p-6 text-center">
+      <div className="bg-neutral-50 rounded-xl p-6 text-center">
         <p className="text-3xl mb-2">📬</p>
-        <p className="font-semibold text-forest-900">{t('invites.sent')}</p>
-        <p className="text-xs text-forest-700 mt-1">
+        <p className="font-semibold text-neutral-900">{t('invites.sent')}</p>
+        <p className="text-xs text-neutral-700 mt-1">
           {t('invites.sentHint', { name: check?.target?.fullName ?? '' })}
         </p>
       </div>
@@ -164,11 +164,11 @@ function InviteByUsername({ roomId, onDone }: { roomId: string; onDone: () => vo
   return (
     <div className="space-y-3">
       <div>
-        <label className="block text-xs font-medium text-forest-700 mb-1.5">
+        <label className="block text-xs font-medium text-neutral-700 mb-1.5">
           {t('profile.fields.username')}
         </label>
         <div className="flex items-center gap-1">
-          <span className="text-forest-500 font-mono">@</span>
+          <span className="text-neutral-400 font-mono">@</span>
           <input
             value={username}
             onChange={(e) => {
@@ -176,19 +176,19 @@ function InviteByUsername({ roomId, onDone }: { roomId: string; onDone: () => vo
               setCheck(null);
             }}
             placeholder="ivan_petrenko"
-            className="flex-1 px-3 py-2 rounded-lg border border-forest-100 focus:border-forest-500 outline-none text-sm font-mono"
+            className="flex-1 px-3 py-2 rounded-lg border border-neutral-100 focus:border-accent-500 outline-none text-sm font-mono"
             autoFocus
           />
         </div>
       </div>
 
-      {checking && <p className="text-xs text-forest-500 italic">{t('invites.checking')}</p>}
+      {checking && <p className="text-xs text-neutral-400 italic">{t('invites.checking')}</p>}
 
       {check && !checking && (
         <div
           className={`rounded-xl p-3 ${
             check.allowed
-              ? 'bg-forest-50 border border-forest-500/30'
+              ? 'bg-neutral-50 border border-accent-500/30'
               : 'bg-red-50 border border-red-200'
           }`}
         >
@@ -200,12 +200,12 @@ function InviteByUsername({ roomId, onDone }: { roomId: string; onDone: () => vo
                 size={36}
               />
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-forest-900 truncate">
+                <p className="text-sm font-semibold text-neutral-900 truncate">
                   {check.target.fullName}
                 </p>
-                <p className="text-xs text-forest-500">@{check.target.username}</p>
+                <p className="text-xs text-neutral-400">@{check.target.username}</p>
               </div>
-              <span className="text-forest-600 text-xs font-semibold">
+              <span className="text-accent-600 text-xs font-semibold">
                 {t('invites.canInvite')}
               </span>
             </div>
@@ -218,7 +218,7 @@ function InviteByUsername({ roomId, onDone }: { roomId: string; onDone: () => vo
       )}
 
       <div>
-        <label className="block text-xs font-medium text-forest-700 mb-1.5">
+        <label className="block text-xs font-medium text-neutral-700 mb-1.5">
           {t('invites.messageOptional')}
         </label>
         <textarea
@@ -227,14 +227,14 @@ function InviteByUsername({ roomId, onDone }: { roomId: string; onDone: () => vo
           rows={2}
           maxLength={500}
           placeholder={t('invites.messagePlaceholder')}
-          className="w-full px-3 py-2 rounded-lg border border-forest-100 focus:border-forest-500 outline-none text-sm resize-none"
+          className="w-full px-3 py-2 rounded-lg border border-neutral-100 focus:border-accent-500 outline-none text-sm resize-none"
         />
       </div>
 
       <button
         onClick={handleSend}
         disabled={!check?.allowed || create.isPending}
-        className="w-full bg-forest-600 hover:bg-forest-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-xl transition text-sm"
+        className="w-full bg-brand-gradient hover:bg-brand-gradient-hover disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-xl transition text-sm"
       >
         {create.isPending ? t('common.sending') : t('invites.send')}
       </button>
@@ -258,31 +258,31 @@ function InviteByLink({
   const { t } = useTranslation();
   return (
     <>
-      <label className="block text-xs font-medium text-forest-500 mb-1.5">
+      <label className="block text-xs font-medium text-neutral-400 mb-1.5">
         {t('rooms.inviteCode')}
       </label>
       <div className="flex gap-2 mb-4">
-        <div className="flex-1 px-4 py-2.5 rounded-xl border border-forest-100 bg-forest-50 font-mono tracking-widest text-forest-900 text-center">
+        <div className="flex-1 px-4 py-2.5 rounded-xl border border-neutral-100 bg-neutral-50 font-mono tracking-widest text-neutral-900 text-center">
           {inviteCode}
         </div>
         <button
           onClick={() => onCopy(inviteCode, 'code')}
-          className="px-4 rounded-xl border border-forest-100 text-forest-700 font-semibold hover:bg-forest-50 transition text-sm"
+          className="px-4 rounded-xl border border-neutral-100 text-neutral-700 font-semibold hover:bg-neutral-50 transition text-sm"
         >
           {copied === 'code' ? t('common.copied') : t('common.copy')}
         </button>
       </div>
 
-      <label className="block text-xs font-medium text-forest-500 mb-1.5">
+      <label className="block text-xs font-medium text-neutral-400 mb-1.5">
         {t('invites.linkLabel')}
       </label>
       <div className="flex gap-2 mb-5">
-        <div className="flex-1 px-4 py-2.5 rounded-xl border border-forest-100 bg-forest-50 text-forest-700 text-sm truncate">
+        <div className="flex-1 px-4 py-2.5 rounded-xl border border-neutral-100 bg-neutral-50 text-neutral-700 text-sm truncate">
           {inviteLink}
         </div>
         <button
           onClick={() => onCopy(inviteLink, 'link')}
-          className="px-4 rounded-xl border border-forest-100 text-forest-700 font-semibold hover:bg-forest-50 transition text-sm"
+          className="px-4 rounded-xl border border-neutral-100 text-neutral-700 font-semibold hover:bg-neutral-50 transition text-sm"
         >
           {copied === 'link' ? t('common.copied') : t('common.copy')}
         </button>
@@ -290,7 +290,7 @@ function InviteByLink({
 
       <button
         onClick={onClose}
-        className="w-full bg-forest-600 hover:bg-forest-700 text-white font-semibold py-2.5 rounded-xl transition"
+        className="w-full bg-brand-gradient hover:bg-brand-gradient-hover text-white font-semibold py-2.5 rounded-xl transition"
       >
         {t('common.done')}
       </button>

@@ -39,19 +39,19 @@ export function JoinByLinkPage() {
   }, [isInitialized, isAuthenticated, code, navigate, t]);
 
   return (
-    <div className="min-h-screen bg-forest-50 flex items-center justify-center px-6">
+    <div className="min-h-screen bg-neutral-50 flex items-center justify-center px-6">
       <div className="text-center font-body">
-        <h1 className="font-display text-3xl font-bold text-forest-900 mb-4">
-          Camp<span className="text-ember-500">Flow</span>
+        <h1 className="font-display text-3xl font-bold text-neutral-900 mb-4">
+          Camp<span className="text-accent-600">Flow</span>
         </h1>
         {!error ? (
-          <p className="text-forest-700 animate-pulse">{t('common.loading')}</p>
+          <p className="text-neutral-700 animate-pulse">{t('common.loading')}</p>
         ) : (
           <div>
-            <p className="text-forest-700 mb-4">{error}</p>
+            <p className="text-neutral-700 mb-4">{error}</p>
             <button
               onClick={() => navigate('/rooms')}
-              className="bg-forest-600 hover:bg-forest-700 text-white font-semibold px-5 py-2.5 rounded-xl transition"
+              className="bg-brand-gradient hover:bg-brand-gradient-hover text-white font-semibold px-5 py-2.5 rounded-xl transition"
             >
               {t('rooms.title')}
             </button>

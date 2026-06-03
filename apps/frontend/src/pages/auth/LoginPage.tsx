@@ -34,27 +34,27 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-forest-50 flex items-center justify-center px-6 relative">
+    <div className="min-h-screen bg-neutral-50 flex items-center justify-center px-6 relative">
       <div className="absolute top-4 right-4">
         <LanguageSwitcher />
       </div>
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="font-display text-4xl font-bold text-forest-900">
-            Camp<span className="text-ember-500">Flow</span>
+          <h1 className="font-display text-4xl font-bold text-neutral-900">
+            Camp<span className="text-accent-600">Flow</span>
           </h1>
-          <p className="font-body text-forest-700 mt-2">{t('auth.loginTitle')}</p>
+          <p className="font-body text-neutral-700 mt-2">{t('auth.loginTitle')}</p>
         </div>
-        <div className="bg-white rounded-2xl shadow-xl shadow-forest-900/5 border border-forest-100 p-8">
+        <div className="bg-white rounded-2xl shadow-xl shadow-neutral-900/5 border border-neutral-100 p-8">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 font-body">
             <div>
-              <label className="block text-sm font-medium text-forest-700 mb-1.5">
+              <label className="block text-sm font-medium text-neutral-700 mb-1.5">
                 {t('auth.email')}
               </label>
               <input
                 type="email"
                 autoComplete="email"
-                className="w-full px-4 py-2.5 rounded-xl border border-forest-100 focus:border-forest-500 focus:ring-2 focus:ring-forest-500/20 outline-none transition"
+                className="w-full px-4 py-2.5 rounded-xl border border-neutral-100 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 outline-none transition"
                 placeholder="you@example.com"
                 {...register('email', { required: true })}
               />
@@ -63,13 +63,13 @@ export function LoginPage() {
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-forest-700 mb-1.5">
+              <label className="block text-sm font-medium text-neutral-700 mb-1.5">
                 {t('auth.password')}
               </label>
               <input
                 type="password"
                 autoComplete="current-password"
-                className="w-full px-4 py-2.5 rounded-xl border border-forest-100 focus:border-forest-500 focus:ring-2 focus:ring-forest-500/20 outline-none transition"
+                className="w-full px-4 py-2.5 rounded-xl border border-neutral-100 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 outline-none transition"
                 placeholder="••••••••"
                 {...register('password', { required: true })}
               />
@@ -83,15 +83,15 @@ export function LoginPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-forest-600 hover:bg-forest-700 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition"
+              className="w-full bg-brand-gradient hover:bg-brand-gradient-hover disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition"
             >
               {isSubmitting ? t('common.loading') : t('auth.login')}
             </button>
           </form>
         </div>
-        <p className="text-center text-forest-700 text-sm mt-6 font-body">
+        <p className="text-center text-neutral-700 text-sm mt-6 font-body">
           {t('auth.noAccount')}{' '}
-          <Link to="/register" className="text-ember-500 font-semibold hover:underline">
+          <Link to="/register" className="text-accent-600 font-semibold hover:underline">
             {t('auth.register')}
           </Link>
         </p>

@@ -42,14 +42,14 @@ export function LanguageSwitcher() {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="text-sm hover:bg-forest-50 rounded-lg px-2 py-1 transition flex items-center gap-1"
+        className="text-sm hover:bg-neutral-50 rounded-lg px-2 py-1 transition flex items-center gap-1"
         title={t(`language.${current}`)}
       >
         <span><FlagIcon lang={current} /></span>
-        <span className="text-xs text-forest-700 uppercase">{current}</span>
+        <span className="text-xs text-neutral-700 uppercase">{current}</span>
       </button>
       {open && (
-        <ul className="absolute right-0 top-full mt-1 bg-white border border-forest-100 rounded-xl shadow-lg overflow-hidden z-50 min-w-[140px]">
+        <ul className="absolute right-0 top-full mt-1 bg-white border border-neutral-100 rounded-xl shadow-lg overflow-hidden z-50 min-w-[140px]">
           {supported.map((lang) => (
             <li key={lang}>
               <button
@@ -57,10 +57,10 @@ export function LanguageSwitcher() {
                   change(lang);
                   setOpen(false);
                 }}
-                className={`w-full text-left px-3 py-2 text-sm hover:bg-forest-50 transition flex items-center gap-2 ${
+                className={`w-full text-left px-3 py-2 text-sm hover:bg-neutral-50 transition flex items-center gap-2 ${
                   current === lang
-                    ? 'bg-forest-50 text-forest-900 font-semibold'
-                    : 'text-forest-700'
+                    ? 'bg-neutral-50 text-neutral-900 font-semibold'
+                    : 'text-neutral-700'
                 }`}
               >
                 <span><FlagIcon lang={lang} /></span>

@@ -23,23 +23,23 @@ export function CloseRoomModal({ roomId, roomName, onClose, onClosed }: Props) {
 
   return (
     <div
-      className="fixed inset-0 bg-forest-900/40 flex items-center justify-center px-4 z-50"
+      className="fixed inset-0 bg-neutral-900/40 flex items-center justify-center px-4 z-50"
       onClick={closeRoom.isPending ? undefined : onClose}
     >
       <div
         className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 font-body"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="font-display text-xl font-bold text-forest-900 mb-2">
+        <h2 className="font-display text-xl font-bold text-neutral-900 mb-2">
           {t('polls.ai.closeRoomConfirm')}
         </h2>
-        <p className="font-display text-sm text-forest-700 mb-3">«{roomName}»</p>
-        <p className="text-sm text-forest-700 mb-5 leading-relaxed">
+        <p className="font-display text-sm text-neutral-700 mb-3">«{roomName}»</p>
+        <p className="text-sm text-neutral-700 mb-5 leading-relaxed">
           {t('polls.ai.closeRoomDescription')}
         </p>
 
         {closeRoom.isPending && (
-          <p className="text-sm text-forest-700 bg-forest-50 rounded-lg px-3 py-2 mb-4 animate-pulse">
+          <p className="text-sm text-neutral-700 bg-neutral-50 rounded-lg px-3 py-2 mb-4 animate-pulse">
             {t('polls.ai.summarizing')}
           </p>
         )}
@@ -55,7 +55,7 @@ export function CloseRoomModal({ roomId, roomName, onClose, onClosed }: Props) {
             type="button"
             onClick={onClose}
             disabled={closeRoom.isPending}
-            className="flex-1 border border-forest-100 text-forest-700 font-semibold py-2.5 rounded-xl hover:bg-forest-50 disabled:opacity-60 transition"
+            className="flex-1 border border-neutral-100 text-neutral-700 font-semibold py-2.5 rounded-xl hover:bg-neutral-50 disabled:opacity-60 transition"
           >
             {t('common.cancel')}
           </button>
@@ -63,7 +63,7 @@ export function CloseRoomModal({ roomId, roomName, onClose, onClosed }: Props) {
             type="button"
             onClick={handleSubmit}
             disabled={closeRoom.isPending}
-            className="flex-1 bg-ember-500 hover:opacity-90 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition"
+            className="flex-1 bg-warm-gradient hover:opacity-90 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition"
           >
             {closeRoom.isPending ? t('polls.ai.summarizing') : t('polls.ai.closeRoomAction')}
           </button>

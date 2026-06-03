@@ -6,6 +6,7 @@ import { PollCard } from './polls/PollCard';
 import { CreatePollModal } from './polls/CreatePollModal';
 import { FinalPlanPanel } from './FinalPlanPanel';
 import { cn } from '../../shared/ui';
+import { Plus } from 'lucide-react';
 
 interface Props {
   roomId: string;
@@ -54,9 +55,10 @@ export function PollsPanel({ roomId, isAdmin, members, currentUserId }: Props) {
             </h2>
             <button
               onClick={() => setShowCreate(true)}
-              className="text-xs bg-brand-gradient hover:bg-brand-gradient-hover text-white font-semibold px-3 py-1 rounded-lg transition"
+              className="w-7 h-7 flex items-center justify-center bg-brand-gradient hover:bg-brand-gradient-hover text-white rounded-lg transition shrink-0"
+              title={t('polls.createNew')}
             >
-              {t('polls.createNew')}
+              <Plus size={16} />
             </button>
           </div>
         )}

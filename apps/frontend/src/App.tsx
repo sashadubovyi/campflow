@@ -26,9 +26,9 @@ function AppContent() {
 
   if (!isInitialized) {
     return (
-      <div className="min-h-screen bg-forest-50 flex items-center justify-center">
-        <div className="font-display text-2xl text-forest-900 animate-pulse">
-          Camp<span className="text-ember-500">Flow</span>
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <div className="font-display text-2xl text-neutral-900 animate-pulse">
+          Camp<span className="text-accent-600">Flow</span>
         </div>
       </div>
     );

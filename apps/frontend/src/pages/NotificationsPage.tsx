@@ -15,23 +15,23 @@ export function NotificationsPage() {
   const unreadCount = notifications?.filter((n) => !n.readAt).length ?? 0;
 
   return (
-    <div className="min-h-screen bg-forest-50 font-body">
-      <header className="bg-white border-b border-forest-100 sticky top-0 z-10">
+    <div className="min-h-screen bg-neutral-50 font-body">
+      <header className="bg-white border-b border-neutral-100 sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-6 py-3 flex items-center justify-between">
           <button
             onClick={() => navigate(-1)}
-            className="text-forest-600 hover:text-forest-900 text-sm font-medium"
+            className="text-accent-600 hover:text-neutral-900 text-sm font-medium"
           >
             {t('common.back')}
           </button>
-          <span className="font-display text-lg font-bold text-forest-900">
+          <span className="font-display text-lg font-bold text-neutral-900">
             {t('notifications.title')}
           </span>
           {unreadCount > 0 ? (
             <button
               onClick={() => markAllRead.mutate()}
               disabled={markAllRead.isPending}
-              className="text-xs text-forest-600 hover:text-forest-900 font-medium"
+              className="text-xs text-accent-600 hover:text-neutral-900 font-medium"
             >
               {t('notifications.markAllRead')}
             </button>
@@ -43,14 +43,14 @@ export function NotificationsPage() {
 
       <main className="max-w-2xl mx-auto px-6 py-6">
         {isLoading && (
-          <p className="text-forest-500 text-center animate-pulse">{t('common.loading')}</p>
+          <p className="text-neutral-400 text-center animate-pulse">{t('common.loading')}</p>
         )}
 
         {!isLoading && notifications && notifications.length === 0 && (
-          <div className="bg-white rounded-2xl border border-forest-100 border-dashed p-10 text-center">
+          <div className="bg-white rounded-2xl border border-neutral-100 border-dashed p-10 text-center">
             <p className="text-3xl mb-3">🔔</p>
-            <p className="font-display text-lg text-forest-900 mb-1">{t('notifications.empty')}</p>
-            <p className="text-forest-700 text-sm">{t('notifications.emptyHint')}</p>
+            <p className="font-display text-lg text-neutral-900 mb-1">{t('notifications.empty')}</p>
+            <p className="text-neutral-700 text-sm">{t('notifications.emptyHint')}</p>
           </div>
         )}
 
@@ -139,7 +139,7 @@ function InviteCard({
   return (
     <li
       className={`bg-white rounded-2xl border shadow-sm p-4 transition ${
-        isUnread && isPending ? 'border-ember-500/30 bg-ember-500/5' : 'border-forest-100'
+        isUnread && isPending ? 'border-accent-500/30 bg-accent-500/5' : 'border-neutral-100'
       } ${!isPending ? 'opacity-60' : ''}`}
     >
       <div className="flex items-start gap-3">
@@ -149,34 +149,34 @@ function InviteCard({
           size={44}
         />
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-forest-900">
+          <p className="text-sm text-neutral-900">
             <span className="font-semibold">{payload.invitedBy.fullName}</span>
-            <span className="text-forest-700">
+            <span className="text-neutral-700">
               {' '}
               {t('notifications.inviteText', { name: '' }).trim()}{' '}
             </span>
             <span className="font-semibold">«{payload.roomName}»</span>
           </p>
           {payload.message && (
-            <p className="text-xs text-forest-700 mt-1.5 italic bg-forest-50 rounded-lg px-2 py-1.5">
+            <p className="text-xs text-neutral-700 mt-1.5 italic bg-neutral-50 rounded-lg px-2 py-1.5">
               «{payload.message}»
             </p>
           )}
-          <p className="text-[10px] text-forest-500 mt-1.5">{relativeTime(n.createdAt)}</p>
+          <p className="text-[10px] text-neutral-400 mt-1.5">{relativeTime(n.createdAt)}</p>
 
           {isPending && (
             <div className="mt-3 flex flex-wrap gap-2">
               <button
                 onClick={handleAccept}
                 disabled={loading}
-                className="bg-forest-600 hover:bg-forest-700 disabled:opacity-50 text-white text-xs font-semibold px-4 py-1.5 rounded-lg transition"
+                className="bg-brand-gradient hover:bg-brand-gradient-hover disabled:opacity-50 text-white text-xs font-semibold px-4 py-1.5 rounded-lg transition"
               >
                 {accept.isPending ? t('notifications.accepting') : t('notifications.accept')}
               </button>
               <button
                 onClick={handleDefer}
                 disabled={loading}
-                className="bg-forest-50 hover:bg-forest-100 disabled:opacity-50 text-forest-700 text-xs font-semibold px-4 py-1.5 rounded-lg transition"
+                className="bg-neutral-50 hover:bg-neutral-100 disabled:opacity-50 text-neutral-700 text-xs font-semibold px-4 py-1.5 rounded-lg transition"
               >
                 {t('notifications.defer')}
               </button>
@@ -191,15 +191,15 @@ function InviteCard({
           )}
 
           {status === 'accepted' && (
-            <p className="mt-2 text-xs text-forest-600 font-semibold">
+            <p className="mt-2 text-xs text-accent-600 font-semibold">
               {t('notifications.accepted')}
             </p>
           )}
           {status === 'declined' && (
-            <p className="mt-2 text-xs text-forest-500">{t('notifications.declined')}</p>
+            <p className="mt-2 text-xs text-neutral-400">{t('notifications.declined')}</p>
           )}
           {status === 'cancelled' && (
-            <p className="mt-2 text-xs text-forest-500">{t('notifications.cancelled')}</p>
+            <p className="mt-2 text-xs text-neutral-400">{t('notifications.cancelled')}</p>
           )}
         </div>
       </div>
@@ -221,16 +221,16 @@ function SystemCard({
     <li
       onClick={onClick}
       className={`bg-white rounded-2xl border shadow-sm p-4 cursor-pointer transition ${
-        isUnread ? 'border-ember-500/30 bg-ember-500/5' : 'border-forest-100'
+        isUnread ? 'border-accent-500/30 bg-accent-500/5' : 'border-neutral-100'
       }`}
     >
       <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-full bg-forest-50 flex items-center justify-center text-lg shrink-0">
+        <div className="w-10 h-10 rounded-full bg-neutral-50 flex items-center justify-center text-lg shrink-0">
           {iconForKind(n.kind)}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-forest-900">{text}</p>
-          <p className="text-[10px] text-forest-500 mt-1">{relativeTime(n.createdAt)}</p>
+          <p className="text-sm text-neutral-900">{text}</p>
+          <p className="text-[10px] text-neutral-400 mt-1">{relativeTime(n.createdAt)}</p>
         </div>
       </div>
     </li>
