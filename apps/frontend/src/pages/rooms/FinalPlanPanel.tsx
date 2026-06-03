@@ -3,7 +3,7 @@ import { useFinalPlan } from '../../shared/api/final-plan.hooks';
 import type { FinalPlanItem } from '../../shared/api/final-plan.api';
 import { Avatar } from '../../shared/ui/Avatar';
 import { relativeTime } from '../../shared/lib/relativeTime';
-import { ClipboardList } from 'lucide-react';
+import { Calendar, MapPin, ClipboardList, type LucideIcon } from 'lucide-react';
 
 interface Props {
   roomId: string;
@@ -40,7 +40,7 @@ export function FinalPlanPanel({ roomId }: Props) {
   return (
     <div className="px-3 py-3 space-y-4">
       {plan.grouped.decisions.length > 0 && (
-        <Section title={t('polls.finalPlan.decisions')} icon="📅">
+        <Section title={t('polls.finalPlan.decisions')} icon={Calendar}>
           {plan.grouped.decisions.map((item) => (
             <DecisionCard key={item.id} item={item} />
           ))}
@@ -48,7 +48,7 @@ export function FinalPlanPanel({ roomId }: Props) {
       )}
 
       {plan.grouped.locations.length > 0 && (
-        <Section title={t('polls.finalPlan.locations')} icon="📍">
+        <Section title={t('polls.finalPlan.locations')} icon={MapPin}>
           {plan.grouped.locations.map((item) => (
             <LocationCard key={item.id} item={item} />
           ))}
@@ -56,7 +56,7 @@ export function FinalPlanPanel({ roomId }: Props) {
       )}
 
       {plan.grouped.items.length > 0 && (
-        <Section title={t('polls.finalPlan.items')} icon="✅">
+        <Section title={t('polls.finalPlan.items')} icon={ClipboardList}>
           {plan.grouped.items.map((item) => (
             <ItemCard key={item.id} item={item} />
           ))}
@@ -68,17 +68,18 @@ export function FinalPlanPanel({ roomId }: Props) {
 
 function Section({
   title,
-  icon,
+  icon: Icon,
   children,
 }: {
   title: string;
-  icon: string;
+  icon: LucideIcon;
   children: React.ReactNode;
 }) {
   return (
     <div>
-      <h3 className="font-body text-xs font-semibold text-neutral-400 uppercase tracking-widest px-2 mb-2">
-        {icon} {title}
+      <h3 className="font-body text-xs font-semibold text-neutral-400 uppercase tracking-widest px-2 mb-2 flex items-center gap-1.5">
+        <Icon size={13} />
+        {title}
       </h3>
       <div className="space-y-2">{children}</div>
     </div>
@@ -101,7 +102,10 @@ function LocationCard({ item }: { item: FinalPlanItem }) {
   const { t } = useTranslation();
   return (
     <div className="bg-white rounded-xl border border-neutral-100 p-3">
-      <p className="text-sm font-medium text-neutral-900">📍 {item.title}</p>
+      <p className="text-sm font-medium text-neutral-900 flex items-center gap-1">
+        <MapPin size={13} className="text-neutral-400 shrink-0" />
+        {item.title}
+      </p>
       {item.address && (
         <p className="text-[10px] text-neutral-400 mt-0.5 truncate">{item.address}</p>
       )}

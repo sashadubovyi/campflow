@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { invitesApi, type CanInviteResult } from '../../shared/api/invites.api';
 import { useCreateInvite } from '../../shared/api/invites.hooks';
 import { Avatar } from '../../shared/ui/Avatar';
-import { UserSearch, Link } from 'lucide-react';
+import { UserSearch, Link, CheckCircle } from 'lucide-react';
 
 interface Props {
   roomId: string;
@@ -155,7 +155,7 @@ function InviteByUsername({ roomId, onDone }: { roomId: string; onDone: () => vo
   if (sent) {
     return (
       <div className="bg-neutral-50 rounded-xl p-6 text-center">
-        <p className="text-3xl mb-2">📬</p>
+        <CheckCircle size={36} className="text-accent-500 mb-2 mx-auto" />
         <p className="font-semibold text-neutral-900">{t('invites.sent')}</p>
         <p className="text-xs text-neutral-700 mt-1">
           {t('invites.sentHint', { name: check?.target?.fullName ?? '' })}

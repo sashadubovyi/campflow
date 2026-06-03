@@ -18,7 +18,7 @@ const pickerIcon = L.divIcon({
       font-size:14px;
       border:3px solid #fff;
       box-shadow:0 2px 6px rgba(0,0,0,0.25);
-    ">📍</div>`,
+    ">·</div>`,
   iconSize: [28, 28],
   iconAnchor: [14, 14],
 });
@@ -96,7 +96,7 @@ export function MapPicker({ onPick, initialCenter = [50.4501, 30.5234], height =
       </MapContainer>
 
       <div className="absolute top-2 left-2 right-2 bg-white/95 backdrop-blur rounded-lg px-3 py-2 text-xs text-neutral-700 font-body shadow-sm pointer-events-none">
-        {loadingAddress ? '🔍 Визначаю адресу…' : '📍 Клікніть по карті, щоб додати точку'}
+        {loadingAddress ? 'Визначаю адресу…' : 'Клікніть по карті, щоб додати точку'}
       </div>
     </div>
   );

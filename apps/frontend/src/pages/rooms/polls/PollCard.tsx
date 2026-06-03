@@ -12,6 +12,7 @@ import type { PollDetails, PollOption } from '../../../shared/api/polls.api';
 import type { RoomMember } from '../../../shared/api/rooms.api';
 import { Avatar } from '../../../shared/ui/Avatar';
 import { LocationMap } from '../../../shared/ui/map/LocationMap';
+import { MapPin } from 'lucide-react';
 
 interface Props {
   poll: PollDetails;
@@ -301,7 +302,10 @@ function LocationView({
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="text-sm text-neutral-900 truncate">📍 {opt.label}</p>
+                    <p className="text-sm text-neutral-900 truncate flex items-center gap-1">
+                      <MapPin size={12} className="text-neutral-400 shrink-0" />
+                      {opt.label}
+                    </p>
                     {opt.address && (
                       <p className="text-[10px] text-neutral-400 truncate">{opt.address}</p>
                     )}

@@ -4,7 +4,7 @@ import { useContacts, useRemoveContact } from '../shared/api/contacts.hooks';
 import { Avatar } from '../shared/ui/Avatar';
 import { relativeTime } from '../shared/lib/relativeTime';
 import { BackButton } from '../shared/ui';
-import { Users } from 'lucide-react';
+import { Users, ArrowLeftRight } from 'lucide-react';
 
 export function ContactsPage() {
   const { t } = useTranslation();
@@ -55,7 +55,9 @@ export function ContactsPage() {
                   <div className="min-w-0 flex-1">
                     <p className="font-medium text-neutral-900 truncate flex items-center gap-1.5">
                       {c.user.fullName}
-                      {c.isMutual && <span title="🔁">🔁</span>}
+                      {c.isMutual && (
+                        <ArrowLeftRight size={12} className="text-accent-500 shrink-0" />
+                      )}
                     </p>
                     <p className="text-xs text-neutral-400 truncate">
                       @{c.user.username}

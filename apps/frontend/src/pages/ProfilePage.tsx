@@ -1,6 +1,21 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Pencil, Users, Calendar, ShieldCheck, LogOut, ChevronRight } from 'lucide-react';
+import {
+  Mail,
+  Phone,
+  Send,
+  MessageCircle,
+  Camera,
+  Users,
+  Cake,
+  MapPin,
+  Pencil,
+  Calendar,
+  ShieldCheck,
+  LogOut,
+  ChevronRight,
+  type LucideIcon,
+} from 'lucide-react';
 import { useProfile } from '../shared/api/profile.hooks';
 import { useAuth } from '../shared/store/useAuth';
 import { relativeTime } from '../shared/lib/relativeTime';
@@ -200,45 +215,45 @@ function PublicDetails({
   const allHobbies = [...profile.hobbies];
   if (profile.hobbiesCustom) allHobbies.push(profile.hobbiesCustom);
 
-  const contacts: { icon: string; label: string; value: string; href: string }[] = [];
+  const contacts: { icon: LucideIcon; label: string; value: string; href: string }[] = [];
   if (profile.email)
     contacts.push({
-      icon: '📧',
+      icon: Mail,
       label: 'Email',
       value: profile.email,
       href: `mailto:${profile.email}`,
     });
   if (profile.phone)
     contacts.push({
-      icon: '📱',
+      icon: Phone,
       label: t('auth.phone'),
       value: profile.phone,
       href: `tel:${profile.phone}`,
     });
   if (profile.telegram)
     contacts.push({
-      icon: '💬',
+      icon: Send,
       label: 'Telegram',
       value: `@${profile.telegram.replace(/^@/, '')}`,
       href: `https://t.me/${profile.telegram.replace(/^@/, '')}`,
     });
   if (profile.whatsapp)
     contacts.push({
-      icon: '🟢',
+      icon: MessageCircle,
       label: 'WhatsApp',
       value: profile.whatsapp,
       href: `https://wa.me/${profile.whatsapp.replace(/\D/g, '')}`,
     });
   if (profile.instagram)
     contacts.push({
-      icon: '📸',
+      icon: Camera,
       label: 'Instagram',
       value: `@${profile.instagram.replace(/^@/, '')}`,
       href: `https://instagram.com/${profile.instagram.replace(/^@/, '')}`,
     });
   if (profile.facebook)
     contacts.push({
-      icon: '👥',
+      icon: Users,
       label: 'Facebook',
       value: profile.facebook,
       href: `https://facebook.com/${profile.facebook}`,
@@ -252,11 +267,21 @@ function PublicDetails({
       {hasMeta && (
         <section className="bg-white rounded-card shadow-card p-5">
           <p className="text-sm text-neutral-700 flex flex-wrap gap-x-4 gap-y-1">
-            {age !== null && <span>🎂 {age}</span>}
+            {age !== null && (
+              <span className="flex items-center gap-1">
+                <Cake size={14} />
+                {age}
+              </span>
+            )}
             {profile.gender && profile.gender !== 'unspecified' && (
               <span>{t(`profile.gender.${profile.gender}`)}</span>
             )}
-            {profile.city && <span>📍 {profile.city}</span>}
+            {profile.city && (
+              <span className="flex items-center gap-1">
+                <MapPin size={14} />
+                {profile.city}
+              </span>
+            )}
           </p>
         </section>
       )}
@@ -296,7 +321,12 @@ function PublicDetails({
           <ul className="space-y-2.5 text-sm">
             {contacts.map((c) => (
               <li key={c.label} className="flex items-center gap-3">
-                <span className="text-lg">{c.icon}</span>
+                <span className="shrink-0">
+                  {(() => {
+                    const Icon = c.icon;
+                    return <Icon size={18} className="text-neutral-400" />;
+                  })()}
+                </span>
                 <div className="min-w-0 flex-1">
                   <p className="text-[10px] text-neutral-400 uppercase tracking-wider">{c.label}</p>
                   <a

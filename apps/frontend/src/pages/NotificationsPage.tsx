@@ -6,7 +6,7 @@ import { Avatar } from '../shared/ui/Avatar';
 import { relativeTime } from '../shared/lib/relativeTime';
 import type { NotificationItem } from '../shared/api/notifications.api';
 import { BackButton } from '../shared/ui';
-import { Bell } from 'lucide-react';
+import { Mail, CheckCircle, XCircle, UserX, Crown, Clock, Bell } from 'lucide-react';
 
 export function NotificationsPage() {
   const { t } = useTranslation();
@@ -234,17 +234,17 @@ function SystemCard({
   );
 }
 
-function iconForKind(kind: NotificationItem['kind']): string {
-  const map: Record<NotificationItem['kind'], string> = {
-    room_invite: '📩',
-    room_invite_accepted: '✅',
-    room_invite_declined: '❌',
-    member_removed: '🚪',
-    room_admin_transferred: '👑',
-    room_deletion_warning: '⏰',
-    system: '🔔',
+function iconForKind(kind: NotificationItem['kind']) {
+  const map = {
+    room_invite: <Mail size={18} className="text-neutral-500" />,
+    room_invite_accepted: <CheckCircle size={18} className="text-green-500" />,
+    room_invite_declined: <XCircle size={18} className="text-red-400" />,
+    member_removed: <UserX size={18} className="text-neutral-500" />,
+    room_admin_transferred: <Crown size={18} className="text-amber-500" />,
+    room_deletion_warning: <Clock size={18} className="text-orange-400" />,
+    system: <Bell size={18} className="text-neutral-500" />,
   };
-  return map[kind] ?? '🔔';
+  return map[kind] ?? <Bell size={18} className="text-neutral-500" />;
 }
 
 function useTextForKind(n: NotificationItem): string {

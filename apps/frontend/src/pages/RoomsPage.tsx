@@ -95,7 +95,7 @@ export function RoomsPage() {
 
         {rooms && rooms.length === 0 && (
           <div className="bg-white rounded-card shadow-card p-10 text-center">
-            <p className="text-lg text-neutral-900 mb-1">{t('rooms.empty')} 🏕️</p>
+            <p className="text-lg text-neutral-900 mb-1">{t('rooms.empty')}</p>
             <p className="text-neutral-600 text-sm mb-5">{t('rooms.emptyHint')}</p>
             <button
               onClick={() => setShowCreate(true)}

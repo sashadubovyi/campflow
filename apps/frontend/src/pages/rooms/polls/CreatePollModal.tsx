@@ -31,12 +31,6 @@ interface LocationDraft {
   address?: string;
 }
 
-const TYPE_EMOJI: Record<PollType, string> = {
-  single_choice: '📅',
-  multi_choice: '✅',
-  location: '📍',
-};
-
 export function CreatePollModal({ roomId, onClose }: Props) {
   const { t } = useTranslation();
   const [type, setType] = useState<PollType>('single_choice');

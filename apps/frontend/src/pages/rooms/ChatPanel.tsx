@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Send } from 'lucide-react';
+import { Send, MessageCircle } from 'lucide-react';
 import { useRoomChat } from '../../shared/api/useRoomChat';
 import { useAuth } from '../../shared/store/useAuth';
 import { Avatar } from '../../shared/ui/Avatar';
@@ -72,7 +72,7 @@ export function ChatPanel({ roomId, roomName }: Props) {
         {!isLoading && messages.length === 0 && (
           <div className="h-full flex items-center justify-center">
             <div className="text-center text-neutral-400">
-              <p className="text-3xl mb-2">💬</p>
+              <MessageCircle size={36} className="text-neutral-300 mb-2 mx-auto" />
               <p className="text-sm">{t('chat.noMessages')}</p>
             </div>
           </div>
