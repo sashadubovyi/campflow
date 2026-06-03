@@ -5,6 +5,7 @@ import { useAcceptInvite, useDeclineInvite, useDeferInvite } from '../shared/api
 import { Avatar } from '../shared/ui/Avatar';
 import { relativeTime } from '../shared/lib/relativeTime';
 import type { NotificationItem } from '../shared/api/notifications.api';
+import { BackButton } from '../shared/ui';
 
 export function NotificationsPage() {
   const { t } = useTranslation();
@@ -18,12 +19,7 @@ export function NotificationsPage() {
     <div className="min-h-screen bg-neutral-50 font-body">
       <header className="bg-white border-b border-neutral-100 sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-6 py-3 flex items-center justify-between">
-          <button
-            onClick={() => navigate(-1)}
-            className="text-accent-600 hover:text-neutral-900 text-sm font-medium"
-          >
-            {t('common.back')}
-          </button>
+          <BackButton />
           <span className="font-display text-lg font-bold text-neutral-900">
             {t('notifications.title')}
           </span>
