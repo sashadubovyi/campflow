@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMyProfile, useUpdateMyProfile } from '../shared/api/profile.hooks';
 import type { Visibility, Gender, MyProfile } from '../shared/api/profile.api';
+import { Mail, Phone, Send, MessageCircle, Camera, Users, type LucideIcon } from 'lucide-react';
 
 const HOBBY_GRADIENTS = [
   'linear-gradient(135deg,#598dff,#2d6ff8)', // синій
@@ -235,7 +236,7 @@ export function ProfileSettingsPage() {
 
           <ContactRow
             label="Email"
-            icon="📧"
+            icon={Mail}
             value={profile.email}
             disabled
             visibility={form.emailVisibility}
@@ -243,7 +244,7 @@ export function ProfileSettingsPage() {
           />
           <ContactRow
             label={t('auth.phone')}
-            icon="📱"
+            icon={Phone}
             value={form.phone ?? ''}
             onChange={(v) => set('phone', v || null)}
             visibility={form.phoneVisibility}
@@ -251,7 +252,7 @@ export function ProfileSettingsPage() {
           />
           <ContactRow
             label="Telegram"
-            icon="💬"
+            icon={Send}
             value={form.telegram ?? ''}
             onChange={(v) => set('telegram', v || null)}
             placeholder="@username"
@@ -260,7 +261,7 @@ export function ProfileSettingsPage() {
           />
           <ContactRow
             label="WhatsApp"
-            icon="🟢"
+            icon={MessageCircle}
             value={form.whatsapp ?? ''}
             onChange={(v) => set('whatsapp', v || null)}
             placeholder="+380..."
@@ -269,7 +270,7 @@ export function ProfileSettingsPage() {
           />
           <ContactRow
             label="Instagram"
-            icon="📸"
+            icon={Camera}
             value={form.instagram ?? ''}
             onChange={(v) => set('instagram', v || null)}
             placeholder="@username"
@@ -278,7 +279,7 @@ export function ProfileSettingsPage() {
           />
           <ContactRow
             label="Facebook"
-            icon="👥"
+            icon={Users}
             value={form.facebook ?? ''}
             onChange={(v) => set('facebook', v || null)}
             placeholder="username"
@@ -370,7 +371,7 @@ function ContactRow({
   disabled,
 }: {
   label: string;
-  icon: string;
+  icon: LucideIcon;
   value: string | null;
   onChange?: (v: string) => void;
   visibility?: Visibility;
@@ -381,7 +382,10 @@ function ContactRow({
   const { t } = useTranslation();
   return (
     <div className="flex items-center gap-2 mb-2">
-      <span className="text-lg shrink-0">{icon}</span>
+      {(() => {
+        const Icon = icon;
+        return <Icon size={18} className="text-neutral-400 shrink-0" />;
+      })()}
       <input
         value={value ?? ''}
         onChange={(e) => onChange?.(e.target.value)}
