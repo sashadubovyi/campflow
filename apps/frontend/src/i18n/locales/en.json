@@ -148,7 +148,7 @@
       "duplicateWarning": "⚠️ Possible duplicate",
       "duplicateBody": "A similar poll seems to exist: «{{title}}»",
       "summarizing": "Creating event summary…",
-      "closeRoom": "🏁 Close room",
+      "closeRoom": "Close room",
       "closeRoomConfirm": "Close the room forever?",
       "closeRoomDescription": "AI will create a summary of the event. The chat will be wiped, the room deleted in 2 days. A memory of the event will stay in your profile.",
       "closeRoomAction": "Yes, close",

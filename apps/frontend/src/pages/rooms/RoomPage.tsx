@@ -74,7 +74,7 @@ export function RoomPage() {
         setInfoOpen(false);
         setShowCloseModal(true);
       }}
-      className="border border-accent-500 text-accent-600 hover:bg-accent-50 text-sm font-medium px-3 py-1.5 rounded-lg transition"
+      className="bg-danger-gradient hover:bg-danger-gradient-hover text-white text-sm font-medium px-3 py-1.5 rounded-lg transition shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]"
     >
       {t('polls.ai.closeRoom')}
     </button>

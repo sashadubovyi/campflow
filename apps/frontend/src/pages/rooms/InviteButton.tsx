@@ -38,7 +38,7 @@ export function InviteButton({ roomId, inviteCode }: Props) {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="text-sm bg-warm-gradient hover:bg-warm-gradient-hover text-white font-semibold px-4 py-1.5 rounded-xl transition"
+        className="text-sm bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-semibold px-4 py-1.5 rounded-xl transition"
       >
         {t('rooms.invite')}
       </button>

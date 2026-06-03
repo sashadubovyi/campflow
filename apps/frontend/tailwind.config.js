@@ -60,6 +60,10 @@ export default {
         'warm-gradient': 'linear-gradient(135deg, #fde047 0%, #f59e0b 60%, #ef4444 100%)',
         'warm-gradient-hover': 'linear-gradient(135deg, #facc15 0%, #ea580c 60%, #dc2626 100%)',
         'brand-gradient-hover': 'linear-gradient(135deg, #2d6ff8 0%, #1a56e0 50%, #1543b4 100%)',
+        'rose-gradient': 'linear-gradient(135deg, #f472b6 0%, #a78bfa 100%)',
+        'rose-gradient-hover': 'linear-gradient(135deg, #ec4899 0%, #7c3aed 100%)',
+        'danger-gradient': 'linear-gradient(135deg, #f87171 0%, #ef4444 50%, #dc2626 100%)',
+        'danger-gradient-hover': 'linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%)',
       },
       borderRadius: {
         card: '20px',
