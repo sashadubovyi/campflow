@@ -107,13 +107,7 @@ export function ProfileSettingsPage() {
     <div className="h-full overflow-y-auto bg-neutral-50 font-body pb-20">
       <header className="bg-white border-b border-neutral-100 sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-6 py-3 flex items-center justify-between">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-1.5 text-sm font-medium text-neutral-500 hover:text-neutral-900 transition"
-          >
-            <BackButton />
-            <span className="hidden sm:inline">{t('common.back')}</span>
-          </button>
+          <BackButton />
           <span className="font-display text-lg font-bold text-neutral-900">
             {t('profile.settings')}
           </span>
