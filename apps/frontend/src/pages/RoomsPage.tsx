@@ -20,27 +20,26 @@ export function RoomsPage() {
   }
 
   return (
-    <div className="h-full overflow-y-auto bg-neutral-50">
-      <main className="max-w-4xl mx-auto px-6 py-8">
-        <RoomsHeader
-          onCreateClick={() => setShowCreate(true)}
-          onJoinClick={() => setShowJoin(true)}
-        />
+    <div className="h-full flex flex-col bg-neutral-50 overflow-hidden">
+      <RoomsHeader
+        onCreateClick={() => setShowCreate(true)}
+        onJoinClick={() => setShowJoin(true)}
+      />
 
-        {isLoading && (
-          <p className="text-neutral-400 animate-pulse text-center">{t('common.loading')}</p>
-        )}
-
-        {isError && (
-          <p className="text-danger-700 bg-danger-100 rounded-lg px-4 py-3 text-center">
-            {t('common.error')}
-          </p>
-        )}
-
-        {rooms && rooms.length === 0 && <RoomsEmpty onCreateClick={() => setShowCreate(true)} />}
-
-        {rooms && rooms.length > 0 && <RoomsList rooms={rooms} onOpen={openRoom} />}
-      </main>
+      <div className="flex-1 overflow-y-auto">
+        <main className="max-w-4xl mx-auto px-6 py-6">
+          {isLoading && (
+            <p className="text-neutral-400 animate-pulse text-center">{t('common.loading')}</p>
+          )}
+          {isError && (
+            <p className="text-danger-700 bg-danger-100 rounded-lg px-4 py-3 text-center">
+              {t('common.error')}
+            </p>
+          )}
+          {rooms && rooms.length === 0 && <RoomsEmpty onCreateClick={() => setShowCreate(true)} />}
+          {rooms && rooms.length > 0 && <RoomsList rooms={rooms} onOpen={openRoom} />}
+        </main>
+      </div>
 
       {showCreate && (
         <CreateRoomModal
@@ -51,7 +50,6 @@ export function RoomsPage() {
           }}
         />
       )}
-
       {showJoin && (
         <JoinRoomModal
           onClose={() => setShowJoin(false)}

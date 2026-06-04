@@ -9,3 +9,4 @@ export { Skeleton } from './Skeleton';
 export { SegmentedControl } from './SegmentedControl';
 export { Drawer } from './Drawer';
 export { BackButton } from './BackButton';
+export { PageHeader } from './PageHeader';

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ChevronLeft, Users, Info, ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronLeft, Users, Info, ChevronDown, ChevronUp, X } from 'lucide-react';
 import { useRoom } from '../../shared/api/rooms.hooks';
 import { useAuth } from '../../shared/store/useAuth';
 import { useMediaQuery } from '../../shared/lib/useMediaQuery';
@@ -71,9 +71,11 @@ export function RoomPage() {
         setInfoOpen(false);
         setShowCloseModal(true);
       }}
-      className="w-full text-xs font-semibold py-1.5 rounded-lg transition bg-danger-gradient text-white"
+      title={t('polls.ai.closeRoom')}
+      aria-label={t('polls.ai.closeRoom')}
+      className="w-full flex items-center justify-center py-1.5 rounded-lg transition bg-danger-gradient text-white"
     >
-      {t('polls.ai.closeRoom')}
+      <X size={18} />
     </button>
   );
 
@@ -95,9 +97,11 @@ export function RoomPage() {
             <BackButton />
             <h1 className="text-lg font-bold text-neutral-900 truncate">{room.name}</h1>
           </div>
-          <div className="flex items-center gap-3">
-            <InviteButton roomId={room.id} inviteCode={room.inviteCode} />
-            {closeBtn}
+          <div className="flex items-center gap-2">
+            <div className="w-20">
+              <InviteButton roomId={room.id} inviteCode={room.inviteCode} />
+            </div>
+            {closeBtn && <div className="w-20">{closeBtn}</div>}
           </div>
         </header>
         <div className="flex-1 grid grid-cols-[1fr_22%] min-h-0 overflow-hidden">
@@ -129,14 +133,14 @@ export function RoomPage() {
   /* ---------- MOBILE ---------- */
   return (
     <div className="h-full flex flex-col bg-neutral-50 overflow-hidden">
-      <header className="bg-white border-b border-neutral-100 shrink-0 px-2 py-2 flex items-center gap-1">
+      <header className="bg-white border-b border-neutral-100 shrink-0 px-2 h-14 flex items-center gap-1">
         <button
           onClick={() => (mobileView !== 'chat' ? setMobileView('chat') : navigate('/rooms'))}
           className="p-2 text-neutral-500 hover:text-neutral-900 rounded-lg"
         >
           <ChevronLeft size={20} />
         </button>
-        <h1 className="flex-1 text-base font-bold text-neutral-900 truncate text-center px-1">
+        <h1 className="flex-1 font-display text-lg font-bold text-neutral-900 truncate text-center px-1">
           {room.name}
         </h1>
         <button

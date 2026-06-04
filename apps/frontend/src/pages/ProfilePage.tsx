@@ -19,7 +19,7 @@ import {
 import { useProfile } from '../shared/api/profile.hooks';
 import { useAuth } from '../shared/store/useAuth';
 import { relativeTime } from '../shared/lib/relativeTime';
-import { cn } from '../shared/ui';
+import { cn, PageHeader, BackButton } from '../shared/ui';
 import { useAddContact, useRemoveContact } from '../shared/api/contacts.hooks';
 import { useBlockUser } from '../shared/api/blocks.hooks';
 
@@ -101,7 +101,12 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="h-full overflow-y-auto bg-neutral-50">
+    <div className="h-full flex flex-col bg-neutral-50 overflow-hidden">
+      <PageHeader
+        title={profile.isSelf ? t('nav.profile') : profile.fullName}
+        left={<BackButton to="/rooms" />}
+      />
+      <div className="flex-1 overflow-y-auto">
       <main className="max-w-2xl mx-auto px-4 md:px-6 py-6 space-y-4">
         {/* Header card */}
         <section className="bg-white rounded-card shadow-card p-6">
@@ -171,6 +176,7 @@ export function ProfilePage() {
           <PublicDetails profile={profile} age={age} />
         )}
       </main>
+      </div>
     </div>
   );
 }

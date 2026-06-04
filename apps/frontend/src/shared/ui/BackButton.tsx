@@ -2,12 +2,17 @@ import { ChevronLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-export function BackButton() {
+interface BackButtonProps {
+  /** Явний маршрут. Якщо не задано — navigate(-1). */
+  to?: string;
+}
+
+export function BackButton({ to }: BackButtonProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
   return (
     <button
-      onClick={() => navigate(-1)}
+      onClick={() => (to ? navigate(to) : navigate(-1))}
       className="flex items-center gap-1.5 text-sm font-medium text-neutral-500 hover:text-neutral-900 transition"
     >
       <ChevronLeft size={18} />

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { invitesApi, type CanInviteResult } from '../../shared/api/invites.api';
 import { useCreateInvite } from '../../shared/api/invites.hooks';
 import { Avatar } from '../../shared/ui/Avatar';
-import { UserSearch, Link, CheckCircle } from 'lucide-react';
+import { UserSearch, Link, CheckCircle, Ampersand } from 'lucide-react';
 
 interface Props {
   roomId: string;
@@ -39,9 +39,11 @@ export function InviteButton({ roomId, inviteCode }: Props) {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="w-full text-xs font-semibold py-1.5 rounded-lg transition bg-white text-neutral-900 shadow-sm"
+        title={t('rooms.invite')}
+        aria-label={t('rooms.invite')}
+        className="w-full flex items-center justify-center py-1.5 rounded-lg transition bg-accent-50 text-accent-500 shadow-card hover:bg-accent-100 hover:shadow-card-lg"
       >
-        {t('rooms.invite')}
+        <Ampersand size={18} />
       </button>
 
       {open && (

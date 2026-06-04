@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { Plus, LogIn } from 'lucide-react';
+import { Plus, Ampersand } from 'lucide-react';
+import { PageHeader } from '../../shared/ui';
 
 interface RoomsHeaderProps {
   onCreateClick: () => void;
@@ -8,26 +9,29 @@ interface RoomsHeaderProps {
 
 export function RoomsHeader({ onCreateClick, onJoinClick }: RoomsHeaderProps) {
   const { t } = useTranslation();
-
   return (
-    <div className="mb-6 text-center">
-      <h2 className="font-display text-lg font-bold text-neutral-900 mb-4">{t('rooms.title')}</h2>
-      <div className="flex gap-2">
-        <button
-          onClick={onCreateClick}
-          className="flex-1 flex items-center justify-center gap-2 bg-brand-gradient hover:bg-brand-gradient-hover text-white font-semibold py-2.5 rounded-xl transition"
-        >
-          <Plus size={16} />
-          {t('common.create')}
-        </button>
+    <PageHeader
+      title={t('rooms.title')}
+      left={
         <button
           onClick={onJoinClick}
-          className="flex-1 flex items-center justify-center gap-2 bg-white text-neutral-700 border border-neutral-200 font-semibold py-2.5 rounded-xl hover:bg-neutral-50 transition"
+          title={t('rooms.join')}
+          aria-label={t('rooms.join')}
+          className="p-2 bg-accent-50 text-accent-500 rounded-xl shadow-card hover:bg-accent-100 hover:shadow-card-lg transition"
         >
-          <LogIn size={16} />
-          {t('rooms.join')}
+          <Ampersand size={20} />
         </button>
-      </div>
-    </div>
+      }
+      right={
+        <button
+          onClick={onCreateClick}
+          title={t('common.create')}
+          aria-label={t('common.create')}
+          className="p-2 bg-brand-gradient hover:bg-brand-gradient-hover text-white rounded-lg transition"
+        >
+          <Plus size={20} />
+        </button>
+      }
+    />
   );
 }

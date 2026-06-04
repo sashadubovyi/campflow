@@ -4,7 +4,7 @@ import L from 'leaflet';
 import { useEffect } from 'react';
 import { useMapPoints } from '../shared/api/map.hooks';
 import type { MapPoint } from '../shared/api/map.api';
-import { BackButton } from '../shared/ui';
+import { BackButton, PageHeader } from '../shared/ui';
 
 delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -42,13 +42,7 @@ export function MapPage() {
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
-      <header className="relative bg-white border-b border-neutral-100 shrink-0 px-4 py-3 flex items-center justify-between">
-        <BackButton />
-        <h1 className="font-display text-lg font-bold text-neutral-900 absolute left-1/2 -translate-x-1/2">
-          {t('nav.map')}
-        </h1>
-        <span className="w-16" />
-      </header>
+      <PageHeader title={t('nav.map')} left={<BackButton />} />
 
       {isLoading && (
         <div className="flex-1 flex items-center justify-center text-neutral-400 animate-pulse">

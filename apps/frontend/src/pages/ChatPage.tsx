@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { MessageCircle, ChevronDown, ArrowUpRight } from 'lucide-react';
 import { useRooms } from '../shared/api/rooms.hooks';
 import { ChatPanel } from './rooms/ChatPanel';
-import { cn } from '../shared/ui';
+import { cn, PageHeader } from '../shared/ui';
 
 export function ChatPage() {
   const { t } = useTranslation();
@@ -39,29 +39,35 @@ export function ChatPage() {
   return (
     <div className="h-full flex flex-col">
       {/* Хедер лише на мобайлі (на десктопі назву показує ChatPanel) */}
-      <header className="md:hidden bg-white border-b border-neutral-100 shrink-0 px-3 py-2.5 flex items-center gap-2 relative">
-        <button
-          onClick={() => hasMany && setPickerOpen((v) => !v)}
-          className="flex items-center gap-1.5 min-w-0"
-        >
-          <span className="text-base font-bold text-neutral-900 truncate">{room.name}</span>
-          {hasMany && (
-            <ChevronDown
-              size={18}
-              className={cn(
-                'text-neutral-400 transition-transform shrink-0',
-                pickerOpen && 'rotate-180',
+      <div className="md:hidden relative">
+        <PageHeader
+          title={
+            <button
+              onClick={() => hasMany && setPickerOpen((v) => !v)}
+              className="inline-flex items-center gap-1.5 max-w-full"
+            >
+              <span className="truncate">{room.name}</span>
+              {hasMany && (
+                <ChevronDown
+                  size={18}
+                  className={cn(
+                    'text-neutral-400 transition-transform shrink-0',
+                    pickerOpen && 'rotate-180',
+                  )}
+                />
               )}
-            />
-          )}
-        </button>
-        <button
-          onClick={() => navigate(`/rooms/${room.id}`)}
-          className="ml-auto p-2 text-neutral-500 hover:text-accent-600 rounded-lg"
-          title={t('chat.openRoom')}
-        >
-          <ArrowUpRight size={20} />
-        </button>
+            </button>
+          }
+          right={
+            <button
+              onClick={() => navigate(`/rooms/${room.id}`)}
+              className="p-2 text-neutral-500 hover:text-accent-600 rounded-lg"
+              title={t('chat.openRoom')}
+            >
+              <ArrowUpRight size={20} />
+            </button>
+          }
+        />
 
         {pickerOpen && hasMany && (
           <>
@@ -88,7 +94,7 @@ export function ChatPage() {
             </ul>
           </>
         )}
-      </header>
+      </div>
 
       <div className="flex-1 min-h-0">
         <ChatPanel roomId={room.id} roomName={room.name} />
