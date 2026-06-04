@@ -14,11 +14,11 @@ interface PageHeaderProps {
 export function PageHeader({ title, left, right }: PageHeaderProps) {
   return (
     <header className="relative bg-white border-b border-neutral-100 shrink-0 px-4 h-14 flex items-center">
-      <div className="flex items-center justify-start min-w-[2.5rem] shrink-0">{left}</div>
-      <h1 className="flex-1 font-display text-lg font-bold text-neutral-900 text-center truncate px-2">
+      <div className="shrink-0">{left}</div>
+      <h1 className="font-display text-lg font-bold text-neutral-900 text-center truncate px-2 absolute left-1/2 -translate-x-1/2 pointer-events-none">
         {title}
       </h1>
-      <div className="flex items-center justify-end gap-2 min-w-[2.5rem] shrink-0">{right}</div>
+      <div className="ml-auto flex items-center gap-2 shrink-0">{right}</div>
     </header>
   );
 }

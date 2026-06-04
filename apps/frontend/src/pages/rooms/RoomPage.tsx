@@ -89,12 +89,14 @@ export function RoomPage() {
     return (
       <div className="h-full flex flex-col bg-neutral-50 overflow-hidden">
         {/* Хедер */}
-        <header className="bg-white border-b border-neutral-100 shrink-0 px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3 min-w-0">
+        <header className="bg-white border-b border-neutral-100 shrink-0 px-4 h-14 flex items-center">
+          <div className="flex items-center justify-start min-w-[2.5rem] shrink-0">
             <BackButton />
-            <h1 className="text-lg font-bold text-neutral-900 truncate">{room.name}</h1>
           </div>
-          <div className="flex items-center gap-2">
+          <h1 className="flex-1 font-display text-lg font-bold text-neutral-900 text-center truncate px-2">
+            {room.name}
+          </h1>
+          <div className="flex items-center justify-end gap-2 min-w-[2.5rem] shrink-0">
             <div className="w-20">
               <InviteButton roomId={room.id} inviteCode={room.inviteCode} />
             </div>

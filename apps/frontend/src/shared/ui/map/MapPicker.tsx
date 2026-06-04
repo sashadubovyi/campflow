@@ -81,6 +81,7 @@ export function MapPicker({ onPick, initialCenter = [50.4501, 30.5234], height =
       className="rounded-xl overflow-hidden border border-neutral-100 relative"
       style={{ height }}
     >
+      <div style={{ isolation: 'isolate', position: 'relative', height: '100%' }}>
       <MapContainer
         center={initialCenter}
         zoom={11}
@@ -94,6 +95,7 @@ export function MapPicker({ onPick, initialCenter = [50.4501, 30.5234], height =
         <ClickHandler onClick={handleClick} />
         {pending && <Marker position={[pending.lat, pending.lng]} icon={pickerIcon} />}
       </MapContainer>
+      </div>
 
       <div className="absolute top-2 left-2 right-2 bg-white/95 backdrop-blur rounded-lg px-3 py-2 text-xs text-neutral-700 font-body shadow-sm pointer-events-none">
         {loadingAddress ? 'Визначаю адресу…' : 'Клікніть по карті, щоб додати точку'}

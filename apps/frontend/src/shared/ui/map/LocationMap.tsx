@@ -79,6 +79,7 @@ export function LocationMap({ points, height = 240, fitBounds = true }: Props) {
 
   return (
     <div className="rounded-xl overflow-hidden border border-neutral-100" style={{ height }}>
+      <div style={{ isolation: 'isolate', position: 'relative', height: '100%' }}>
       <MapContainer
         center={initialCenter}
         zoom={11}
@@ -108,6 +109,7 @@ export function LocationMap({ points, height = 240, fitBounds = true }: Props) {
           </Marker>
         ))}
       </MapContainer>
+      </div>
     </div>
   );
 }

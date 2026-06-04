@@ -79,7 +79,8 @@ export function CreateRoomModal({ onClose, onCreated }: Props) {
               </label>
               <input
                 type="date"
-                className="w-full px-3 py-2.5 rounded-xl border border-neutral-100 focus:border-accent-500 outline-none transition"
+                placeholder="YYYY-MM-DD"
+                className="w-full px-3 py-2.5 rounded-xl border border-neutral-100 focus:border-accent-500 outline-none transition text-neutral-400 [&::-webkit-calendar-picker-indicator]:opacity-40"
                 {...register('startsAt')}
               />
             </div>
@@ -89,7 +90,8 @@ export function CreateRoomModal({ onClose, onCreated }: Props) {
               </label>
               <input
                 type="date"
-                className="w-full px-3 py-2.5 rounded-xl border border-neutral-100 focus:border-accent-500 outline-none transition"
+                placeholder="YYYY-MM-DD"
+                className="w-full px-3 py-2.5 rounded-xl border border-neutral-100 focus:border-accent-500 outline-none transition text-neutral-400 [&::-webkit-calendar-picker-indicator]:opacity-40"
                 {...register('endsAt')}
               />
             </div>

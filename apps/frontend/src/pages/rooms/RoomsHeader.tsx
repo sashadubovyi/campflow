@@ -15,21 +15,36 @@ export function RoomsHeader({ onCreateClick, onJoinClick, onSearchClick, searchO
     <PageHeader
       title={t('rooms.title')}
       left={
+        /* & кнопка — розширюється вправо з текстом */
         <button
           onClick={onJoinClick}
           title={t('rooms.join')}
-          aria-label={t('rooms.join')}
-          className="p-2 bg-accent-50 text-accent-500 rounded-xl shadow-card hover:bg-accent-100 hover:shadow-card-lg transition"
+          className="group flex items-center gap-0 bg-accent-50 text-accent-500 rounded-xl shadow-card hover:bg-accent-100 hover:shadow-card-lg transition-all duration-300 overflow-hidden px-2 py-2"
         >
-          <Ampersand size={20} />
+          <Ampersand size={20} className="shrink-0" />
+          <span className="max-w-0 group-hover:max-w-[100px] overflow-hidden whitespace-nowrap transition-all duration-300 ease-in-out text-sm font-semibold group-hover:ml-1.5">
+            {t('rooms.join')}
+          </span>
         </button>
       }
       right={
         <div className="flex items-center gap-1.5">
+          {/* + Створити — розширюється вліво з текстом */}
+          <button
+            onClick={onCreateClick}
+            title={t('common.create')}
+            className="group flex items-center gap-0 bg-brand-gradient hover:bg-brand-gradient-hover text-white rounded-xl transition-all duration-300 overflow-hidden px-2 py-2"
+          >
+            <span className="max-w-0 group-hover:max-w-[100px] overflow-hidden whitespace-nowrap transition-all duration-300 ease-in-out text-sm font-semibold group-hover:mr-1.5">
+              {t('common.create')}
+            </span>
+            <Plus size={20} className="shrink-0" />
+          </button>
+
+          {/* Пошук */}
           <button
             onClick={onSearchClick}
             title={t('rooms.search')}
-            aria-label={t('rooms.search')}
             className={`p-2 rounded-xl shadow-card transition ${
               searchOpen
                 ? 'bg-accent-500 text-white'
@@ -37,14 +52,6 @@ export function RoomsHeader({ onCreateClick, onJoinClick, onSearchClick, searchO
             }`}
           >
             {searchOpen ? <X size={20} /> : <Search size={20} />}
-          </button>
-          <button
-            onClick={onCreateClick}
-            title={t('common.create')}
-            aria-label={t('common.create')}
-            className="p-2 bg-brand-gradient hover:bg-brand-gradient-hover text-white rounded-xl transition"
-          >
-            <Plus size={20} />
           </button>
         </div>
       }

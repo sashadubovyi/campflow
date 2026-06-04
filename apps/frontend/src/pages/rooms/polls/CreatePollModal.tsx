@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import {
@@ -211,43 +211,56 @@ export function CreatePollModal({ roomId, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 bg-neutral-900/40 flex items-center justify-center px-4 z-50"
+      className="fixed inset-0 bg-neutral-900/40 flex items-center justify-center px-4 z-[200] backdrop-animate"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 font-body max-h-[90vh] overflow-y-auto"
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 font-body max-h-[90vh] overflow-y-auto scrollbar-hide modal-animate"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="font-display text-xl font-bold text-neutral-900 mb-4">
           {t('polls.newPoll')}
         </h2>
 
-        <div className="grid grid-cols-3 gap-2 mb-3">
-          {pollTypes.map((pt) => {
-            const Icon = TYPE_ICON[pt];
-            const active = type === pt;
-            return (
-              <button
-                key={pt}
-                type="button"
-                onClick={() => {
-                  setType(pt);
-                  setAiSource(null);
-                }}
-                className={cn(
-                  'flex flex-col items-center justify-center gap-1.5 py-3 rounded-xl border transition',
-                  active
-                    ? 'border-transparent bg-brand-gradient text-white shadow-card'
-                    : 'border-neutral-200 text-neutral-500 hover:border-accent-500/40 hover:text-neutral-700',
-                )}
-              >
-                <Icon size={20} />
-                <span className="text-xs font-semibold">
-                  {t(`polls.types.${getTypeLabel(pt)}`)}
-                </span>
-              </button>
-            );
-          })}
+        {/* Animated radio selector */}
+        <div className="relative mb-3">
+          <div className="relative flex bg-neutral-100 rounded-2xl p-1.5 gap-1">
+            {/* Ковзаючий індикатор */}
+            <div
+              className="absolute top-1.5 bottom-1.5 rounded-xl bg-white shadow-card transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
+              style={{
+                left: '6px',
+                width: 'calc((100% - 12px - 8px) / 3)',
+                transform: `translateX(calc(${pollTypes.indexOf(type)} * (100% + 4px)))`,
+              }}
+            />
+            {pollTypes.map((pt) => {
+              const Icon = TYPE_ICON[pt];
+              const active = type === pt;
+              return (
+                <button
+                  key={pt}
+                  type="button"
+                  onClick={() => { setType(pt); setAiSource(null); }}
+                  className="relative z-10 flex-1 flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl transition-all duration-200 active:scale-95"
+                >
+                  <Icon
+                    size={18}
+                    className={cn(
+                      'transition-colors duration-200',
+                      active ? 'text-accent-600' : 'text-neutral-400',
+                    )}
+                  />
+                  <span className={cn(
+                    'text-[11px] font-semibold transition-colors duration-200',
+                    active ? 'text-accent-600' : 'text-neutral-400',
+                  )}>
+                    {t(`polls.types.${getTypeLabel(pt)}`)}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
         <p className="text-xs text-neutral-400 mb-5 italic">
           {t(`polls.types.${getTypeLabel(type)}Hint`)}

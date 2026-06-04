@@ -121,7 +121,7 @@ function SingleView({
               onClick={() => vote.mutate({ pollId: poll.id, optionId: opt.id })}
               className={`w-full text-left px-3 py-2 rounded-lg border transition disabled:cursor-default ${
                 isChosen
-                  ? 'border-accent-500 bg-neutral-50'
+                  ? 'border-accent-500 bg-accent-50 shadow-sm'
                   : 'border-neutral-100 hover:border-accent-500/50'
               }`}
             >
@@ -171,7 +171,7 @@ function MultiView({
         const percent = totalVotes > 0 ? (opt.votes / totalVotes) * 100 : 0;
 
         return (
-          <li key={opt.id} className="bg-neutral-50 rounded-lg p-2">
+          <li key={opt.id} className={`rounded-lg p-2 transition ${isChosen ? 'bg-accent-50 border border-accent-500/30' : 'bg-neutral-50'}`}>
             <button
               type="button"
               disabled={isClosed || toggleVote.isPending}
@@ -181,7 +181,7 @@ function MultiView({
               <div className="flex items-center gap-2">
                 <span
                   className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 ${
-                    isChosen ? 'border-accent-500 bg-neutral-500' : 'border-neutral-100 bg-white'
+                    isChosen ? 'border-accent-500 bg-accent-500' : 'border-neutral-100 bg-white'
                   }`}
                 >
                   {isChosen && <span className="text-white text-[10px]">✓</span>}
