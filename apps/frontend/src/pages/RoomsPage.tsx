@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { Search, X } from 'lucide-react';
 import { useRooms } from '../shared/api/rooms.hooks';
 import { RoomsHeader } from './rooms/RoomsHeader';
 import { RoomsEmpty } from './rooms/RoomsEmpty';
@@ -14,17 +15,49 @@ export function RoomsPage() {
   const { data: rooms, isLoading, isError } = useRooms();
   const [showCreate, setShowCreate] = useState(false);
   const [showJoin, setShowJoin] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [query, setQuery] = useState('');
 
   function openRoom(id: string) {
     navigate(`/rooms/${id}`);
   }
+
+  const filtered = rooms
+    ? query.trim()
+      ? rooms.filter((r) => r.name.toLowerCase().includes(query.toLowerCase()))
+      : rooms
+    : [];
 
   return (
     <div className="h-full flex flex-col bg-neutral-50 overflow-hidden">
       <RoomsHeader
         onCreateClick={() => setShowCreate(true)}
         onJoinClick={() => setShowJoin(true)}
+        onSearchClick={() => {
+          setSearchOpen((v) => !v);
+          setQuery('');
+        }}
+        searchOpen={searchOpen}
       />
+
+      {/* Поле пошуку */}
+      {searchOpen && (
+        <div className="bg-white border-b border-neutral-100 px-4 py-2 flex items-center gap-2">
+          <Search size={16} className="text-neutral-400 shrink-0" />
+          <input
+            autoFocus
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={t('rooms.searchPlaceholder')}
+            className="flex-1 text-sm outline-none bg-transparent text-neutral-900 placeholder:text-neutral-400"
+          />
+          {query && (
+            <button onClick={() => setQuery('')} className="text-neutral-400 hover:text-neutral-600">
+              <X size={15} />
+            </button>
+          )}
+        </div>
+      )}
 
       <div className="flex-1 overflow-y-auto">
         <main className="max-w-4xl mx-auto px-6 py-6">
@@ -36,27 +69,28 @@ export function RoomsPage() {
               {t('common.error')}
             </p>
           )}
-          {rooms && rooms.length === 0 && <RoomsEmpty onCreateClick={() => setShowCreate(true)} />}
-          {rooms && rooms.length > 0 && <RoomsList rooms={rooms} onOpen={openRoom} />}
+          {!isLoading && !isError && filtered.length === 0 && query && (
+            <p className="text-neutral-400 text-center text-sm py-10">
+              {t('rooms.searchEmpty', { query })}
+            </p>
+          )}
+          {!isLoading && !isError && filtered.length === 0 && !query && (
+            <RoomsEmpty onCreateClick={() => setShowCreate(true)} />
+          )}
+          {filtered.length > 0 && <RoomsList rooms={filtered} onOpen={openRoom} />}
         </main>
       </div>
 
       {showCreate && (
         <CreateRoomModal
           onClose={() => setShowCreate(false)}
-          onCreated={(id) => {
-            setShowCreate(false);
-            openRoom(id);
-          }}
+          onCreated={(id) => { setShowCreate(false); openRoom(id); }}
         />
       )}
       {showJoin && (
         <JoinRoomModal
           onClose={() => setShowJoin(false)}
-          onJoined={(id) => {
-            setShowJoin(false);
-            openRoom(id);
-          }}
+          onJoined={(id) => { setShowJoin(false); openRoom(id); }}
         />
       )}
     </div>

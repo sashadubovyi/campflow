@@ -1,19 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { Users, Calendar } from 'lucide-react';
 import type { RoomListItem } from '../../shared/api/rooms.api';
-
-function formatDateRange(
-  startsAt: string | null,
-  endsAt: string | null,
-  locale: string,
-): string | null {
-  if (!startsAt) return null;
-  const localeMap: Record<string, string> = { uk: 'uk-UA', en: 'en-US', ru: 'ru-RU' };
-  const dateLocale = localeMap[locale] ?? 'uk-UA';
-  const fmt = (d: string) =>
-    new Date(d).toLocaleDateString(dateLocale, { day: 'numeric', month: 'short' });
-  return endsAt ? `${fmt(startsAt)} — ${fmt(endsAt)}` : fmt(startsAt);
-}
+import { Avatar } from '../../shared/ui';
+import { relativeTime } from '../../shared/lib/relativeTime';
 
 interface RoomCardProps {
   room: RoomListItem;
@@ -22,33 +11,56 @@ interface RoomCardProps {
 
 export function RoomCard({ room, onOpen }: RoomCardProps) {
   const { i18n } = useTranslation();
-  const dates = formatDateRange(room.startsAt, room.endsAt, i18n.language);
 
   return (
     <button
       onClick={() => onOpen(room.id)}
       className="text-left w-full bg-white rounded-card shadow-card hover:shadow-card-lg transition-all duration-200 overflow-hidden group"
     >
-      <div className="h-1 w-full bg-brand-gradient" />
-      <div className="p-5">
-        <div className="flex items-start justify-between gap-3 mb-1">
-          <h3 className="text-base font-semibold text-neutral-900 group-hover:text-accent-600 transition leading-snug">
+      {/* Рядок адміна */}
+      <div className="flex items-center gap-2.5 px-3 pt-3 pb-2">
+        {room.admin ? (
+          <Avatar
+            fullName={room.admin.fullName}
+            avatarUrl={room.admin.avatarUrl}
+            size={32}
+          />
+        ) : (
+          <div className="w-8 h-8 rounded-full bg-neutral-200 shrink-0" />
+        )}
+        <div className="flex flex-col min-w-0 flex-1">
+          <span className="text-sm font-semibold text-neutral-900 truncate leading-tight">
             {room.name}
-          </h3>
-          <span className="shrink-0 flex items-center gap-1 text-xs bg-neutral-100 text-neutral-500 rounded-full px-2.5 py-1 font-medium">
+          </span>
+          {room.description && (
+            <span className="text-xs text-neutral-400 truncate leading-tight mt-0.5">
+              {room.description}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Обкладинка */}
+      <div className="relative w-full aspect-[16/7] overflow-hidden">
+        <img
+          src={room.coverUrl ?? '/room-cover-placeholder.jpeg'}
+          alt={room.name}
+          className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
+        />
+
+        {/* Темний градієнт знизу */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+
+        {/* Мета: дата + учасники */}
+        <div className="absolute bottom-0 left-0 right-0 px-3 pb-2 pt-6 flex items-end justify-between">
+          <span className="text-white/70 text-xs">
+            {relativeTime(room.createdAt)}
+          </span>
+          <span className="flex items-center gap-1 text-white/70 text-xs">
             <Users size={11} />
             {room.memberCount}
           </span>
         </div>
-        {room.description && (
-          <p className="text-sm text-neutral-500 line-clamp-2 mt-1.5">{room.description}</p>
-        )}
-        {dates && (
-          <div className="flex items-center gap-1.5 text-xs text-neutral-400 mt-3">
-            <Calendar size={12} />
-            {dates}
-          </div>
-        )}
       </div>
     </button>
   );

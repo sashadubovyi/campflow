@@ -14,6 +14,7 @@ export interface RoomListItem {
   closedAt?: string | null;
   createdAt: string;
   updatedAt: string;
+  admin: { id: string; fullName: string; avatarUrl: string | null } | null;
 }
 
 export interface RoomMember {

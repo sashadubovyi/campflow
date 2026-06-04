@@ -59,6 +59,13 @@ export class RoomsService {
       },
       include: {
         _count: { select: { members: true } },
+        members: {
+          where: { role: 'admin' },
+          take: 1,
+          include: {
+            user: { select: { id: true, fullName: true, avatarUrl: true } },
+          },
+        },
       },
       orderBy: { updatedAt: 'desc' },
     });
@@ -197,6 +204,7 @@ export class RoomsService {
     createdAt: Date;
     updatedAt: Date;
     _count: { members: number };
+    members?: { user: { id: string; fullName: string; avatarUrl: string | null } }[];
   }) {
     return {
       id: room.id,
@@ -210,6 +218,7 @@ export class RoomsService {
       memberCount: room._count.members,
       createdAt: room.createdAt,
       updatedAt: room.updatedAt,
+      admin: room.members?.[0]?.user ?? null,
     };
   }
 

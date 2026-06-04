@@ -70,7 +70,10 @@
     "transferAndLeave": "Transfer and leave",
     "transferring": "Transferring…",
     "defaultChoice": "(default)",
-    "transferHint": "If you don't choose — rights go to the oldest member."
+    "transferHint": "If you don't choose — rights go to the oldest member.",
+    "searchPlaceholder": "Search rooms...",
+    "searchEmpty": "Nothing found for «{{query}}»",
+    "search": "Search"
   },
   "nav": {
     "home": "Rooms",
