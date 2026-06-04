@@ -197,18 +197,21 @@ export function RoomPage() {
           className={`absolute inset-0 bg-neutral-900/40 z-10 transition-opacity duration-300 ${
             mobileView !== 'chat' ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
+          
         />
         <div
-          className={`absolute top-2 right-0 bottom-0 z-20 w-[85vw] bg-white shadow-card-lg flex flex-col transition-transform duration-300 ease-out rounded-tl-xl rounded-bl-xl ${
+          className={`absolute top-2 right-0 bottom-0 z-20 w-[85vw] bg-white shadow-card-lg flex flex-col transition-transform duration-300 ease-out overflow-hidden ${
             mobileView === 'members' ? 'translate-x-0' : 'translate-x-full'
           }`}
+          style={{ borderTopLeftRadius: '14px' }}
         >
           {members}
         </div>
         <div
-          className={`absolute top-2 right-0 bottom-0 z-20 w-[85vw] bg-white shadow-card-lg flex flex-col transition-transform duration-300 ease-out rounded-tl-xl rounded-bl-xl ${
+          className={`absolute top-2 right-0 bottom-0 z-20 w-[85vw] bg-white shadow-card-lg flex flex-col transition-transform duration-300 ease-out overflow-hidden ${
             mobileView === 'info' ? 'translate-x-0' : 'translate-x-full'
           }`}
+          style={{ borderTopLeftRadius: '14px' }}
         >
           <div className="border-b border-neutral-100 shrink-0">
             <div className="px-4 pt-4 pb-3">
