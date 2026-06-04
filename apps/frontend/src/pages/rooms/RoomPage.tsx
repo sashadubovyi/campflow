@@ -13,7 +13,7 @@ import { InviteButton } from './InviteButton';
 import { CloseRoomModal } from './CloseRoomModal';
 import { usePresence } from '../../shared/api/usePresence';
 import { useArchiveRoom } from '../../shared/api/rooms.hooks';
-import { BackButton } from '../../shared/ui';
+import { BackButton, Modal } from '../../shared/ui';
 
 export function RoomPage() {
   const { t } = useTranslation();
@@ -72,7 +72,7 @@ export function RoomPage() {
       onClick={() => { setInfoOpen(false); setShowCloseModal(true); }}
       title={t('polls.ai.closeRoom')}
       aria-label={t('polls.ai.closeRoom')}
-      className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg transition bg-danger-gradient text-white"
+      className="w-full flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl transition bg-danger-gradient text-white text-sm font-semibold whitespace-nowrap"
     >
       <X size={16} />
       <span className="text-xs font-semibold">{t('polls.ai.closeRoom')}</span>
@@ -100,11 +100,19 @@ export function RoomPage() {
           <h1 className="flex-1 font-display text-lg font-bold text-neutral-900 text-center truncate px-2">
             {room.name}
           </h1>
-          <div className="flex items-center justify-end gap-2 min-w-[2.5rem] shrink-0">
-            <div className="w-20">
-              <InviteButton roomId={room.id} inviteCode={room.inviteCode} />
-            </div>
-            {closeBtn && <div className="w-20">{closeBtn}</div>}
+          <div className="flex items-center justify-end gap-1.5 shrink-0">
+            <InviteButton roomId={room.id} inviteCode={room.inviteCode} />
+            {closeBtn}
+            {isAdmin && isClosed && (
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                disabled={archiveRoom.isPending}
+                className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl transition bg-red-50 text-red-500 hover:bg-red-100 text-xs font-semibold disabled:opacity-50"
+              >
+                <Trash2 size={14} />
+                {t('rooms.delete')}
+              </button>
+            )}
           </div>
         </header>
 
@@ -162,6 +170,43 @@ export function RoomPage() {
         </PanelGroup>
 
         {modal}
+        <Modal
+          open={showDeleteConfirm}
+          onClose={() => setShowDeleteConfirm(false)}
+          size="sm"
+        >
+          <div className="text-center space-y-4">
+            <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mx-auto">
+              <Trash2 size={22} className="text-red-500" />
+            </div>
+            <div>
+              <h3 className="font-display text-lg font-bold text-neutral-900 mb-1">
+                {t('rooms.delete')}
+              </h3>
+              <p className="text-sm text-neutral-500">
+                {t('rooms.deleteConfirmText', { name: room.name })}
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="flex-1 border border-neutral-100 text-neutral-700 font-semibold py-2.5 rounded-xl hover:bg-neutral-50 transition text-sm"
+              >
+                {t('common.cancel')}
+              </button>
+              <button
+                onClick={async () => {
+                  await archiveRoom.mutateAsync(room.id);
+                  navigate('/rooms');
+                }}
+                disabled={archiveRoom.isPending}
+                className="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-2.5 rounded-xl transition text-sm disabled:opacity-50"
+              >
+                {archiveRoom.isPending ? '...' : t('rooms.confirmDelete')}
+              </button>
+            </div>
+          </div>
+        </Modal>
       </div>
     );
   }

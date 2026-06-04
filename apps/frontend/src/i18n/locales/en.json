@@ -84,7 +84,8 @@
     "aiPreviewHint": "Polls will be created automatically after confirmation",
     "aiCreate": "Create Event",
     "delete": "Delete room",
-    "confirmDelete": "Confirm delete"
+    "confirmDelete": "Confirm delete",
+    "deleteConfirmText": "Are you sure you want to delete «{{name}}»? This cannot be undone."
   },
   "nav": {
     "home": "Rooms",

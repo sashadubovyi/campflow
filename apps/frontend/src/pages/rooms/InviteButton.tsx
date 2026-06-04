@@ -41,7 +41,7 @@ export function InviteButton({ roomId, inviteCode }: Props) {
         onClick={() => setOpen(true)}
         title={t('rooms.invite')}
         aria-label={t('rooms.invite')}
-        className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg transition bg-accent-50 text-accent-500 shadow-card hover:bg-accent-100 hover:shadow-card-lg"
+        className="w-full flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl transition bg-accent-50 text-accent-500 shadow-card hover:bg-accent-100 hover:shadow-card-lg text-sm font-semibold"
       >
         <Ampersand size={16} />
         <span className="text-xs font-semibold">{t('rooms.invite')}</span>
