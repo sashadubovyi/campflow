@@ -107,7 +107,7 @@ export function RoomPage() {
               <button
                 onClick={() => setShowDeleteConfirm(true)}
                 disabled={archiveRoom.isPending}
-                className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl transition bg-red-50 text-red-500 hover:bg-red-100 text-xs font-semibold disabled:opacity-50"
+                className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl transition bg-red-50 text-red-500 hover:bg-red-100 text-xs font-semibold disabled:opacity-50 whitespace-nowrap"
               >
                 <Trash2 size={14} />
                 {t('rooms.delete')}
@@ -287,7 +287,7 @@ export function RoomPage() {
                 {!showDeleteConfirm ? (
                   <button
                     onClick={() => setShowDeleteConfirm(true)}
-                    className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold text-red-500 hover:bg-red-50 transition"
+                    className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold text-red-500 hover:bg-red-50 transition whitespace-nowrap"
                   >
                     <Trash2 size={13} />
                     {t('rooms.delete')}
