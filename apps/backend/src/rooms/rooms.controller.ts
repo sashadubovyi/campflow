@@ -15,10 +15,25 @@ import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
 import { JoinRoomDto } from './dto/join-room.dto';
 import { CurrentUser, AuthenticatedUser } from '../auth/decorators/current-user.decorator';
+import { AiService } from '../ai/ai.service';
+import { AiDraftRoomDto } from './dto/ai-draft-room.dto';
 
 @Controller('rooms')
 export class RoomsController {
-  constructor(private readonly roomsService: RoomsService) {}
+  constructor(
+    private readonly roomsService: RoomsService,
+    private readonly aiService: AiService,
+  ) {}
+
+  @Post('ai-draft')
+  @HttpCode(HttpStatus.OK)
+  async aiDraft(@CurrentUser() user: AuthenticatedUser, @Body() dto: AiDraftRoomDto) {
+    const draft = await this.aiService.generateRoomDraft(user.id, dto.prompt, user.locale ?? 'uk');
+    if (!draft) {
+      return { error: 'AI unavailable' };
+    }
+    return draft;
+  }
 
   @Get()
   listMyRooms(@CurrentUser() user: AuthenticatedUser) {

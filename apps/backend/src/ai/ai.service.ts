@@ -1,6 +1,19 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { GeoResolverService } from './geo-resolver.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { GeminiService } from './gemini.service';
+
+export interface DraftPoll {
+  kind: 'single_choice' | 'multi_choice' | 'location';
+  question: string;
+  options?: string[];
+  geoQuery?: { area: string; category: string; limit: number };
+}
+
+export interface RoomDraft {
+  room: { name: string; description: string | null; eventDate: string | null };
+  polls: DraftPoll[];
+}
 
 interface ChecklistResult {
   categories: { name: string; items: string[] }[];
@@ -19,12 +32,59 @@ export class AiService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly gemini: GeminiService,
+    private readonly geo: GeoResolverService,
   ) {}
 
   /**
    * Генерує чек-лист речей за текстовим описом поїздки.
    * Відповідає мовою інтерфейсу користувача.
    */
+  async generateRoomDraft(userId: string, prompt: string, locale: string): Promise<RoomDraft | null> {
+    const lang = this.gemini.localeName(locale);
+
+    const systemPrompt = `You are an event planning assistant. Analyze the user's request and decompose it into a room (event) and multiple polls.
+
+User request: "${prompt}"
+
+Rules:
+- Decompose into SEPARATE independent polls for each decision
+- For geographic decisions, do NOT invent coordinates — return geoQuery instead
+- geoQuery.category must be one of: cinema, restaurant, bar, cafe, park, museum, hotel, theatre, club, sport
+- eventDate must be ISO date string (YYYY-MM-DD) or null if not mentioned
+- Return ONLY valid JSON, no markdown
+
+Respond in this exact JSON format:
+{
+  "room": { "name": "string", "description": "string or null", "eventDate": "YYYY-MM-DD or null" },
+  "polls": [
+    { "kind": "single_choice", "question": "string", "options": ["opt1", "opt2"] },
+    { "kind": "location", "question": "string", "geoQuery": { "area": "string", "category": "string", "limit": 5 } }
+  ]
+}
+
+Write all text in ${lang} language.`;
+
+    const draft = await this.gemini.generateJson<RoomDraft>(systemPrompt);
+    if (!draft) return null;
+
+    // Збагачуємо location-polls реальними координатами
+    for (const poll of draft.polls) {
+      if (poll.kind === 'location' && poll.geoQuery) {
+        const places = await this.geo.resolve(
+          poll.geoQuery.area,
+          poll.geoQuery.category,
+          poll.geoQuery.limit,
+        );
+        if (places.length > 0) {
+          (poll as any).resolvedPlaces = places;
+        }
+      }
+    }
+
+    await this.logInteraction(userId, 'room_draft', locale, prompt, draft);
+    return draft;
+  }
+
   async generateChecklist(userId: string, description: string, locale: string) {
     const lang = this.gemini.localeName(locale);
 
