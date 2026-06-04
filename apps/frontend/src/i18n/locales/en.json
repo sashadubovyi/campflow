@@ -82,7 +82,9 @@
     "aiGenerating": "Generating...",
     "aiPolls": "{{count}} polls will be created",
     "aiPreviewHint": "Polls will be created automatically after confirmation",
-    "aiCreate": "Create Event"
+    "aiCreate": "Create Event",
+    "delete": "Delete room",
+    "confirmDelete": "Confirm delete"
   },
   "nav": {
     "home": "Rooms",

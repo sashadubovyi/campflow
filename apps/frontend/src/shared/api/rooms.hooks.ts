@@ -49,3 +49,11 @@ export function useCloseRoom(roomId: string) {
     },
   });
 }
+
+export function useArchiveRoom() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (roomId: string) => roomsApi.archive(roomId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['rooms'] }),
+  });
+}

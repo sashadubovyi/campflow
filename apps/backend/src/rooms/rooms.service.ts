@@ -132,7 +132,10 @@ export class RoomsService {
         archivedAt: null,
         members: { some: { userId } },
       },
-      include: {
+      select: {
+        id: true, name: true, description: true, coverUrl: true,
+        inviteCode: true, startsAt: true, endsAt: true, ownerId: true,
+        createdAt: true, updatedAt: true, status: true,
         _count: { select: { members: true } },
         members: {
           where: { role: 'admin' },
@@ -280,6 +283,7 @@ export class RoomsService {
     updatedAt: Date;
     _count: { members: number };
     members?: { user: { id: string; fullName: string; avatarUrl: string | null } }[];
+    status?: string;
   }) {
     return {
       id: room.id,
@@ -294,6 +298,7 @@ export class RoomsService {
       createdAt: room.createdAt,
       updatedAt: room.updatedAt,
       admin: room.members?.[0]?.user ?? null,
+      status: room.status ?? 'open',
     };
   }
 

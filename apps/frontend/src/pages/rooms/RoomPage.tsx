@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ChevronLeft, Users, Info, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { ChevronLeft, Users, Info, ChevronDown, ChevronUp, X, Trash2 } from 'lucide-react';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { useRoom } from '../../shared/api/rooms.hooks';
 import { useAuth } from '../../shared/store/useAuth';
@@ -12,6 +12,7 @@ import { PollsPanel } from './PollsPanel';
 import { InviteButton } from './InviteButton';
 import { CloseRoomModal } from './CloseRoomModal';
 import { usePresence } from '../../shared/api/usePresence';
+import { useArchiveRoom } from '../../shared/api/rooms.hooks';
 import { BackButton } from '../../shared/ui';
 
 export function RoomPage() {
@@ -26,6 +27,8 @@ export function RoomPage() {
   const isDesktop = useMediaQuery('(min-width: 768px)');
   usePresence(id ?? '');
   const [showMembers, setShowMembers] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const archiveRoom = useArchiveRoom();
 
   if (isLoading) {
     return (
@@ -214,11 +217,19 @@ export function RoomPage() {
           style={{ borderTopLeftRadius: '14px' }}
         >
           <div className="border-b border-neutral-100 shrink-0">
-            <div className="px-4 pt-4 pb-3">
-              <h2 className="text-lg font-bold text-neutral-900">{room.name}</h2>
-              {room.description && (
-                <p className="text-sm text-neutral-600 mt-1">{room.description}</p>
-              )}
+            <div className="px-4 pt-3 pb-2 flex items-start justify-between gap-2">
+              <div className="min-w-0 flex-1">
+                <h2 className="text-base font-bold text-neutral-900 truncate">{room.name}</h2>
+                {room.description && (
+                  <p className="text-xs text-neutral-500 mt-0.5 line-clamp-2">{room.description}</p>
+                )}
+              </div>
+              <button
+                onClick={() => setMobileView('chat')}
+                className="p-1.5 text-neutral-400 hover:text-neutral-700 rounded-lg shrink-0"
+              >
+                <X size={16} />
+              </button>
             </div>
             <div className="flex gap-1 bg-neutral-100 mx-2 mb-2 p-1 rounded-xl">
               <div className="flex-1">
@@ -226,6 +237,38 @@ export function RoomPage() {
               </div>
               {closeBtn && <div className="flex-1">{closeBtn}</div>}
             </div>
+            {isAdmin && isClosed && (
+              <div className="px-2 pb-2">
+                {!showDeleteConfirm ? (
+                  <button
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold text-red-500 hover:bg-red-50 transition"
+                  >
+                    <Trash2 size={13} />
+                    {t('rooms.delete')}
+                  </button>
+                ) : (
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => setShowDeleteConfirm(false)}
+                      className="flex-1 py-1.5 rounded-lg text-xs font-semibold text-neutral-500 hover:bg-neutral-100 transition"
+                    >
+                      {t('common.cancel')}
+                    </button>
+                    <button
+                      onClick={async () => {
+                        await archiveRoom.mutateAsync(room.id);
+                        navigate('/rooms');
+                      }}
+                      disabled={archiveRoom.isPending}
+                      className="flex-1 py-1.5 rounded-lg text-xs font-semibold bg-red-500 text-white hover:bg-red-600 transition disabled:opacity-50"
+                    >
+                      {t('rooms.confirmDelete')}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           <div className="flex-1 min-h-0 overflow-hidden">{polls}</div>
         </div>

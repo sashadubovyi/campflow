@@ -64,4 +64,7 @@ export const roomsApi = {
   async close(id: string): Promise<void> {
     await api.post(`/rooms/${id}/close`);
   },
+  async archive(id: string): Promise<void> {
+    await api.delete(`/rooms/${id}`);
+  },
 };

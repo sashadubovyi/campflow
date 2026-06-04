@@ -18,7 +18,7 @@ export function RoomCard({ room, onOpen }: RoomCardProps) {
       className="text-left w-full bg-white rounded-card shadow-card hover:shadow-card-lg transition-all duration-200 overflow-hidden group"
     >
       {/* Рядок адміна */}
-      <div className="flex items-center gap-2.5 px-3 pt-3 pb-2">
+      <div className={`flex items-center gap-2.5 px-3 pt-3 pb-2 ${room.status === 'closed' ? 'bg-rose-100' : ''}`}>
         {room.admin ? (
           <Avatar
             fullName={room.admin.fullName}
@@ -45,7 +45,7 @@ export function RoomCard({ room, onOpen }: RoomCardProps) {
         <img
           src={room.coverUrl ?? '/room-cover-placeholder.jpeg'}
           alt={room.name}
-          className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
+          className={`w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300 ${room.status === 'closed' ? 'grayscale' : ''}`}
         />
 
         {/* Темний градієнт знизу */}
