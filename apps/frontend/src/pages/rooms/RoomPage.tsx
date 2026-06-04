@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft, Users, Info, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { useRoom } from '../../shared/api/rooms.hooks';
 import { useAuth } from '../../shared/store/useAuth';
 import { useMediaQuery } from '../../shared/lib/useMediaQuery';
-import { Drawer } from '../../shared/ui';
 import { MembersPanel } from './MembersPanel';
 import { ChatPanel } from './ChatPanel';
 import { PollsPanel } from './PollsPanel';
@@ -21,7 +21,6 @@ export function RoomPage() {
   const { user } = useAuth();
   const { data: room, isLoading, isError } = useRoom(id ?? '');
   const [showCloseModal, setShowCloseModal] = useState(false);
-  const [membersOpen, setMembersOpen] = useState(false);
   const [mobileView, setMobileView] = useState<'chat' | 'members' | 'info'>('chat');
   const [infoOpen, setInfoOpen] = useState(false);
   const isDesktop = useMediaQuery('(min-width: 768px)');
@@ -67,10 +66,7 @@ export function RoomPage() {
 
   const closeBtn = isAdmin && !isClosed && (
     <button
-      onClick={() => {
-        setInfoOpen(false);
-        setShowCloseModal(true);
-      }}
+      onClick={() => { setInfoOpen(false); setShowCloseModal(true); }}
       title={t('polls.ai.closeRoom')}
       aria-label={t('polls.ai.closeRoom')}
       className="w-full flex items-center justify-center py-1.5 rounded-lg transition bg-danger-gradient text-white"
@@ -92,6 +88,7 @@ export function RoomPage() {
   if (isDesktop) {
     return (
       <div className="h-full flex flex-col bg-neutral-50 overflow-hidden">
+        {/* Хедер */}
         <header className="bg-white border-b border-neutral-100 shrink-0 px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3 min-w-0">
             <BackButton />
@@ -104,27 +101,60 @@ export function RoomPage() {
             {closeBtn && <div className="w-20">{closeBtn}</div>}
           </div>
         </header>
-        <div className="flex-1 grid grid-cols-[1fr_22%] min-h-0 overflow-hidden">
-          <div className="min-h-0 overflow-hidden">{chat}</div>
-          <div className="border-l border-neutral-100 min-h-0 overflow-hidden flex flex-col">
-            <div className={`min-h-0 overflow-hidden ${showMembers ? 'h-1/2' : 'flex-1'}`}>
-              {polls}
-            </div>
-            {showMembers && (
-              <div className="h-1/2 border-t border-neutral-100 min-h-0 overflow-hidden">
-                {members}
+
+        {/* Основний вміст — resizable panels */}
+        <PanelGroup
+          direction="horizontal"
+          autoSaveId="room-h"
+          style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}
+        >
+          {/* Чат */}
+          <Panel defaultSize={78} minSize={50} style={{ minHeight: 0, overflow: 'hidden' }}>
+            {chat}
+          </Panel>
+
+          {/* Вертикальний resizer */}
+          <PanelResizeHandle style={{ width: 4, background: '#f0f0f0', cursor: 'col-resize', transition: 'background 0.15s' }}
+            onDragging={(isDragging) => {
+              const el = document.querySelector('[data-panel-resize-handle-id]') as HTMLElement;
+              if (el) el.style.background = isDragging ? '#2d6ff8' : '#f0f0f0';
+            }}
+          />
+
+          {/* Права панель */}
+          <Panel defaultSize={22} minSize={15} maxSize={45} style={{ minHeight: 0, overflow: 'hidden', borderLeft: '1px solid #f0f2f5' }}>
+            <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+
+              {/* Polls + Members (resizable vertically) */}
+              <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+                {showMembers ? (
+                  <PanelGroup direction="vertical" autoSaveId="room-v" style={{ height: '100%' }}>
+                    <Panel defaultSize={50} minSize={20} style={{ minHeight: 0, overflow: 'hidden' }}>
+                      {polls}
+                    </Panel>
+                    <PanelResizeHandle style={{ height: 4, background: '#f0f0f0', cursor: 'row-resize', transition: 'background 0.15s' }} />
+                    <Panel defaultSize={50} minSize={20} style={{ minHeight: 0, overflow: 'hidden' }}>
+                      {members}
+                    </Panel>
+                  </PanelGroup>
+                ) : (
+                  <div style={{ height: '100%', overflow: 'hidden' }}>{polls}</div>
+                )}
               </div>
-            )}
-            <button
-              onClick={() => setShowMembers((v) => !v)}
-              className="shrink-0 border-t border-neutral-100 py-3.5 text-sm font-semibold text-neutral-500 hover:bg-neutral-50 hover:text-neutral-700 transition flex items-center justify-center gap-1.5"
-            >
-              <Users size={14} />
-              {t('rooms.members')}
-              {showMembers ? <ChevronDown size={13} /> : <ChevronUp size={13} />}
-            </button>
-          </div>
-        </div>
+
+              {/* Toggle members кнопка */}
+              <button
+                onClick={() => setShowMembers((v) => !v)}
+                className="shrink-0 border-t border-neutral-100 py-3.5 text-sm font-semibold text-neutral-500 hover:bg-neutral-50 hover:text-neutral-700 transition flex items-center justify-center gap-1.5"
+              >
+                <Users size={14} />
+                {t('rooms.members')}
+                {showMembers ? <ChevronDown size={13} /> : <ChevronUp size={13} />}
+              </button>
+            </div>
+          </Panel>
+        </PanelGroup>
+
         {modal}
       </div>
     );
@@ -158,18 +188,13 @@ export function RoomPage() {
       </header>
 
       <div className="flex-1 min-h-0 overflow-hidden relative">
-        {/* Чат — завжди рендериться позаду */}
         {chat}
-
-        {/* Затемнення */}
         <div
           onClick={() => setMobileView('chat')}
           className={`absolute inset-0 bg-neutral-900/40 z-10 transition-opacity duration-300 ${
             mobileView !== 'chat' ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
         />
-
-        {/* Учасники */}
         <div
           className={`absolute top-0 right-0 bottom-0 z-20 w-[60vw] bg-white shadow-card-lg flex flex-col transition-transform duration-300 ease-out ${
             mobileView === 'members' ? 'translate-x-0' : 'translate-x-full'
@@ -177,8 +202,6 @@ export function RoomPage() {
         >
           {members}
         </div>
-
-        {/* Інфо + опитування */}
         <div
           className={`absolute top-0 right-0 bottom-0 z-20 w-[60vw] bg-white shadow-card-lg flex flex-col transition-transform duration-300 ease-out ${
             mobileView === 'info' ? 'translate-x-0' : 'translate-x-full'
