@@ -1,125 +1,85 @@
-import { useForm } from 'react-hook-form';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useCreateRoom } from '../../shared/api/rooms.hooks';
+import { Sparkles, Pencil } from 'lucide-react';
+import type { RoomDraft } from '../../shared/api/ai-rooms.api';
+import { ManualRoomForm } from './create-room/ManualRoomForm';
+import { AiRoomInput } from './create-room/AiRoomInput';
+import { AiRoomPreview } from './create-room/AiRoomPreview';
+import { cn } from '../../shared/ui';
 
 interface Props {
   onClose: () => void;
   onCreated: (roomId: string) => void;
 }
 
-interface FormValues {
-  name: string;
-  description?: string;
-  startsAt?: string;
-  endsAt?: string;
-}
+type Mode = 'manual' | 'ai';
+type Step = 'input' | 'preview';
 
 export function CreateRoomModal({ onClose, onCreated }: Props) {
   const { t } = useTranslation();
-  const createRoom = useCreateRoom();
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<FormValues>();
+  const [mode, setMode] = useState<Mode>('manual');
+  const [step, setStep] = useState<Step>('input');
+  const [draft, setDraft] = useState<RoomDraft | null>(null);
 
-  async function onSubmit(values: FormValues) {
-    const room = await createRoom.mutateAsync({
-      name: values.name,
-      description: values.description || undefined,
-      startsAt: values.startsAt || undefined,
-      endsAt: values.endsAt || undefined,
-    });
-    onCreated(room.id);
+  function handleDraft(d: RoomDraft) {
+    setDraft(d);
+    setStep('preview');
+  }
+
+  function switchMode(m: Mode) {
+    setMode(m);
+    setStep('input');
+    setDraft(null);
   }
 
   return (
     <div
-      className="fixed inset-0 bg-neutral-900/40 flex items-center justify-center px-4 z-50"
+      className="fixed inset-0 bg-neutral-900/40 flex items-center justify-center px-4 z-50 backdrop-animate"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 font-body"
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 font-body max-h-[90vh] overflow-y-auto scrollbar-hide modal-animate"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="font-display text-xl font-bold text-neutral-900 mb-4">
           {t('rooms.newRoom')}
         </h2>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-              {t('rooms.roomName')}
-            </label>
-            <input
-              className="w-full px-4 py-2.5 rounded-xl border border-neutral-100 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 outline-none transition"
-              {...register('name', {
-                required: true,
-                minLength: { value: 2, message: '' },
-              })}
-            />
-            {errors.name && <p className="text-red-500 text-xs mt-1">{t('rooms.roomName')}</p>}
-          </div>
+        {/* Перемикач режиму */}
+        <div className="flex gap-2 mb-5 bg-neutral-100 p-1 rounded-xl">
+          <button
+            type="button"
+            onClick={() => switchMode('manual')}
+            className={cn(
+              'flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-semibold transition',
+              mode === 'manual' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500',
+            )}
+          >
+            <Pencil size={14} />
+            {t('rooms.createManual')}
+          </button>
+          <button
+            type="button"
+            onClick={() => switchMode('ai')}
+            className={cn(
+              'flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-semibold transition',
+              mode === 'ai' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500',
+            )}
+          >
+            <Sparkles size={14} />
+            {t('rooms.createAi')}
+          </button>
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-              {t('rooms.descriptionOptional')}
-            </label>
-            <textarea
-              rows={2}
-              className="w-full px-4 py-2.5 rounded-xl border border-neutral-100 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 outline-none transition resize-none"
-              {...register('description')}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-                {t('rooms.startsAt')}
-              </label>
-              <input
-                type="date"
-                placeholder="YYYY-MM-DD"
-                className="w-full px-3 py-2.5 rounded-xl border border-neutral-100 focus:border-accent-500 outline-none transition text-neutral-400 [&::-webkit-calendar-picker-indicator]:opacity-40"
-                {...register('startsAt')}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-                {t('rooms.endsAt')}
-              </label>
-              <input
-                type="date"
-                placeholder="YYYY-MM-DD"
-                className="w-full px-3 py-2.5 rounded-xl border border-neutral-100 focus:border-accent-500 outline-none transition text-neutral-400 [&::-webkit-calendar-picker-indicator]:opacity-40"
-                {...register('endsAt')}
-              />
-            </div>
-          </div>
-
-          {createRoom.isError && (
-            <p className="text-red-500 text-sm bg-red-50 rounded-lg px-3 py-2">
-              {t('common.error')}
-            </p>
-          )}
-
-          <div className="flex gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 border border-neutral-100 text-neutral-700 font-semibold py-2.5 rounded-xl hover:bg-neutral-50 transition"
-            >
-              {t('common.cancel')}
-            </button>
-            <button
-              type="submit"
-              disabled={createRoom.isPending}
-              className="flex-1 bg-brand-gradient hover:bg-brand-gradient-hover disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition"
-            >
-              {createRoom.isPending ? t('common.creating') : t('common.create')}
-            </button>
-          </div>
-        </form>
+        {mode === 'manual' && (
+          <ManualRoomForm onClose={onClose} onCreated={onCreated} />
+        )}
+        {mode === 'ai' && step === 'input' && (
+          <AiRoomInput onClose={onClose} onDraft={handleDraft} />
+        )}
+        {mode === 'ai' && step === 'preview' && draft && (
+          <AiRoomPreview draft={draft} onBack={() => setStep('input')} onCreated={onCreated} />
+        )}
       </div>
     </div>
   );

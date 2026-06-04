@@ -73,7 +73,16 @@
     "transferHint": "If you don't choose — rights go to the oldest member.",
     "searchPlaceholder": "Search rooms...",
     "searchEmpty": "Nothing found for «{{query}}»",
-    "search": "Search"
+    "search": "Search",
+    "createManual": "Manual",
+    "createAi": "With Gemini",
+    "aiPromptLabel": "Describe your event",
+    "aiPromptPlaceholder": "E.g.: going to the cinema with 5 people on Friday, need to choose a movie and cinema in Podil...",
+    "aiGenerate": "Generate",
+    "aiGenerating": "Generating...",
+    "aiPolls": "{{count}} polls will be created",
+    "aiPreviewHint": "Polls will be created automatically after confirmation",
+    "aiCreate": "Create Event"
   },
   "nav": {
     "home": "Rooms",
