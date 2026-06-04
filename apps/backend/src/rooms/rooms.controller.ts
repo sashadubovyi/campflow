@@ -17,6 +17,7 @@ import { JoinRoomDto } from './dto/join-room.dto';
 import { CurrentUser, AuthenticatedUser } from '../auth/decorators/current-user.decorator';
 import { AiService } from '../ai/ai.service';
 import { AiDraftRoomDto } from './dto/ai-draft-room.dto';
+import { AiCommitRoomDto } from './dto/ai-commit-room.dto';
 
 @Controller('rooms')
 export class RoomsController {
@@ -33,6 +34,12 @@ export class RoomsController {
       return { error: 'AI unavailable' };
     }
     return draft;
+  }
+
+  @Post('ai-commit')
+  @HttpCode(HttpStatus.OK)
+  async aiCommit(@CurrentUser() user: AuthenticatedUser, @Body() dto: AiCommitRoomDto) {
+    return this.roomsService.commitRoomDraft(user.id, dto);
   }
 
   @Get()

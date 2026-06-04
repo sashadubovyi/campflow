@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Sparkles } from 'lucide-react';
-import { useCreateRoom } from '../../../shared/api/rooms.hooks';
 import type { RoomDraft } from '../../../shared/api/ai-rooms.api';
+import { useAiRoomCommit } from '../../../shared/api/ai-rooms.hooks';
 import { GradientButton } from '../../../shared/ui/GradientButton';
 import { PollPreviewCard } from './PollPreviewCard';
 
@@ -13,14 +13,10 @@ interface Props {
 
 export function AiRoomPreview({ draft, onBack, onCreated }: Props) {
   const { t } = useTranslation();
-  const createRoom = useCreateRoom();
+  const commit = useAiRoomCommit();
 
   async function handleCommit() {
-    const room = await createRoom.mutateAsync({
-      name: draft.room.name,
-      description: draft.room.description || undefined,
-      startsAt: draft.room.eventDate || undefined,
-    });
+    const room = await commit.mutateAsync(draft);
     onCreated(room.id);
   }
 
@@ -56,7 +52,7 @@ export function AiRoomPreview({ draft, onBack, onCreated }: Props) {
         {t('rooms.aiPreviewHint')}
       </p>
 
-      {createRoom.isError && (
+      {commit.isError && (
         <p className="text-red-500 text-sm bg-red-50 rounded-lg px-3 py-2">{t('common.error')}</p>
       )}
 
@@ -71,7 +67,7 @@ export function AiRoomPreview({ draft, onBack, onCreated }: Props) {
         <div className="flex-1">
           <GradientButton
             onClick={handleCommit}
-            loading={createRoom.isPending}
+            loading={commit.isPending}
             className="w-full py-2.5"
           >
             <Sparkles size={16} />

@@ -8,6 +8,7 @@ import {
 import { customAlphabet } from 'nanoid';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateRoomDto } from './dto/create-room.dto';
+import { AiCommitRoomDto } from './dto/ai-commit-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
 import { PresenceService } from '../presence/presence.service';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -49,6 +50,80 @@ export class RoomsService {
     });
 
     return this.serializeRoom(room);
+  }
+
+  async commitRoomDraft(userId: string, dto: AiCommitRoomDto) {
+    const inviteCode = generateInviteCode();
+
+    return this.prisma.$transaction(async (tx) => {
+      // 1. Створити кімнату
+      const room = await tx.room.create({
+        data: {
+          name: dto.name,
+          description: dto.description ?? null,
+          coverUrl: null,
+          inviteCode,
+          ownerId: userId,
+          startsAt: dto.eventDate ? new Date(dto.eventDate) : null,
+          members: { create: { userId, role: 'admin' } },
+        },
+        include: { _count: { select: { members: true } } },
+      });
+
+      // 2. Створити опитування
+      for (const poll of dto.polls) {
+        if (poll.kind === 'single_choice') {
+          const options = (poll.options ?? []).filter(Boolean);
+          if (options.length < 2) continue;
+          await tx.poll.create({
+            data: {
+              roomId: room.id,
+              authorId: userId,
+              title: poll.question,
+              type: 'single_choice',
+              options: {
+                create: options.map((label) => ({ label })),
+              },
+            },
+          });
+        } else if (poll.kind === 'multi_choice') {
+          const options = (poll.options ?? []).filter(Boolean);
+          if (options.length < 2) continue;
+          await tx.poll.create({
+            data: {
+              roomId: room.id,
+              authorId: userId,
+              title: poll.question,
+              type: 'multi_choice',
+              options: {
+                create: options.map((label) => ({ label })),
+              },
+            },
+          });
+        } else if (poll.kind === 'location') {
+          const places = poll.resolvedPlaces ?? [];
+          if (places.length < 2) continue;
+          await tx.poll.create({
+            data: {
+              roomId: room.id,
+              authorId: userId,
+              title: poll.question,
+              type: 'location',
+              options: {
+                create: places.map((p) => ({
+                  label: p.label,
+                  latitude: p.latitude,
+                  longitude: p.longitude,
+                  address: p.address ?? null,
+                })),
+              },
+            },
+          });
+        }
+      }
+
+      return this.serializeRoom(room);
+    });
   }
 
   async listMyRooms(userId: string) {
