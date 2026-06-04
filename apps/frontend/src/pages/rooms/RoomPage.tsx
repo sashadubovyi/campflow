@@ -69,9 +69,10 @@ export function RoomPage() {
       onClick={() => { setInfoOpen(false); setShowCloseModal(true); }}
       title={t('polls.ai.closeRoom')}
       aria-label={t('polls.ai.closeRoom')}
-      className="w-full flex items-center justify-center py-1.5 rounded-lg transition bg-danger-gradient text-white"
+      className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg transition bg-danger-gradient text-white"
     >
-      <X size={18} />
+      <X size={16} />
+      <span className="text-xs font-semibold">{t('polls.ai.closeRoom')}</span>
     </button>
   );
 
@@ -198,14 +199,14 @@ export function RoomPage() {
           }`}
         />
         <div
-          className={`absolute top-0 right-0 bottom-0 z-20 w-[60vw] bg-white shadow-card-lg flex flex-col transition-transform duration-300 ease-out ${
+          className={`absolute top-2 right-0 bottom-0 z-20 w-[85vw] bg-white shadow-card-lg flex flex-col transition-transform duration-300 ease-out rounded-tl-xl rounded-bl-xl ${
             mobileView === 'members' ? 'translate-x-0' : 'translate-x-full'
           }`}
         >
           {members}
         </div>
         <div
-          className={`absolute top-0 right-0 bottom-0 z-20 w-[60vw] bg-white shadow-card-lg flex flex-col transition-transform duration-300 ease-out ${
+          className={`absolute top-2 right-0 bottom-0 z-20 w-[85vw] bg-white shadow-card-lg flex flex-col transition-transform duration-300 ease-out rounded-tl-xl rounded-bl-xl ${
             mobileView === 'info' ? 'translate-x-0' : 'translate-x-full'
           }`}
         >
