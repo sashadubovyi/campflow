@@ -182,8 +182,9 @@ model Message {
   roomId    String      @map("room_id") @db.Uuid
   authorId  String?     @map("author_id") @db.Uuid
   type      MessageType @default(text)
-  content   String      @db.Text
-  editedAt  DateTime?   @map("edited_at") @db.Timestamptz()
+  content     String      @db.Text
+  isImportant Boolean     @default(false) @map("is_important")
+  editedAt    DateTime?   @map("edited_at") @db.Timestamptz()
   createdAt DateTime    @default(now()) @map("created_at") @db.Timestamptz()
 
   room   Room  @relation(fields: [roomId], references: [id], onDelete: Cascade)
