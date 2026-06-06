@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { LayoutList, Map as MapIcon, Calendar, Heart } from 'lucide-react';
+import { LayoutList, Map as MapIcon, Calendar, Heart, Plus, LogIn, ChevronDown } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import { Calendar as BigCalendar, dateFnsLocalizer, type Event as RBCEvent } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
@@ -10,9 +10,12 @@ import L from 'leaflet';
 import { PageHeader } from '../shared/ui';
 import { useRooms } from '../shared/api/rooms.hooks';
 import { useMapPoints } from '../shared/api/map.hooks';
+import { useMediaQuery } from '../shared/lib/useMediaQuery';
 import type { MapPoint } from '../shared/api/map.api';
 import type { RoomListItem } from '../shared/api/rooms.api';
 import { RoomCard } from './rooms/RoomCard';
+import { CreateRoomModal } from './rooms/CreateRoomModal';
+import { JoinRoomModal } from './rooms/JoinRoomModal';
 
 // ─── Leaflet icon fix (idempotent) ─────────────────────────────────────────
 delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl;
@@ -73,26 +76,70 @@ const localizer = dateFnsLocalizer({
 // ─── View types ────────────────────────────────────────────────────────────
 type EventView = 'list' | 'map' | 'calendar';
 
-function ViewToggle({ view, onChange }: { view: EventView; onChange: (v: EventView) => void }) {
-  const buttons: { id: EventView; icon: typeof LayoutList }[] = [
-    { id: 'list', icon: LayoutList },
-    { id: 'map', icon: MapIcon },
-    { id: 'calendar', icon: Calendar },
-  ];
+const VIEW_ICONS: Record<EventView, typeof LayoutList> = {
+  list: LayoutList,
+  map: MapIcon,
+  calendar: Calendar,
+};
+
+// Desktop: всі 3 кнопки завжди видно
+function DesktopViewToggle({ view, onChange }: { view: EventView; onChange: (v: EventView) => void }) {
+  const buttons: EventView[] = ['list', 'map', 'calendar'];
   return (
     <div className="flex items-center gap-0.5 bg-neutral-100 rounded-xl p-1">
-      {buttons.map(({ id, icon: Icon }) => (
-        <button
-          key={id}
-          onClick={() => onChange(id)}
-          className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${
-            view === id ? 'bg-white text-accent-600 shadow-sm' : 'text-neutral-400 hover:text-neutral-600'
-          }`}
-        >
-          <Icon size={16} />
-        </button>
-      ))}
+      {buttons.map((id) => {
+        const Icon = VIEW_ICONS[id];
+        return (
+          <button
+            key={id}
+            onClick={() => onChange(id)}
+            className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${
+              view === id ? 'bg-white text-accent-600 shadow-sm' : 'text-neutral-400 hover:text-neutral-600'
+            }`}
+          >
+            <Icon size={16} />
+          </button>
+        );
+      })}
     </div>
+  );
+}
+
+// Mobile: одна кнопка, по кліку — 3 окремі
+function MobileViewToggle({ view, onChange }: { view: EventView; onChange: (v: EventView) => void }) {
+  const [expanded, setExpanded] = useState(false);
+  const ActiveIcon = VIEW_ICONS[view];
+  const buttons: EventView[] = ['list', 'map', 'calendar'];
+
+  if (expanded) {
+    return (
+      <div className="flex items-center gap-0.5 bg-neutral-100 rounded-xl p-1">
+        {buttons.map((id) => {
+          const Icon = VIEW_ICONS[id];
+          return (
+            <button
+              key={id}
+              onClick={() => { onChange(id); setExpanded(false); }}
+              className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${
+                view === id ? 'bg-white text-accent-600 shadow-sm' : 'text-neutral-400 hover:text-neutral-600'
+              }`}
+            >
+              <Icon size={16} />
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
+  return (
+    <button
+      onClick={() => setExpanded(true)}
+      className="flex items-center gap-1 bg-neutral-100 rounded-xl px-2 h-9 text-neutral-500"
+    >
+      <ActiveIcon size={16} />
+      <ChevronDown size={13} />
+    </button>
   );
 }
 
@@ -122,7 +169,7 @@ function EventsListView() {
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="max-w-2xl mx-auto px-4 md:px-6 py-4 space-y-3">
+      <div className="px-4 md:px-6 py-4 space-y-3">
         {rooms.map((room) => (
           <RoomCard key={room.id} room={room} onOpen={(id) => navigate(`/rooms/${id}`)} compact />
         ))}
@@ -248,19 +295,62 @@ function EventsCalendarView() {
 // ─── Page ──────────────────────────────────────────────────────────────────
 export function EventsPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [view, setView] = useState<EventView>('list');
+  const [showCreate, setShowCreate] = useState(false);
+  const [showJoin, setShowJoin] = useState(false);
+  const isDesktop = useMediaQuery('(min-width: 768px)');
+
+  const mobileLeft = !isDesktop ? (
+    <div className="flex items-center gap-1">
+      <button
+        onClick={() => setShowCreate(true)}
+        className="w-8 h-8 flex items-center justify-center rounded-xl bg-brand-gradient text-white shadow-fab"
+        title={t('rooms.newRoom')}
+      >
+        <Plus size={16} />
+      </button>
+      <button
+        onClick={() => setShowJoin(true)}
+        className="w-8 h-8 flex items-center justify-center rounded-xl text-neutral-400 hover:bg-neutral-100 transition"
+        title={t('rooms.joinByCode')}
+      >
+        <LogIn size={16} />
+      </button>
+    </div>
+  ) : undefined;
+
+  const headerRight = isDesktop ? (
+    <DesktopViewToggle view={view} onChange={setView} />
+  ) : (
+    <MobileViewToggle view={view} onChange={setView} />
+  );
 
   return (
     <div className="h-full flex flex-col">
       <PageHeader
         title={t('nav.events')}
-        right={<ViewToggle view={view} onChange={setView} />}
+        left={mobileLeft}
+        right={headerRight}
       />
       <div className="flex-1 min-h-0">
         {view === 'list' && <EventsListView />}
         {view === 'map' && <EventsMapView />}
         {view === 'calendar' && <EventsCalendarView />}
       </div>
+
+      {showCreate && (
+        <CreateRoomModal
+          onClose={() => setShowCreate(false)}
+          onCreated={(id) => { setShowCreate(false); navigate(`/rooms/${id}`); }}
+        />
+      )}
+      {showJoin && (
+        <JoinRoomModal
+          onClose={() => setShowJoin(false)}
+          onJoined={(id) => { setShowJoin(false); navigate(`/rooms/${id}`); }}
+        />
+      )}
     </div>
   );
 }
