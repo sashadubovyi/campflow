@@ -104,7 +104,7 @@ export function ProfilePage() {
     <div className="h-full flex flex-col bg-neutral-50 overflow-hidden">
       <PageHeader
         title={profile.isSelf ? t('nav.profile') : profile.fullName}
-        left={<BackButton to="/rooms" />}
+        left={profile.isSelf ? undefined : <BackButton />}
       />
       <div className="flex-1 overflow-y-auto">
       <main className="max-w-2xl mx-auto px-4 md:px-6 py-6 space-y-4">
