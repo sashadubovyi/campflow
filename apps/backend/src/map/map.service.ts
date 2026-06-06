@@ -21,6 +21,7 @@ export class MapService {
       orderBy: { approvedAt: 'desc' },
     });
 
+    console.log(`[MapService] userId=${userId} → found ${items.length} location points`);
     return items.map((item) => ({
       id: item.id,
       roomId: item.roomId,
