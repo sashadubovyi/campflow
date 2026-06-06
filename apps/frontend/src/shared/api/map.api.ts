@@ -8,6 +8,7 @@ export interface MapPoint {
   address: string | null;
   latitude: number;
   longitude: number;
+  approved: boolean;
 }
 
 export const mapApi = {

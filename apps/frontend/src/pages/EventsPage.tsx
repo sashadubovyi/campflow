@@ -29,13 +29,16 @@ function roomColor(roomId: string): string {
   return ROOM_COLORS[Math.abs(hash) % ROOM_COLORS.length]!;
 }
 
-function pointIcon(roomId: string) {
+function pointIcon(roomId: string, approved: boolean) {
   const color = roomColor(roomId);
+  const border = approved ? '#fff' : '#e5e7eb';
+  const size = approved ? 32 : 26;
+  const opacity = approved ? 1 : 0.7;
   return L.divIcon({
     className: '',
-    html: `<div style="background:${color};width:32px;height:32px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px ${color}66;"></div>`,
-    iconSize: [32, 32],
-    iconAnchor: [16, 16],
+    html: `<div style="background:${color};width:${size}px;height:${size}px;border-radius:50%;border:3px solid ${border};box-shadow:0 2px 8px ${color}66;opacity:${opacity};"></div>`,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
   });
 }
 
@@ -156,7 +159,7 @@ function EventsMapView() {
         />
         <FitBounds points={points} />
         {points.map((p) => (
-          <Marker key={p.id} position={[p.latitude, p.longitude]} icon={pointIcon(p.roomId)}>
+          <Marker key={p.id} position={[p.latitude, p.longitude]} icon={pointIcon(p.roomId, p.approved)}>
             <Popup>
               <div style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px' }}>
                 <p style={{ fontWeight: 700, marginBottom: 2 }}>{p.label}</p>
