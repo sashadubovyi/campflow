@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { LayoutList, Map as MapIcon, Calendar, Heart, Plus, Ampersand, ChevronDown } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaflet';
 import { Calendar as BigCalendar, dateFnsLocalizer, type Event as RBCEvent } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { uk, enUS, ru, type Locale } from 'date-fns/locale';
-import L from 'leaflet';
 import { PageHeader } from '../shared/ui';
 import { useRooms } from '../shared/api/rooms.hooks';
 import { useMapPoints } from '../shared/api/map.hooks';
@@ -17,32 +17,11 @@ import { RoomCard } from './rooms/RoomCard';
 import { CreateRoomModal } from './rooms/CreateRoomModal';
 import { JoinRoomModal } from './rooms/JoinRoomModal';
 
-// ─── Leaflet icon fix (idempotent) ─────────────────────────────────────────
-delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-});
-
 const ROOM_COLORS = ['#2d6ff8', '#7c3aed', '#059669', '#d97706', '#dc2626', '#0891b2', '#9333ea', '#16a34a'];
 function roomColor(roomId: string): string {
   let hash = 0;
   for (let i = 0; i < roomId.length; i++) hash = roomId.charCodeAt(i) + ((hash << 5) - hash);
   return ROOM_COLORS[Math.abs(hash) % ROOM_COLORS.length]!;
-}
-
-function pointIcon(roomId: string, approved: boolean) {
-  const color = roomColor(roomId);
-  const border = approved ? '#fff' : '#e5e7eb';
-  const size = approved ? 32 : 26;
-  const opacity = approved ? 1 : 0.7;
-  return L.divIcon({
-    className: '',
-    html: `<div style="background:${color};width:${size}px;height:${size}px;border-radius:50%;border:3px solid ${border};box-shadow:0 2px 8px ${color}66;opacity:${opacity};"></div>`,
-    iconSize: [size, size],
-    iconAnchor: [size / 2, size / 2],
-  });
 }
 
 function FitBounds({ points }: { points: MapPoint[] }) {
@@ -206,7 +185,17 @@ function EventsMapView() {
         />
         <FitBounds points={points} />
         {points.map((p) => (
-          <Marker key={p.id} position={[p.latitude, p.longitude]} icon={pointIcon(p.roomId, p.approved)}>
+          <CircleMarker
+            key={p.id}
+            center={[p.latitude, p.longitude]}
+            radius={p.approved ? 14 : 10}
+            pathOptions={{
+              color: '#fff',
+              weight: 3,
+              fillColor: roomColor(p.roomId),
+              fillOpacity: p.approved ? 1 : 0.65,
+            }}
+          >
             <Popup>
               <div style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px' }}>
                 <p style={{ fontWeight: 700, marginBottom: 2 }}>{p.label}</p>
@@ -216,7 +205,7 @@ function EventsMapView() {
                 )}
               </div>
             </Popup>
-          </Marker>
+          </CircleMarker>
         ))}
       </MapContainer>
     </div>
