@@ -107,7 +107,7 @@ export function ProfileSettingsPage() {
   return (
     <div className="h-full overflow-y-auto bg-neutral-50 font-body pb-20">
       <header className="bg-white border-b border-neutral-100 sticky top-0 z-10">
-        <div className="max-w-2xl mx-auto px-6 py-3 flex items-center justify-between">
+        <div className="max-w-2xl mx-auto px-4 md:px-6 py-3 flex items-center justify-between">
           <BackButton />
           <span className="font-display text-lg font-bold text-neutral-900">
             {t('profile.settings')}
@@ -132,7 +132,7 @@ export function ProfileSettingsPage() {
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-6 py-6 space-y-4">
+      <main className="max-w-2xl mx-auto px-4 md:px-6 py-6 space-y-4">
         <Section title={t('profile.sections.basic')}>
           <Field label={t('profile.fields.name')}>
             <input

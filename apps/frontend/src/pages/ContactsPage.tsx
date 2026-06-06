@@ -19,7 +19,7 @@ export function ContactsPage() {
         left={<BackButton />}
       />
 
-      <main className="max-w-2xl mx-auto px-6 py-6">
+      <main className="max-w-2xl mx-auto px-4 md:px-6 py-6">
         {isLoading && (
           <p className="text-neutral-400 text-center animate-pulse">{t('common.loading')}</p>
         )}

@@ -67,7 +67,7 @@ function EventsListView() {
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="max-w-2xl mx-auto px-4 py-4 space-y-3 pb-4">
+      <div className="max-w-2xl mx-auto px-4 md:px-6 py-4 space-y-3">
         {rooms.map((room) => (
           <RoomCard key={room.id} room={room} onOpen={(id) => navigate(`/rooms/${id}`)} />
         ))}

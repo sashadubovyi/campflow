@@ -42,7 +42,7 @@ export function RoomsPage() {
 
       {/* Поле пошуку */}
       {searchOpen && (
-        <div className="bg-white border-b border-neutral-100 px-4 py-2 flex items-center gap-2">
+        <div className="bg-white border-b border-neutral-100 px-4 md:px-6 py-2 flex items-center gap-2">
           <Search size={16} className="text-neutral-400 shrink-0" />
           <input
             autoFocus
@@ -60,7 +60,7 @@ export function RoomsPage() {
       )}
 
       <div className="flex-1 overflow-y-auto">
-        <main className="max-w-4xl mx-auto px-6 py-6">
+        <main className="max-w-4xl mx-auto px-4 md:px-6 py-6">
           {isLoading && (
             <p className="text-neutral-400 animate-pulse text-center">{t('common.loading')}</p>
           )}

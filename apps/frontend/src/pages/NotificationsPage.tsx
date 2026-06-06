@@ -19,7 +19,7 @@ export function NotificationsPage() {
   return (
     <div className="min-h-screen bg-neutral-50 font-body">
       <header className="bg-white border-b border-neutral-100 sticky top-0 z-10">
-        <div className="max-w-2xl mx-auto px-6 py-3 flex items-center justify-between">
+        <div className="max-w-2xl mx-auto px-4 md:px-6 py-3 flex items-center justify-between">
           <BackButton />
           <span className="font-display text-lg font-bold text-neutral-900">
             {t('notifications.title')}
@@ -38,7 +38,7 @@ export function NotificationsPage() {
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-6 py-6">
+      <main className="max-w-2xl mx-auto px-4 md:px-6 py-6">
         {isLoading && (
           <p className="text-neutral-400 text-center animate-pulse">{t('common.loading')}</p>
         )}
