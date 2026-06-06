@@ -107,7 +107,7 @@ export function ProfilePage() {
         left={profile.isSelf ? undefined : <BackButton />}
       />
       <div className="flex-1 overflow-y-auto">
-      <main className="max-w-2xl mx-auto px-4 md:px-6 py-6 space-y-4">
+      <main className="px-4 md:px-6 py-6 space-y-4">
         {/* Header card */}
         <section className="bg-white rounded-card shadow-card p-6">
           <div className="flex items-center gap-5">

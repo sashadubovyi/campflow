@@ -60,7 +60,7 @@ export function RoomsPage() {
       )}
 
       <div className="flex-1 overflow-y-auto">
-        <main className="max-w-4xl mx-auto px-4 md:px-6 py-6">
+        <main className="px-4 md:px-6 py-6">
           {isLoading && (
             <p className="text-neutral-400 animate-pulse text-center">{t('common.loading')}</p>
           )}
