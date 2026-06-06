@@ -21,6 +21,7 @@ function AvatarUpload({ avatarUrl, fullName }: { avatarUrl: string | null; fullN
     if (!file) return;
     setPreview(URL.createObjectURL(file));
     uploadAvatar.mutate(file, {
+      onSuccess: (data) => console.log('[avatar upload]', data),
       onError: () => setPreview(null),
     });
   }

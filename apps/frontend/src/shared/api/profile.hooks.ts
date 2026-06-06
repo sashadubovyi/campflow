@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { profileApi, type UpdateProfilePayload } from './profile.api';
+import { useAuthStore } from '../store/auth.store';
 
 export function useProfile(username: string) {
   return useQuery({
@@ -31,7 +32,11 @@ export function useUploadAvatar() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (file: File) => profileApi.uploadAvatar(file),
-    onSuccess: () => {
+    onSuccess: (data) => {
+      const currentUser = useAuthStore.getState().user;
+      if (currentUser) {
+        useAuthStore.getState().setUser({ ...currentUser, avatarUrl: data.avatarUrl });
+      }
       qc.invalidateQueries({ queryKey: ['myProfile'] });
       qc.invalidateQueries({ queryKey: ['profile'] });
     },
