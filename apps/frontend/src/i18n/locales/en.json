@@ -108,6 +108,11 @@
     "retry": "Retry",
     "send": "Send"
   },
+  "events": {
+    "emptyList": "No events yet",
+    "emptyMap": "No events on map",
+    "emptyCalendar": "No scheduled events"
+  },
   "polls": {
     "title": "Polls",
     "createNew": "+ Create",
