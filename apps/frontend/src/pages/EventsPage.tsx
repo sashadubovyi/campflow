@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LayoutList, Map, Calendar, Heart } from 'lucide-react';
+import { LayoutList, Map as MapIcon, Calendar, Heart } from 'lucide-react';
 import { PageHeader } from '../shared/ui';
 
 type EventView = 'list' | 'map' | 'calendar';
@@ -14,7 +14,7 @@ function ViewToggle({
 }) {
   const buttons: { id: EventView; icon: typeof LayoutList }[] = [
     { id: 'list', icon: LayoutList },
-    { id: 'map', icon: Map },
+    { id: 'map', icon: MapIcon },
     { id: 'calendar', icon: Calendar },
   ];
   return (
@@ -56,15 +56,9 @@ export function EventsPage() {
         right={<ViewToggle view={view} onChange={setView} />}
       />
       <div className="flex-1 min-h-0 overflow-hidden">
-        {view === 'list' && (
-          <EmptyView label={t('events.emptyList') ?? 'Поки немає подій'} />
-        )}
-        {view === 'map' && (
-          <EmptyView label={t('events.emptyMap') ?? 'Немає подій на карті'} />
-        )}
-        {view === 'calendar' && (
-          <EmptyView label={t('events.emptyCalendar') ?? 'Немає запланованих подій'} />
-        )}
+        {view === 'list' && <EmptyView label={t('events.emptyList')} />}
+        {view === 'map' && <EmptyView label={t('events.emptyMap')} />}
+        {view === 'calendar' && <EmptyView label={t('events.emptyCalendar')} />}
       </div>
     </div>
   );
