@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Plus, Home, Users, Calendar, Settings, LogOut, Bell } from 'lucide-react';
+import { Plus, Home, Users, Settings, LogOut, Bell } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../shared/store/useAuth';
 import { useUnreadCount } from '../shared/api/notifications.hooks';
@@ -134,9 +134,6 @@ export function DesktopNav({ onCreateRoom }: Props) {
       </NavLink>
       <NavLink to="/contacts" className={itemClass} title="Друзі">
         <Users size={20} />
-      </NavLink>
-      <NavLink to="/calendar" className={itemClass} title="Календар">
-        <Calendar size={20} />
       </NavLink>
 
       {/* Низ: Налаштування → Мова → Вийти */}
