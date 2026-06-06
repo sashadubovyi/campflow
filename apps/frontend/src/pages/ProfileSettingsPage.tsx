@@ -76,7 +76,7 @@ export function ProfileSettingsPage() {
   }
 
   async function handleSave() {
-    await update.mutateAsync({
+    const updated = await update.mutateAsync({
       fullName: form.fullName,
       phone: form.phone,
       bio: form.bio,
@@ -97,8 +97,9 @@ export function ProfileSettingsPage() {
       facebookVisibility: form.facebookVisibility,
       inviteFrom: form.inviteFrom,
     });
+    setForm(updated);
     setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    setTimeout(() => setSaved(false), 2500);
   }
 
   const birthDateInput = form.birthDate ? form.birthDate.slice(0, 10) : '';
@@ -111,17 +112,23 @@ export function ProfileSettingsPage() {
           <span className="font-display text-lg font-bold text-neutral-900">
             {t('profile.settings')}
           </span>
-          <button
-            onClick={handleSave}
-            disabled={!isDirty || update.isPending}
-            className={`text-sm font-semibold px-4 py-1.5 rounded-xl transition ${
-              isDirty && !update.isPending
-                ? 'bg-brand-gradient text-white'
-                : 'bg-neutral-100 text-neutral-400 cursor-default'
-            }`}
-          >
-            {update.isPending ? t('common.saving') : t('common.save')}
-          </button>
+          {saved ? (
+            <span className="flex items-center gap-1.5 text-sm font-semibold text-green-600 px-4 py-1.5 rounded-xl bg-green-50 animate-fade-in">
+              {t('common.saved')}
+            </span>
+          ) : (
+            <button
+              onClick={handleSave}
+              disabled={!isDirty || update.isPending}
+              className={`text-sm font-semibold px-4 py-1.5 rounded-xl transition ${
+                isDirty && !update.isPending
+                  ? 'bg-brand-gradient text-white'
+                  : 'bg-neutral-100 text-neutral-400 cursor-default'
+              }`}
+            >
+              {update.isPending ? t('common.saving') : t('common.save')}
+            </button>
+          )}
         </div>
       </header>
 
