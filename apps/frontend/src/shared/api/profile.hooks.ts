@@ -22,8 +22,18 @@ export function useUpdateMyProfile() {
     mutationFn: (payload: UpdateProfilePayload) => profileApi.updateMyProfile(payload),
     onSuccess: (data) => {
       qc.setQueryData(['myProfile'], data);
-      // інвалідуємо публічний профіль теж, щоб одразу побачити зміни на /u/:username
       qc.invalidateQueries({ queryKey: ['profile', data.username] });
+    },
+  });
+}
+
+export function useUploadAvatar() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (file: File) => profileApi.uploadAvatar(file),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['myProfile'] });
+      qc.invalidateQueries({ queryKey: ['profile'] });
     },
   });
 }

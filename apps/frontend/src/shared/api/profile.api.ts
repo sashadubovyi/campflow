@@ -88,4 +88,13 @@ export const profileApi = {
     const { data } = await api.patch<MyProfile>('/users/me', payload);
     return data;
   },
+
+  async uploadAvatar(file: File): Promise<{ avatarUrl: string }> {
+    const form = new FormData();
+    form.append('avatar', file);
+    const { data } = await api.post<{ avatarUrl: string }>('/users/me/avatar', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return data;
+  },
 };
