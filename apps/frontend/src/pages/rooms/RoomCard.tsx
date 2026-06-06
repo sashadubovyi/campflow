@@ -7,9 +7,10 @@ import { relativeTime } from '../../shared/lib/relativeTime';
 interface RoomCardProps {
   room: RoomListItem;
   onOpen: (id: string) => void;
+  compact?: boolean;
 }
 
-export function RoomCard({ room, onOpen }: RoomCardProps) {
+export function RoomCard({ room, onOpen, compact = false }: RoomCardProps) {
   const { i18n } = useTranslation();
 
   return (
@@ -41,7 +42,7 @@ export function RoomCard({ room, onOpen }: RoomCardProps) {
       </div>
 
       {/* Обкладинка */}
-      <div className="relative w-full aspect-[16/7] overflow-hidden">
+      <div className={`relative w-full overflow-hidden ${compact ? 'aspect-[32/9]' : 'aspect-[16/7]'}`}>
         <img
           src={room.coverUrl ?? '/room-cover-placeholder.jpeg'}
           alt={room.name}
