@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Plus, Home, Users, Heart, Settings, LogOut, Bell, LogIn } from 'lucide-react';
+import { Plus, Home, Users, Heart, Settings, LogOut, Bell, Ampersand } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../shared/store/useAuth';
 import { useUnreadCount } from '../shared/api/notifications.hooks';
@@ -126,7 +126,7 @@ export function DesktopNav({ onCreateRoom }: Props) {
           title="Приєднатись за кодом"
           className="flex items-center justify-center w-11 h-11 rounded-xl text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 transition-colors"
         >
-          <LogIn size={20} />
+          <Ampersand size={20} />
         </button>
 
         <NavLink to="/rooms" className={itemClass} title="Кімнати">

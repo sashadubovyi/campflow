@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { LayoutList, Map as MapIcon, Calendar, Heart, Plus, LogIn, ChevronDown } from 'lucide-react';
+import { LayoutList, Map as MapIcon, Calendar, Heart, Plus, Ampersand, ChevronDown } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import { Calendar as BigCalendar, dateFnsLocalizer, type Event as RBCEvent } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
@@ -315,7 +315,7 @@ export function EventsPage() {
         className="w-8 h-8 flex items-center justify-center rounded-xl text-neutral-400 hover:bg-neutral-100 transition"
         title={t('rooms.joinByCode')}
       >
-        <LogIn size={16} />
+        <Ampersand size={16} />
       </button>
     </div>
   ) : undefined;
