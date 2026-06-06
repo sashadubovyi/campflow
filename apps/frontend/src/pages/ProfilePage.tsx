@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -14,6 +15,8 @@ import {
   ShieldCheck,
   LogOut,
   ChevronRight,
+  Eye,
+  X,
   type LucideIcon,
 } from 'lucide-react';
 import { useProfile } from '../shared/api/profile.hooks';
@@ -94,6 +97,7 @@ export function ProfilePage() {
   }
 
   const age = calculateAge(profile.birthDate);
+  const [showPreview, setShowPreview] = useState(false);
 
   async function handleLogout() {
     await logout();
@@ -141,6 +145,11 @@ export function ProfilePage() {
             {/* Hub menu */}
             <section className="bg-white rounded-card shadow-card overflow-hidden divide-y divide-neutral-100">
               <MenuRow
+                icon={<Eye size={19} />}
+                label={t('profile.menu.viewPublic')}
+                onClick={() => setShowPreview(true)}
+              />
+              <MenuRow
                 icon={<Pencil size={19} />}
                 label={t('profile.menu.personal')}
                 onClick={() => navigate('/settings/profile')}
@@ -177,6 +186,45 @@ export function ProfilePage() {
         )}
       </main>
       </div>
+
+      {/* Модалка публічного профілю */}
+      {showPreview && profile.isSelf && (
+        <div className="fixed inset-0 z-50 bg-neutral-900/50 flex flex-col">
+          <div className="bg-white flex-1 overflow-y-auto relative">
+            <div className="sticky top-0 z-10 bg-white border-b border-neutral-100 px-4 md:px-6 h-14 flex items-center justify-between">
+              <span className="font-display text-base font-bold text-neutral-900">
+                {t('profile.menu.viewPublic')}
+              </span>
+              <button
+                onClick={() => setShowPreview(false)}
+                className="p-2 rounded-xl text-neutral-400 hover:bg-neutral-100 transition"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="px-4 md:px-6 py-6 space-y-4">
+              <section className="bg-white rounded-card shadow-card p-6 border border-neutral-100">
+                <div className="flex items-center gap-5">
+                  <RingAvatar fullName={profile.fullName} avatarUrl={profile.avatarUrl} />
+                  <div className="flex-1 min-w-0">
+                    <h1 className="text-2xl font-bold text-neutral-900 truncate">{profile.fullName}</h1>
+                    <p className="text-neutral-400 text-sm">@{profile.username}</p>
+                  </div>
+                </div>
+              </section>
+              <PublicDetails profile={profile} age={age} />
+              <div className="pb-4">
+                <button
+                  onClick={() => { setShowPreview(false); navigate('/settings/profile'); }}
+                  className="w-full bg-brand-gradient hover:bg-brand-gradient-hover text-white font-semibold py-3 rounded-xl transition text-sm"
+                >
+                  {t('profile.menu.personal')}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

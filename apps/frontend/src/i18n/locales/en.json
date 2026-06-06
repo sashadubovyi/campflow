@@ -188,6 +188,7 @@
     "edit": "✎ Edit profile",
     "editShort": "Edit profile",
     "menu": {
+      "viewPublic": "My profile",
       "personal": "Personal info",
       "contacts": "Contacts",
       "calendar": "Calendar",
