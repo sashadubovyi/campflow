@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { RoomsService } from '../rooms/rooms.service';
 
@@ -70,6 +70,25 @@ export class ChatService {
       nextCursor,
       hasMore,
     };
+  }
+
+  async deleteMessage(userId: string, messageId: string, roomId: string) {
+    const message = await this.prisma.message.findUnique({ where: { id: messageId } });
+    if (!message || message.roomId !== roomId) throw new NotFoundException('Message not found');
+    if (message.authorId !== userId) throw new UnauthorizedException('Cannot delete others\' messages');
+    await this.prisma.message.delete({ where: { id: messageId } });
+    return { messageId };
+  }
+
+  async toggleImportant(userId: string, messageId: string, roomId: string) {
+    await this.assertMembership(userId, roomId);
+    const message = await this.prisma.message.findUnique({ where: { id: messageId } });
+    if (!message || message.roomId !== roomId) throw new NotFoundException('Message not found');
+    return this.prisma.message.update({
+      where: { id: messageId },
+      data: { isImportant: !message.isImportant },
+      include: { author: { select: { id: true, fullName: true, avatarUrl: true } } },
+    });
   }
 
   async touchLastSeen(userId: string, roomId: string) {

@@ -14,6 +14,8 @@ import { JwtService } from '@nestjs/jwt';
 import { Server, Socket } from 'socket.io';
 import { ChatService } from './chat.service';
 import { SendMessageDto } from './dto/send-message.dto';
+import { DeleteMessageDto } from './dto/delete-message.dto';
+import { ToggleImportantDto } from './dto/toggle-important.dto';
 import type { JwtPayload } from '../auth/strategies/jwt.strategy';
 import { PresenceService } from '../presence/presence.service';
 
@@ -131,6 +133,30 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     this.server.to(this.roomChannel(dto.roomId)).emit('message:new', message);
     return { ok: true, id: message.id };
+  }
+
+  @SubscribeMessage('message:delete')
+  async onMessageDelete(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() dto: DeleteMessageDto,
+  ) {
+    const result = await this.chatService.deleteMessage(client.data.userId, dto.messageId, dto.roomId);
+    this.server.to(this.roomChannel(dto.roomId)).emit('message:deleted', result);
+    return { ok: true };
+  }
+
+  @SubscribeMessage('message:toggleImportant')
+  async onToggleImportant(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() dto: ToggleImportantDto,
+  ) {
+    const message = await this.chatService.toggleImportant(
+      client.data.userId,
+      dto.messageId,
+      dto.roomId,
+    );
+    this.server.to(this.roomChannel(dto.roomId)).emit('message:updated', message);
+    return { ok: true };
   }
 
   @SubscribeMessage('typing:start')
