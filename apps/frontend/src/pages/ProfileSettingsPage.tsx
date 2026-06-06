@@ -1,10 +1,79 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useMyProfile, useUpdateMyProfile } from '../shared/api/profile.hooks';
+import { useMyProfile, useUpdateMyProfile, useUploadAvatar } from '../shared/api/profile.hooks';
 import type { Visibility, Gender, MyProfile } from '../shared/api/profile.api';
 import { Mail, Phone, Send, MessageCircle, Camera, Users, type LucideIcon } from 'lucide-react';
 import { BackButton } from '../shared/ui';
+
+function initials(name: string) {
+  const p = name.trim().split(/\s+/);
+  return (p.length >= 2 ? p[0]![0]! + p[1]![0]! : name.slice(0, 2)).toUpperCase();
+}
+
+function AvatarUpload({ avatarUrl, fullName }: { avatarUrl: string | null; fullName: string }) {
+  const uploadAvatar = useUploadAvatar();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+
+  function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPreview(URL.createObjectURL(file));
+    uploadAvatar.mutate(file, {
+      onError: () => setPreview(null),
+    });
+  }
+
+  const src = preview ?? avatarUrl;
+
+  return (
+    <div className="flex flex-col items-center gap-3 py-2">
+      <button
+        type="button"
+        onClick={() => fileRef.current?.click()}
+        className="relative group rounded-full shrink-0"
+        style={{ width: 88, height: 88 }}
+        title="Змінити фото"
+      >
+        {/* Ring */}
+        <span className="absolute inset-0 rounded-full bg-[conic-gradient(from_0deg,#2d6ff8,#8eb5ff,#22c55e,#2d6ff8)] animate-[spin_4s_linear_infinite]" />
+        {/* Avatar */}
+        <span className="absolute inset-[3px] rounded-full overflow-hidden bg-neutral-100 flex items-center justify-center text-2xl font-semibold text-neutral-600">
+          {src ? (
+            <img src={src} alt="" className="w-full h-full object-cover" />
+          ) : (
+            initials(fullName)
+          )}
+        </span>
+        {/* Desktop overlay on hover */}
+        <span className="absolute inset-[3px] rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity md:flex hidden">
+          <Camera size={22} className="text-white" />
+        </span>
+        {/* Mobile — always visible camera dot */}
+        <span className="absolute bottom-0 right-0 w-7 h-7 bg-accent-500 rounded-full border-2 border-white flex items-center justify-center md:hidden">
+          <Camera size={14} className="text-white" />
+        </span>
+        {/* Loading */}
+        {uploadAvatar.isPending && (
+          <span className="absolute inset-[3px] rounded-full bg-black/50 flex items-center justify-center">
+            <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          </span>
+        )}
+      </button>
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        className="hidden"
+        onChange={handleFile}
+      />
+      <p className="text-xs text-neutral-400">
+        {uploadAvatar.isPending ? 'Завантаження…' : 'Натисніть на фото щоб змінити'}
+      </p>
+    </div>
+  );
+}
 
 const HOBBY_GRADIENTS = [
   'linear-gradient(135deg,#598dff,#2d6ff8)', // синій
@@ -133,6 +202,7 @@ export function ProfileSettingsPage() {
       </header>
 
       <main className="max-w-2xl mx-auto px-4 md:px-6 py-6 space-y-4">
+        <AvatarUpload avatarUrl={profile.avatarUrl} fullName={profile.fullName ?? ''} />
         <Section title={t('profile.sections.basic')}>
           <Field label={t('profile.fields.name')}>
             <input
