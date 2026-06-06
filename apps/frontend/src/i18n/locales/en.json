@@ -99,7 +99,13 @@
     "typingMultiple": "Several people are typing…",
     "noMessages": "It's quiet here. Say hi first!",
     "noRoom": "No rooms to chat in yet",
-    "openRoom": "Open room"
+    "openRoom": "Open room",
+    "markImportant": "Mark as important",
+    "unmarkImportant": "Unmark",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this message?",
+    "retry": "Retry",
+    "send": "Send"
   },
   "polls": {
     "title": "Polls",
