@@ -85,7 +85,9 @@
     "aiCreate": "Create Event",
     "delete": "Delete room",
     "confirmDelete": "Confirm delete",
-    "deleteConfirmText": "Are you sure you want to delete «{{name}}»? This cannot be undone."
+    "deleteConfirmText": "Are you sure you want to delete «{{name}}»? This cannot be undone.",
+    "editRoom": "Edit",
+    "editRoomTitle": "Edit room"
   },
   "nav": {
     "home": "Rooms",

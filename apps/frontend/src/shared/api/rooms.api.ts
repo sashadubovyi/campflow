@@ -44,6 +44,13 @@ export interface CreateRoomPayload {
   endsAt?: string;
 }
 
+export interface UpdateRoomPayload {
+  name?: string;
+  description?: string;
+  startsAt?: string | null;
+  endsAt?: string | null;
+}
+
 export const roomsApi = {
   async list(): Promise<RoomListItem[]> {
     const { data } = await api.get<RoomListItem[]>('/rooms');
@@ -66,5 +73,9 @@ export const roomsApi = {
   },
   async archive(id: string): Promise<void> {
     await api.delete(`/rooms/${id}`);
+  },
+  async update(id: string, payload: UpdateRoomPayload): Promise<RoomDetails> {
+    const { data } = await api.patch<RoomDetails>(`/rooms/${id}`, payload);
+    return data;
   },
 };

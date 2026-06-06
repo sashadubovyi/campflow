@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ChevronLeft, Users, Info, ChevronDown, ChevronUp, X, Trash2 } from 'lucide-react';
+import { ChevronLeft, Users, Info, ChevronDown, ChevronUp, X, Trash2, Pencil } from 'lucide-react';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { useRoom } from '../../shared/api/rooms.hooks';
 import { useAuth } from '../../shared/store/useAuth';
@@ -11,6 +11,7 @@ import { ChatPanel } from './ChatPanel';
 import { PollsPanel } from './PollsPanel';
 import { InviteButton } from './InviteButton';
 import { CloseRoomModal } from './CloseRoomModal';
+import { EditRoomModal } from './EditRoomModal';
 import { usePresence } from '../../shared/api/usePresence';
 import { useArchiveRoom } from '../../shared/api/rooms.hooks';
 import { BackButton, Modal } from '../../shared/ui';
@@ -22,6 +23,7 @@ export function RoomPage() {
   const { user } = useAuth();
   const { data: room, isLoading, isError } = useRoom(id ?? '');
   const [showCloseModal, setShowCloseModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [mobileView, setMobileView] = useState<'chat' | 'members' | 'info'>('chat');
   const [infoOpen, setInfoOpen] = useState(false);
   const isDesktop = useMediaQuery('(min-width: 768px)');
@@ -101,6 +103,15 @@ export function RoomPage() {
             {room.name}
           </h1>
           <div className="flex items-center justify-end gap-1.5 shrink-0">
+            {isAdmin && !isClosed && (
+              <button
+                onClick={() => setShowEditModal(true)}
+                title={t('rooms.editRoom')}
+                className="flex items-center justify-center w-9 h-9 rounded-xl text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700 transition"
+              >
+                <Pencil size={16} />
+              </button>
+            )}
             <InviteButton roomId={room.id} inviteCode={room.inviteCode} />
             {closeBtn}
             {isAdmin && isClosed && (
@@ -170,6 +181,9 @@ export function RoomPage() {
         </PanelGroup>
 
         {modal}
+        {showEditModal && (
+          <EditRoomModal room={room} onClose={() => setShowEditModal(false)} />
+        )}
         <Modal
           open={showDeleteConfirm}
           onClose={() => setShowDeleteConfirm(false)}
@@ -280,6 +294,15 @@ export function RoomPage() {
               <div className="flex-1">
                 <InviteButton roomId={room.id} inviteCode={room.inviteCode} />
               </div>
+              {isAdmin && !isClosed && (
+                <button
+                  onClick={() => { setMobileView('chat'); setShowEditModal(true); }}
+                  className="flex items-center justify-center gap-1 px-3 py-2 rounded-xl text-neutral-500 hover:bg-white transition text-xs font-semibold"
+                >
+                  <Pencil size={13} />
+                  {t('rooms.editRoom')}
+                </button>
+              )}
               {closeBtn && <div className="flex-1">{closeBtn}</div>}
             </div>
             {isAdmin && isClosed && (
@@ -320,6 +343,9 @@ export function RoomPage() {
       </div>
 
       {modal}
+      {showEditModal && (
+        <EditRoomModal room={room} onClose={() => setShowEditModal(false)} />
+      )}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { roomsApi, type CreateRoomPayload } from './rooms.api';
+import { roomsApi, type CreateRoomPayload, type UpdateRoomPayload } from './rooms.api';
 
 export function useRooms() {
   return useQuery({
@@ -55,5 +55,16 @@ export function useArchiveRoom() {
   return useMutation({
     mutationFn: (roomId: string) => roomsApi.archive(roomId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['rooms'] }),
+  });
+}
+
+export function useUpdateRoom(roomId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: UpdateRoomPayload) => roomsApi.update(roomId, payload),
+    onSuccess: (updated) => {
+      qc.setQueryData(['room', roomId], updated);
+      qc.invalidateQueries({ queryKey: ['rooms'] });
+    },
   });
 }
