@@ -73,14 +73,22 @@ export function ChatPanel({ roomId, roomName }: Props) {
           </div>
         )}
 
-        {messages.map((m) => (
-          <MessageBubble
-            key={m.id}
-            message={m}
-            isOwn={m.authorId === user?.id}
-            locale={i18n.language}
-          />
-        ))}
+        {messages.map((m, i) => {
+          const prev = messages[i - 1];
+          const showAvatar =
+            m.type !== 'system' &&
+            m.authorId !== user?.id &&
+            (prev === undefined || prev.type === 'system' || prev.authorId !== m.authorId);
+          return (
+            <MessageBubble
+              key={m.id}
+              message={m}
+              isOwn={m.authorId === user?.id}
+              showAvatar={showAvatar}
+              locale={i18n.language}
+            />
+          );
+        })}
 
         <div ref={bottomRef} />
       </div>
@@ -119,10 +127,12 @@ export function ChatPanel({ roomId, roomName }: Props) {
 function MessageBubble({
   message,
   isOwn,
+  showAvatar,
   locale,
 }: {
   message: Message;
   isOwn: boolean;
+  showAvatar: boolean;
   locale: string;
 }) {
   if (message.type === 'system') {
@@ -138,15 +148,19 @@ function MessageBubble({
   return (
     <div className={`flex gap-2.5 ${isOwn ? 'flex-row-reverse' : ''}`}>
       {!isOwn && (
-        <Avatar
-          fullName={message.author?.fullName ?? '?'}
-          avatarUrl={message.author?.avatarUrl}
-          size={32}
-        />
+        showAvatar ? (
+          <Avatar
+            fullName={message.author?.fullName ?? '?'}
+            avatarUrl={message.author?.avatarUrl}
+            size={32}
+          />
+        ) : (
+          <div className="shrink-0" style={{ width: 32 }} />
+        )
       )}
       <div className={`max-w-[75%] flex flex-col ${isOwn ? 'items-end' : 'items-start'}`}>
         <div className="flex items-baseline gap-2 px-1">
-          {!isOwn && (
+          {!isOwn && showAvatar && (
             <span className="text-xs font-medium text-neutral-700">{message.author?.fullName}</span>
           )}
           <span className="text-[10px] text-neutral-400">
