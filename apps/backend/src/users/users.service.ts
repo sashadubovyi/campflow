@@ -78,6 +78,14 @@ export class UsersService {
     return this.getProfile(user.id);
   }
 
+  async updateAvatar(userId: string, avatarUrl: string) {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { avatarUrl },
+    });
+    return { avatarUrl };
+  }
+
   // === Пошук юзера за username (для майбутніх запрошень) ===
   async lookupByUsername(username: string, viewerId: string) {
     if (!username || username.length < 2) {
