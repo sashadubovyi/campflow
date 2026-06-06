@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
 import { chatApi, type Message } from './chat.api';
 import { getSocket } from '../socket/socket';
+import { useAuth } from '../store/useAuth';
 
 export function useRoomChat(roomId: string) {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
   const [connected, setConnected] = useState(false);
 
-  // Завантаження історії
   useEffect(() => {
     let cancelled = false;
     setIsLoading(true);
@@ -25,7 +26,6 @@ export function useRoomChat(roomId: string) {
     };
   }, [roomId]);
 
-  // Підключення до socket + підписки
   useEffect(() => {
     const socket = getSocket();
 
@@ -42,6 +42,15 @@ export function useRoomChat(roomId: string) {
       });
     }
 
+    function onMessageDeleted({ messageId }: { messageId: string }) {
+      setMessages((prev) => prev.filter((m) => m.id !== messageId));
+    }
+
+    function onMessageUpdated(msg: Message) {
+      if (msg.roomId !== roomId) return;
+      setMessages((prev) => prev.map((m) => (m.id === msg.id ? { ...m, ...msg } : m)));
+    }
+
     function onTypingStart(e: { userId: string }) {
       setTypingUsers((prev) => new Set(prev).add(e.userId));
     }
@@ -54,11 +63,11 @@ export function useRoomChat(roomId: string) {
       });
     }
 
-    if (socket.connected) {
-      onConnect();
-    }
+    if (socket.connected) onConnect();
     socket.on('connect', onConnect);
     socket.on('message:new', onNewMessage);
+    socket.on('message:deleted', onMessageDeleted);
+    socket.on('message:updated', onMessageUpdated);
     socket.on('typing:start', onTypingStart);
     socket.on('typing:stop', onTypingStop);
 
@@ -66,26 +75,78 @@ export function useRoomChat(roomId: string) {
       socket.emit('room:leave', { roomId });
       socket.off('connect', onConnect);
       socket.off('message:new', onNewMessage);
+      socket.off('message:deleted', onMessageDeleted);
+      socket.off('message:updated', onMessageUpdated);
       socket.off('typing:start', onTypingStart);
       socket.off('typing:stop', onTypingStop);
     };
   }, [roomId]);
 
   const sendMessage = useCallback(
-    (content: string) => {
+    (content: string, retryId?: string): string => {
       const socket = getSocket();
-      socket.emit('message:send', { roomId, content });
+      const tempId = retryId ?? `pending-${Date.now()}-${Math.random()}`;
+
+      if (!retryId) {
+        const optimistic: Message = {
+          id: tempId,
+          roomId,
+          authorId: user?.id ?? null,
+          type: 'text',
+          content,
+          isImportant: false,
+          createdAt: new Date().toISOString(),
+          author: user
+            ? { id: user.id, fullName: user.fullName, avatarUrl: user.avatarUrl }
+            : null,
+          _status: 'sending',
+        };
+        setMessages((prev) => [...prev, optimistic]);
+      } else {
+        setMessages((prev) =>
+          prev.map((m) => (m.id === retryId ? { ...m, _status: 'sending' as const } : m)),
+        );
+      }
+
+      socket.timeout(6000).emit(
+        'message:send',
+        { roomId, content },
+        (err: Error | null, ack: { ok: boolean; id: string } | undefined) => {
+          if (err || !ack?.ok) {
+            setMessages((prev) =>
+              prev.map((m) => (m.id === tempId ? { ...m, _status: 'failed' as const } : m)),
+            );
+          } else {
+            setMessages((prev) => prev.filter((m) => m.id !== tempId));
+          }
+        },
+      );
+
+      return tempId;
+    },
+    [roomId, user],
+  );
+
+  const deleteMessage = useCallback(
+    (messageId: string) => {
+      getSocket().emit('message:delete', { messageId, roomId });
+    },
+    [roomId],
+  );
+
+  const toggleImportant = useCallback(
+    (messageId: string) => {
+      getSocket().emit('message:toggleImportant', { messageId, roomId });
     },
     [roomId],
   );
 
   const emitTyping = useCallback(
     (typing: boolean) => {
-      const socket = getSocket();
-      socket.emit(typing ? 'typing:start' : 'typing:stop', { roomId });
+      getSocket().emit(typing ? 'typing:start' : 'typing:stop', { roomId });
     },
     [roomId],
   );
 
-  return { messages, isLoading, typingUsers, connected, sendMessage, emitTyping };
+  return { messages, isLoading, typingUsers, connected, sendMessage, deleteMessage, toggleImportant, emitTyping };
 }

@@ -6,12 +6,15 @@ export interface Message {
   authorId: string | null;
   type: 'text' | 'system';
   content: string;
+  isImportant: boolean;
   createdAt: string;
   author: {
     id: string;
     fullName: string;
     avatarUrl: string | null;
   } | null;
+  /** Local-only optimistic send status */
+  _status?: 'sending' | 'failed';
 }
 
 export interface MessagesPage {
