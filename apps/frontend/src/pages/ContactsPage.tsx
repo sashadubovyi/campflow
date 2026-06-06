@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useContacts, useRemoveContact } from '../shared/api/contacts.hooks';
 import { Avatar } from '../shared/ui/Avatar';
 import { relativeTime } from '../shared/lib/relativeTime';
-import { BackButton } from '../shared/ui';
+import { BackButton, PageHeader } from '../shared/ui';
 import { Users, ArrowLeftRight } from 'lucide-react';
 
 export function ContactsPage() {
@@ -14,15 +14,10 @@ export function ContactsPage() {
 
   return (
     <div className="min-h-screen bg-neutral-50 font-body">
-      <header className="bg-white border-b border-neutral-100 sticky top-0 z-10">
-        <div className="max-w-2xl mx-auto px-6 py-3 flex items-center justify-between">
-          <BackButton />
-          <span className="font-display text-lg font-bold text-neutral-900">
-            {t('contacts.title')}
-          </span>
-          <span className="w-16" />
-        </div>
-      </header>
+      <PageHeader
+        title={t('contacts.title')}
+        left={<BackButton />}
+      />
 
       <main className="max-w-2xl mx-auto px-6 py-6">
         {isLoading && (
