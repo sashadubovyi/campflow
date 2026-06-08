@@ -116,9 +116,10 @@ export function RoomPage() {
               <button
                 onClick={() => setShowEditModal(true)}
                 title={t('rooms.editRoom')}
-                className="flex items-center justify-center w-9 h-9 rounded-xl text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700 transition"
+                className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 transition text-xs font-semibold"
               >
-                <Pencil size={16} />
+                <Pencil size={14} />
+                {t('rooms.editRoom')}
               </button>
             )}
             <InviteButton roomId={room.id} inviteCode={room.inviteCode} />
