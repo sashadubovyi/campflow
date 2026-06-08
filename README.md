@@ -118,11 +118,53 @@ pnpm --filter @campflow/frontend dev
 | `GEMINI_API_KEY`                           | Google Gemini API key for AI features |
 | `PORT`                                     | Backend port (default `3001`)         |
 
+## 🚢 Deployment
+
+### Backend (Railway / Heroku-like PaaS)
+
+The backend ships with a `Procfile` and a relative-path media layout, so it's
+PaaS-friendly out of the box.
+
+```
+apps/backend/Procfile
+  web:     node dist/main
+  release: pnpm prisma migrate deploy
+```
+
+1. Create a Postgres service and copy its `DATABASE_URL` into the app env.
+2. Set the env variables from [`apps/backend/.env.example`](apps/backend/.env.example):
+   `JWT_ACCESS_SECRET`, `JWT_ACCESS_TTL`, `JWT_REFRESH_TTL`, `FRONTEND_URL`
+   (origin of the Vercel deployment), `GEMINI_API_KEY` (optional).
+3. Build command: `pnpm install --frozen-lockfile && pnpm --filter @campflow/backend build`.
+4. Start command: `pnpm --filter @campflow/backend start:prod`.
+5. The `release` step runs `prisma migrate deploy` so the DB is on the latest
+   schema before the new image takes traffic.
+6. Persistent storage for `apps/backend/uploads/` — mount a volume; the relative
+   `/uploads/...` URLs are served by Nest's `useStaticAssets`.
+
+### Frontend (Vercel)
+
+`apps/frontend/vercel.json` proxies `/api/*`, `/uploads/*` and `/socket.io/*`
+to the backend, and rewrites every other path to `index.html` so the SPA
+routes resolve client-side.
+
+Before the first deploy, replace `YOUR_BACKEND_DOMAIN` in `vercel.json` with
+the Railway URL (e.g. `andu-backend.up.railway.app`). Alternatively, set
+`VITE_API_URL` and skip the proxy — `getMediaUrl` handles both cases.
+
+```
+# Vercel project settings
+Build command:   pnpm --filter @campflow/frontend build
+Output dir:      apps/frontend/dist
+Install command: pnpm install --frozen-lockfile
+Root directory:  apps/frontend
+```
+
 ## 🗺️ Roadmap
 
-- Map view with event locations
-- Email verification
-- Profile statistics, "My past events" history and shareable profile QR
+- Email verification and OAuth (Google / Apple)
+- Realtime media in chat (Cloudinary / S3)
+- WebRTC voice / video
 - Mobile app wrapper
 - Full rebrand to `@andu/*` packages
 
