@@ -1,17 +1,14 @@
 /**
- * Нормалізує URL медіа з API.
- * - http(s)://, blob:, data: → повертає як є (вже абсолютний)
- * - '/uploads/...' або будь-який інший backend-шлях → префіксує VITE_API_URL
- *   (без хвостового /api, бо статика віддається з кореня, не з /api)
- * - null/undefined/'' → ''
+ * Повертає URL медіа як відносний шлях.
+ * - http(s)://, blob:, data: → залишаємо як є (вже абсолютний / блоб / data URI)
+ * - все інше (включно з '/uploads/...') → повертаємо без змін
  *
- * VITE_API_URL у dev зазвичай не задано → fallback http://localhost:3001.
- * У prod очікується щось на кшталт https://api.example.com (без /api на кінці).
+ * Відносні шляхи проксюються Vite-сервером (див. vite.config.ts: proxy '/uploads')
+ * у dev і обслуговуються тим самим origin у prod, тож працюють і на HTTPS
+ * без mixed-content попереджень.
  */
-export function getMediaUrl(url?: string | null): string {
+export const getMediaUrl = (url?: string | null): string => {
   if (!url) return '';
   if (/^(https?:|blob:|data:)/i.test(url)) return url;
-  const apiOrigin = (import.meta.env.VITE_API_URL ?? 'http://localhost:3001').replace(/\/+$/, '');
-  const path = url.startsWith('/') ? url : `/${url}`;
-  return `${apiOrigin}${path}`;
-}
+  return url;
+};
