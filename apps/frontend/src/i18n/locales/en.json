@@ -122,7 +122,9 @@
   "events": {
     "emptyList": "No events yet",
     "emptyMap": "No events on map",
-    "emptyCalendar": "No scheduled events"
+    "emptyCalendar": "No scheduled events",
+    "approvedItems": "Approved",
+    "openRoom": "Open room"
   },
   "polls": {
     "title": "Polls",

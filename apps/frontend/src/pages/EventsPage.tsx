@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { LayoutList, Map as MapIcon, Calendar, Heart, Plus, Ampersand, ChevronDown } from 'lucide-react';
 import L from 'leaflet';
-import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, CircleMarker, Marker, useMap } from 'react-leaflet';
 import { Calendar as BigCalendar, dateFnsLocalizer, type Event as RBCEvent } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { uk, enUS, ru, type Locale } from 'date-fns/locale';
@@ -16,12 +16,37 @@ import type { RoomListItem } from '../shared/api/rooms.api';
 import { RoomCard } from './rooms/RoomCard';
 import { CreateRoomModal } from './rooms/CreateRoomModal';
 import { JoinRoomModal } from './rooms/JoinRoomModal';
+import { RoomEventModal } from './events/RoomEventModal';
 
 const ROOM_COLORS = ['#2d6ff8', '#7c3aed', '#059669', '#d97706', '#dc2626', '#0891b2', '#9333ea', '#16a34a'];
 function roomColor(roomId: string): string {
   let hash = 0;
   for (let i = 0; i < roomId.length; i++) hash = roomId.charCodeAt(i) + ((hash << 5) - hash);
   return ROOM_COLORS[Math.abs(hash) % ROOM_COLORS.length]!;
+}
+
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function photoMarkerIcon(coverUrl: string, color: string, approved: boolean): L.DivIcon {
+  const size = approved ? 40 : 32;
+  const html = `
+    <div style="
+      width:${size}px;height:${size}px;border-radius:50%;
+      background:#fff;padding:2px;box-shadow:0 2px 6px rgba(0,0,0,.25);
+      border:2px solid ${color};
+      opacity:${approved ? 1 : 0.85};
+    ">
+      <img src="${escapeHtml(coverUrl)}" alt=""
+        style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;" />
+    </div>`;
+  return L.divIcon({
+    className: 'photo-marker',
+    html,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+  });
 }
 
 function FitBounds({ points }: { points: MapPoint[] }) {
@@ -158,7 +183,7 @@ function EventsListView() {
 }
 
 // ─── Map view ──────────────────────────────────────────────────────────────
-function EventsMapView() {
+function EventsMapView({ onSelectRoom }: { onSelectRoom: (roomId: string) => void }) {
   const { t } = useTranslation();
   const { data: points = [], isLoading } = useMapPoints();
 
@@ -184,29 +209,33 @@ function EventsMapView() {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <FitBounds points={points} />
-        {points.map((p) => (
-          <CircleMarker
-            key={p.id}
-            center={[p.latitude, p.longitude]}
-            radius={p.approved ? 14 : 10}
-            pathOptions={{
-              color: '#fff',
-              weight: 3,
-              fillColor: roomColor(p.roomId),
-              fillOpacity: p.approved ? 1 : 0.65,
-            }}
-          >
-            <Popup>
-              <div style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px' }}>
-                <p style={{ fontWeight: 700, marginBottom: 2 }}>{p.label}</p>
-                <p style={{ color: '#6b7280', fontSize: '11px' }}>{p.roomName}</p>
-                {p.address && (
-                  <p style={{ color: '#9ca3af', fontSize: '11px', marginTop: 4 }}>{p.address}</p>
-                )}
-              </div>
-            </Popup>
-          </CircleMarker>
-        ))}
+        {points.map((p) => {
+          const color = roomColor(p.roomId);
+          if (p.roomCoverUrl) {
+            return (
+              <Marker
+                key={p.id}
+                position={[p.latitude, p.longitude]}
+                icon={photoMarkerIcon(p.roomCoverUrl, color, p.approved)}
+                eventHandlers={{ click: () => onSelectRoom(p.roomId) }}
+              />
+            );
+          }
+          return (
+            <CircleMarker
+              key={p.id}
+              center={[p.latitude, p.longitude]}
+              radius={p.approved ? 14 : 10}
+              pathOptions={{
+                color: '#fff',
+                weight: 3,
+                fillColor: color,
+                fillOpacity: p.approved ? 1 : 0.65,
+              }}
+              eventHandlers={{ click: () => onSelectRoom(p.roomId) }}
+            />
+          );
+        })}
       </MapContainer>
     </div>
   );
@@ -230,9 +259,8 @@ function roomsToEvents(rooms: RoomListItem[]): CalendarEvent[] {
     }));
 }
 
-function EventsCalendarView() {
+function EventsCalendarView({ onSelectRoom }: { onSelectRoom: (roomId: string) => void }) {
   const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
   const { data: rooms = [], isLoading } = useRooms();
 
   if (isLoading) {
@@ -274,7 +302,7 @@ function EventsCalendarView() {
         defaultView="month"
         views={['month']}
         style={{ height: '100%' }}
-        onSelectEvent={(event) => navigate(`/rooms/${event.id}`)}
+        onSelectEvent={(event) => onSelectRoom(event.id)}
         popup
       />
     </div>
@@ -288,6 +316,9 @@ export function EventsPage() {
   const [view, setView] = useState<EventView>('list');
   const [showCreate, setShowCreate] = useState(false);
   const [showJoin, setShowJoin] = useState(false);
+  const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
+  const { data: allRooms = [] } = useRooms();
+  const selectedRoom = allRooms.find((r) => r.id === selectedRoomId) ?? null;
   const isDesktop = useMediaQuery('(min-width: 768px)');
 
   const mobileLeft = !isDesktop ? (
@@ -324,9 +355,15 @@ export function EventsPage() {
       />
       <div className="flex-1 min-h-0">
         {view === 'list' && <EventsListView />}
-        {view === 'map' && <EventsMapView />}
-        {view === 'calendar' && <EventsCalendarView />}
+        {view === 'map' && <EventsMapView onSelectRoom={setSelectedRoomId} />}
+        {view === 'calendar' && <EventsCalendarView onSelectRoom={setSelectedRoomId} />}
       </div>
+
+      <RoomEventModal
+        open={!!selectedRoom}
+        onClose={() => setSelectedRoomId(null)}
+        room={selectedRoom}
+      />
 
       {showCreate && (
         <CreateRoomModal

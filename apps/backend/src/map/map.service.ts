@@ -14,7 +14,7 @@ export class MapService {
         longitude: { not: null },
         room: { members: { some: { userId } } },
       },
-      include: { room: { select: { id: true, name: true } } },
+      include: { room: { select: { id: true, name: true, coverUrl: true } } },
       orderBy: { approvedAt: 'desc' },
     });
 
@@ -29,7 +29,7 @@ export class MapService {
         },
       },
       include: {
-        poll: { select: { roomId: true, room: { select: { id: true, name: true } } } },
+        poll: { select: { roomId: true, room: { select: { id: true, name: true, coverUrl: true } } } },
       },
     });
 
@@ -39,6 +39,7 @@ export class MapService {
       id: item.id,
       roomId: item.roomId,
       roomName: item.room.name,
+      roomCoverUrl: item.room.coverUrl,
       label: item.title,
       address: item.address,
       latitude: Number(item.latitude),
@@ -52,6 +53,7 @@ export class MapService {
         id: o.id,
         roomId: o.poll.roomId,
         roomName: o.poll.room.name,
+        roomCoverUrl: o.poll.room.coverUrl,
         label: o.label,
         address: o.address,
         latitude: Number(o.latitude),

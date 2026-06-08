@@ -122,7 +122,9 @@
   "events": {
     "emptyList": "Поки немає подій",
     "emptyMap": "Немає подій на карті",
-    "emptyCalendar": "Немає запланованих подій"
+    "emptyCalendar": "Немає запланованих подій",
+    "approvedItems": "Затверджено",
+    "openRoom": "Перейти в кімнату"
   },
   "polls": {
     "title": "Голосування",
