@@ -42,3 +42,14 @@ export function useUploadAvatar() {
     },
   });
 }
+
+export function useUploadProfileCover() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (file: File) => profileApi.uploadCover(file),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['myProfile'] });
+      qc.invalidateQueries({ queryKey: ['profile'] });
+    },
+  });
+}

@@ -17,6 +17,7 @@ export interface PublicProfile {
   username: string;
   fullName: string;
   avatarUrl: string | null;
+  coverUrl: string | null;
   bio: string | null;
   city: string | null;
   birthDate: string | null;
@@ -34,6 +35,11 @@ export interface PublicProfile {
   isSelf: boolean;
   isContact: boolean;
   isMutual: boolean;
+  createdAt: string;
+  stats: {
+    sharedRooms: number;
+    contacts: number;
+  };
 }
 
 export interface MyProfile {
@@ -43,6 +49,7 @@ export interface MyProfile {
   email: string;
   phone: string | null;
   avatarUrl: string | null;
+  coverUrl: string | null;
   locale: Locale;
   bio: string | null;
   city: string | null;
@@ -93,6 +100,15 @@ export const profileApi = {
     const form = new FormData();
     form.append('avatar', file);
     const { data } = await api.post<{ avatarUrl: string }>('/users/me/avatar', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return data;
+  },
+
+  async uploadCover(file: File): Promise<{ coverUrl: string }> {
+    const form = new FormData();
+    form.append('cover', file);
+    const { data } = await api.post<{ coverUrl: string }>('/users/me/cover', form, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
     return data;

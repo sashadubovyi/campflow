@@ -25,7 +25,15 @@ const avatarStorage = diskStorage({
   },
 });
 
-function avatarFilter(
+const coverStorage = diskStorage({
+  destination: join(__dirname, '..', '..', 'uploads', 'profile-covers'),
+  filename: (_req, file, cb) => {
+    const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    cb(null, `${unique}${extname(file.originalname)}`);
+  },
+});
+
+function imageFilter(
   _req: unknown,
   file: Express.Multer.File,
   cb: (err: Error | null, accept: boolean) => void,
@@ -55,7 +63,7 @@ export class UsersController {
   @UseInterceptors(
     FileInterceptor('avatar', {
       storage: avatarStorage,
-      fileFilter: avatarFilter,
+      fileFilter: imageFilter,
       limits: { fileSize: 5 * 1024 * 1024 },
     }),
   )
@@ -66,6 +74,23 @@ export class UsersController {
     if (!file) throw new BadRequestException('No file uploaded');
     const avatarUrl = `/uploads/avatars/${file.filename}`;
     return this.usersService.updateAvatar(user.id, avatarUrl);
+  }
+
+  @Post('me/cover')
+  @UseInterceptors(
+    FileInterceptor('cover', {
+      storage: coverStorage,
+      fileFilter: imageFilter,
+      limits: { fileSize: 10 * 1024 * 1024 },
+    }),
+  )
+  async uploadCover(
+    @CurrentUser() user: AuthenticatedUser,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) throw new BadRequestException('No file uploaded');
+    const coverUrl = `/uploads/profile-covers/${file.filename}`;
+    return this.usersService.updateCover(user.id, coverUrl);
   }
 
   @Get('lookup')

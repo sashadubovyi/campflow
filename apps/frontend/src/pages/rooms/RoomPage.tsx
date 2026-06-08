@@ -120,9 +120,8 @@ export function RoomPage() {
       <div className="h-full flex flex-col bg-neutral-50 overflow-hidden">
         {/* Хедер */}
         <header className="bg-white border-b border-neutral-100 shrink-0 px-4 h-14 flex items-center">
-          <div className="flex items-center justify-start gap-1 min-w-[2.5rem] shrink-0">
+          <div className="flex items-center justify-start min-w-[2.5rem] shrink-0">
             <BackButton />
-            {importantStar}
           </div>
           <div className="flex-1 flex items-center justify-center gap-2 px-2 min-w-0">
             {room.coverUrl && (
@@ -135,6 +134,7 @@ export function RoomPage() {
             <h1 className="font-display text-lg font-bold text-neutral-900 truncate">
               {room.name}
             </h1>
+            {importantStar}
           </div>
           <div className="flex items-center justify-end gap-1.5 shrink-0">
             {isAdmin && !isClosed && (
@@ -270,11 +270,10 @@ export function RoomPage() {
         >
           <ChevronLeft size={20} />
         </button>
-        {importantStar}
         <div className="flex-1 flex items-center justify-center gap-2 px-1 min-w-0">
           {room.coverUrl && (
             <img
-              src={room.coverUrl}
+              src={getMediaUrl(room.coverUrl)}
               alt=""
               className="w-8 h-8 rounded-lg object-cover shrink-0"
             />
@@ -282,6 +281,7 @@ export function RoomPage() {
           <h1 className="font-display text-lg font-bold text-neutral-900 truncate">
             {room.name}
           </h1>
+          {importantStar}
         </div>
         <button
           onClick={() => setMobileView((v) => (v === 'members' ? 'chat' : 'members'))}

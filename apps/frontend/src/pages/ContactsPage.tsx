@@ -4,7 +4,7 @@ import { useContacts, useRemoveContact } from '../shared/api/contacts.hooks';
 import { Avatar } from '../shared/ui/Avatar';
 import { relativeTime } from '../shared/lib/relativeTime';
 import { BackButton, PageHeader } from '../shared/ui';
-import { Users, ArrowLeftRight } from 'lucide-react';
+import { Users, ArrowLeftRight, MessageCircle, Trash2 } from 'lucide-react';
 
 export function ContactsPage() {
   const { t } = useTranslation();
@@ -66,12 +66,21 @@ export function ContactsPage() {
                   </div>
                 </button>
                 <button
+                  onClick={() => navigate('/chat')}
+                  className="flex items-center justify-center w-9 h-9 rounded-lg text-neutral-400 hover:text-accent-600 hover:bg-accent-50 transition"
+                  title={t('contacts.message', 'Написати')}
+                  aria-label={t('contacts.message', 'Написати')}
+                >
+                  <MessageCircle size={16} />
+                </button>
+                <button
                   onClick={() => remove.mutate(c.user.id)}
                   disabled={remove.isPending}
-                  className="text-red-500 hover:text-red-700 text-xs font-medium px-3 py-1.5 rounded-lg hover:bg-red-50 transition disabled:opacity-50"
+                  className="flex items-center justify-center w-9 h-9 rounded-lg text-neutral-400 hover:text-red-600 hover:bg-red-50 transition disabled:opacity-50"
                   title={t('common.remove')}
+                  aria-label={t('common.remove')}
                 >
-                  ✕
+                  <Trash2 size={16} />
                 </button>
               </li>
             ))}

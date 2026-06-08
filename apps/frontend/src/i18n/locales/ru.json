@@ -126,6 +126,12 @@
     "importantFilter": "Только важные",
     "noImportantMessages": "Нет важных сообщений"
   },
+  "qr": {
+    "title": "QR код профиля",
+    "share": "Поделиться",
+    "savePng": "Сохранить PNG",
+    "shareText": "Профиль в &u"
+  },
   "events": {
     "emptyList": "Пока нет событий",
     "emptyMap": "Нет событий на карте",
@@ -205,8 +211,15 @@
   "profile": {
     "edit": "✎ Редактировать профиль",
     "editShort": "Редактировать профиль",
+    "stats": {
+      "myRooms": "мои комнаты",
+      "shared": "общие",
+      "contacts": "контактов",
+      "memberSince": "с нами с"
+    },
     "menu": {
       "viewPublic": "Мой профиль",
+      "qr": "QR код профиля",
       "personal": "Личные данные",
       "contacts": "Контакты",
       "calendar": "Календарь",
@@ -279,7 +292,8 @@
     "empty": "Контактов нет",
     "emptyHint": "Добавляйте людей с их профилей — кнопка «+ Добавить в контакты».",
     "count": "{{count}} контактов",
-    "mutual": "— взаимно добавлены"
+    "mutual": "— взаимно добавлены",
+    "message": "Написать"
   },
   "invites": {
     "byUsername": "По username",

@@ -126,6 +126,12 @@
     "importantFilter": "Тільки важливі",
     "noImportantMessages": "Немає важливих повідомлень"
   },
+  "qr": {
+    "title": "QR код профілю",
+    "share": "Поділитись",
+    "savePng": "Зберегти PNG",
+    "shareText": "Профіль на &u"
+  },
   "events": {
     "emptyList": "Поки немає подій",
     "emptyMap": "Немає подій на карті",
@@ -205,8 +211,15 @@
   "profile": {
     "edit": "✎ Редагувати профіль",
     "editShort": "Редагувати профіль",
+    "stats": {
+      "myRooms": "мої кімнати",
+      "shared": "спільні",
+      "contacts": "контактів",
+      "memberSince": "з нами з"
+    },
     "menu": {
       "viewPublic": "Мій профіль",
+      "qr": "QR код профілю",
       "personal": "Особисті дані",
       "contacts": "Контакти",
       "calendar": "Календар",
@@ -279,7 +292,8 @@
     "empty": "Контактів немає",
     "emptyHint": "Додавайте людей з їхніх профілів — кнопка «+ Додати в контакти».",
     "count": "{{count}} контактів",
-    "mutual": "— взаємно додані"
+    "mutual": "— взаємно додані",
+    "message": "Написати"
   },
   "invites": {
     "byUsername": "По username",

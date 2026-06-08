@@ -27,6 +27,7 @@ export class UsersService {
       email: user.email,
       phone: user.phone,
       avatarUrl: user.avatarUrl,
+      coverUrl: user.coverUrl,
       locale: user.locale,
       bio: user.bio,
       city: user.city,
@@ -86,6 +87,14 @@ export class UsersService {
     return { avatarUrl };
   }
 
+  async updateCover(userId: string, coverUrl: string) {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { coverUrl },
+    });
+    return { coverUrl };
+  }
+
   // === Пошук юзера за username (для майбутніх запрошень) ===
   async lookupByUsername(username: string, viewerId: string) {
     if (!username || username.length < 2) {
@@ -125,6 +134,24 @@ export class UsersService {
     const isContact = await this.contacts.isContact(viewerId, user.id);
     const isMutual = await this.contacts.isMutual(viewerId, user.id);
 
+    // Статистика для публічного профілю
+    const [contactsCount, sharedRoomsCount] = await Promise.all([
+      this.prisma.contact.count({ where: { ownerId: user.id } }),
+      user.id === viewerId
+        ? this.prisma.roomMember.count({
+            where: { userId: user.id, room: { archivedAt: null } },
+          })
+        : this.prisma.room.count({
+            where: {
+              archivedAt: null,
+              AND: [
+                { members: { some: { userId: user.id } } },
+                { members: { some: { userId: viewerId } } },
+              ],
+            },
+          }),
+    ]);
+
     // Хелпер: чи показувати поле згідно з visibility
     const canSee = (visibility: 'public' | 'contacts' | 'hidden') => {
       if (user.id === viewerId) return true;
@@ -138,6 +165,7 @@ export class UsersService {
       username: user.username,
       fullName: user.fullName,
       avatarUrl: user.avatarUrl,
+      coverUrl: user.coverUrl,
       bio: user.bio,
       city: user.city,
       birthDate: user.birthDate,
@@ -159,6 +187,13 @@ export class UsersService {
       isSelf: user.id === viewerId,
       isContact,
       isMutual,
+
+      // Статистика (Хвиля D)
+      createdAt: user.createdAt,
+      stats: {
+        sharedRooms: sharedRoomsCount,
+        contacts: contactsCount,
+      },
     };
   }
 }

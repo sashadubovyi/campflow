@@ -5,40 +5,37 @@ import { useAcceptInvite, useDeclineInvite, useDeferInvite } from '../shared/api
 import { Avatar } from '../shared/ui/Avatar';
 import { relativeTime } from '../shared/lib/relativeTime';
 import type { NotificationItem } from '../shared/api/notifications.api';
-import { BackButton } from '../shared/ui';
-import { Mail, CheckCircle, XCircle, UserX, Crown, Clock, Bell } from 'lucide-react';
+import { BackButton, PageHeader } from '../shared/ui';
+import { Mail, CheckCircle, XCircle, UserX, Crown, Clock, Bell, CheckCheck } from 'lucide-react';
 
 export function NotificationsPage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { data: notifications, isLoading } = useNotifications();
   const markAllRead = useMarkAllRead();
 
   const unreadCount = notifications?.filter((n) => !n.readAt).length ?? 0;
 
   return (
-    <div className="min-h-screen bg-neutral-50 font-body">
-      <header className="bg-white border-b border-neutral-100 sticky top-0 z-10">
-        <div className="max-w-2xl mx-auto px-4 md:px-6 py-3 flex items-center justify-between">
-          <BackButton />
-          <span className="font-display text-lg font-bold text-neutral-900">
-            {t('notifications.title')}
-          </span>
-          {unreadCount > 0 ? (
+    <div className="h-full flex flex-col bg-neutral-50 font-body">
+      <PageHeader
+        title={t('notifications.title')}
+        left={<BackButton />}
+        right={
+          unreadCount > 0 ? (
             <button
               onClick={() => markAllRead.mutate()}
               disabled={markAllRead.isPending}
-              className="text-xs text-accent-600 hover:text-neutral-900 font-medium"
+              className="flex items-center gap-1.5 text-xs font-semibold text-accent-600 hover:text-accent-700 px-2.5 py-1.5 rounded-lg hover:bg-accent-50 transition disabled:opacity-50"
+              title={t('notifications.markAllRead')}
             >
-              {t('notifications.markAllRead')}
+              <CheckCheck size={14} />
+              <span className="hidden md:inline">{t('notifications.markAllRead')}</span>
             </button>
-          ) : (
-            <span className="w-20" />
-          )}
-        </div>
-      </header>
+          ) : undefined
+        }
+      />
 
-      <main className="max-w-2xl mx-auto px-4 md:px-6 py-6">
+      <main className="flex-1 overflow-y-auto max-w-2xl mx-auto w-full px-4 md:px-6 py-6">
         {isLoading && (
           <p className="text-neutral-400 text-center animate-pulse">{t('common.loading')}</p>
         )}

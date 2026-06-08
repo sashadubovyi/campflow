@@ -1,30 +1,20 @@
-import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useBlockedUsers, useUnblockUser } from '../shared/api/blocks.hooks';
 import { Avatar } from '../shared/ui/Avatar';
 import { relativeTime } from '../shared/lib/relativeTime';
-import { BackButton } from '../shared/ui';
+import { BackButton, PageHeader } from '../shared/ui';
 import { ShieldOff } from 'lucide-react';
 
 export function BlockedUsersPage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { data: blocked, isLoading } = useBlockedUsers();
   const unblock = useUnblockUser();
 
   return (
-    <div className="min-h-screen bg-neutral-50 font-body">
-      <header className="bg-white border-b border-neutral-100 sticky top-0 z-10">
-        <div className="max-w-2xl mx-auto px-4 md:px-6 py-3 flex items-center justify-between">
-          <BackButton />
-          <span className="font-display text-lg font-bold text-neutral-900">
-            {t('blocked.title')}
-          </span>
-          <span className="w-16" />
-        </div>
-      </header>
+    <div className="h-full flex flex-col bg-neutral-50 font-body">
+      <PageHeader title={t('blocked.title')} left={<BackButton />} />
 
-      <main className="max-w-2xl mx-auto px-4 md:px-6 py-6">
+      <main className="flex-1 overflow-y-auto max-w-2xl mx-auto w-full px-4 md:px-6 py-6">
         {isLoading && (
           <p className="text-neutral-400 text-center animate-pulse">{t('common.loading')}</p>
         )}

@@ -23,6 +23,7 @@ model User {
   fullName        String   @map("full_name")
   phone           String?
   avatarUrl       String?  @map("avatar_url")
+  coverUrl        String?  @map("cover_url")
   locale          UserLocale @default(uk)
   lastSeenAt      DateTime @default(now()) @map("last_seen_at") @db.Timestamptz()
 

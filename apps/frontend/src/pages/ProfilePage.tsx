@@ -15,8 +15,10 @@ import {
   LogOut,
   ChevronRight,
   Eye,
+  QrCode,
   type LucideIcon,
 } from 'lucide-react';
+import { ProfileQRModal } from './profile/ProfileQRModal';
 import { useProfile, useMyProfile } from '../shared/api/profile.hooks';
 import type { PublicProfile, MyProfile, Visibility } from '../shared/api/profile.api';
 import { useAuth } from '../shared/store/useAuth';
@@ -91,6 +93,7 @@ export function ProfilePage() {
   const { data: profile, isLoading, isError } = useProfile(username ?? '');
   const { data: myProfile } = useMyProfile();
   const [showPreview, setShowPreview] = useState(false);
+  const [showQr, setShowQr] = useState(false);
 
   async function handleLogout() {
     await logout();
@@ -128,7 +131,21 @@ export function ProfilePage() {
         left={profile.isSelf ? undefined : <BackButton />}
       />
       <div className="flex-1 overflow-y-auto">
-      <main className="px-4 md:px-6 py-6 space-y-4">
+      {/* Cover photo banner */}
+      <div
+        className={`relative w-full h-32 md:h-48 ${
+          profile.coverUrl ? 'bg-neutral-100' : 'bg-gradient-to-br from-accent-100 via-accent-50 to-neutral-50'
+        }`}
+      >
+        {profile.coverUrl && (
+          <img
+            src={getMediaUrl(profile.coverUrl)}
+            alt=""
+            className="w-full h-full object-cover"
+          />
+        )}
+      </div>
+      <main className="px-4 md:px-6 pb-6 space-y-4 -mt-10">
         {/* Header card */}
         <section className="bg-white rounded-card shadow-card p-6">
           <div className="flex items-center gap-5">
@@ -155,6 +172,8 @@ export function ProfilePage() {
               isMutual={profile.isMutual}
             />
           )}
+
+          <ProfileStats profile={profile} />
         </section>
 
         {profile.isSelf ? (
@@ -165,6 +184,11 @@ export function ProfilePage() {
                 icon={<Eye size={19} />}
                 label={t('profile.menu.viewPublic')}
                 onClick={() => setShowPreview(true)}
+              />
+              <MenuRow
+                icon={<QrCode size={19} />}
+                label={t('profile.menu.qr', 'QR код профілю')}
+                onClick={() => setShowQr(true)}
               />
               <MenuRow
                 icon={<Pencil size={19} />}
@@ -223,6 +247,46 @@ export function ProfilePage() {
           </button>
         </div>
       </Modal>
+
+      <ProfileQRModal
+        open={showQr}
+        onClose={() => setShowQr(false)}
+        username={profile.username}
+      />
+    </div>
+  );
+}
+
+function ProfileStats({ profile }: { profile: PublicProfile }) {
+  const { t, i18n } = useTranslation();
+  const localeMap: Record<string, string> = { uk: 'uk-UA', en: 'en-US', ru: 'ru-RU' };
+  const memberSince = new Date(profile.createdAt).toLocaleDateString(
+    localeMap[i18n.language] ?? 'uk-UA',
+    { month: 'long', year: 'numeric' },
+  );
+
+  return (
+    <div className="mt-5 pt-5 border-t border-neutral-100 grid grid-cols-3 gap-3">
+      <div className="text-center">
+        <p className="text-xl font-bold text-neutral-900">{profile.stats.sharedRooms}</p>
+        <p className="text-[10px] text-neutral-400 uppercase tracking-wider mt-0.5">
+          {profile.isSelf
+            ? t('profile.stats.myRooms', 'мої кімнати')
+            : t('profile.stats.shared', 'спільні')}
+        </p>
+      </div>
+      <div className="text-center border-x border-neutral-100">
+        <p className="text-xl font-bold text-neutral-900">{profile.stats.contacts}</p>
+        <p className="text-[10px] text-neutral-400 uppercase tracking-wider mt-0.5">
+          {t('profile.stats.contacts', 'контактів')}
+        </p>
+      </div>
+      <div className="text-center">
+        <p className="text-xs font-semibold text-neutral-700 leading-tight">{memberSince}</p>
+        <p className="text-[10px] text-neutral-400 uppercase tracking-wider mt-0.5">
+          {t('profile.stats.memberSince', 'з нами з')}
+        </p>
+      </div>
     </div>
   );
 }

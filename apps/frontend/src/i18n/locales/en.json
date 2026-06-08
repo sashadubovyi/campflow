@@ -126,6 +126,12 @@
     "importantFilter": "Important only",
     "noImportantMessages": "No important messages"
   },
+  "qr": {
+    "title": "Profile QR code",
+    "share": "Share",
+    "savePng": "Save PNG",
+    "shareText": "Profile on &u"
+  },
   "events": {
     "emptyList": "No events yet",
     "emptyMap": "No events on map",
@@ -205,8 +211,15 @@
   "profile": {
     "edit": "✎ Edit profile",
     "editShort": "Edit profile",
+    "stats": {
+      "myRooms": "my rooms",
+      "shared": "shared",
+      "contacts": "contacts",
+      "memberSince": "with us since"
+    },
     "menu": {
       "viewPublic": "My profile",
+      "qr": "Profile QR code",
       "personal": "Personal info",
       "contacts": "Contacts",
       "calendar": "Calendar",
@@ -279,7 +292,8 @@
     "empty": "No contacts yet",
     "emptyHint": "Add people from their profiles — the «+ Add to contacts» button.",
     "count": "{{count}} contacts",
-    "mutual": "— mutually added"
+    "mutual": "— mutually added",
+    "message": "Message"
   },
   "invites": {
     "byUsername": "By username",
