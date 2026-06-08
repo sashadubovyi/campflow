@@ -10,6 +10,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  ServiceUnavailableException,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -56,8 +57,10 @@ export class RoomsController {
   @HttpCode(HttpStatus.OK)
   async aiDraft(@CurrentUser() user: AuthenticatedUser, @Body() dto: AiDraftRoomDto) {
     const draft = await this.aiService.generateRoomDraft(user.id, dto.prompt, user.locale ?? 'uk');
-    if (!draft) {
-      return { error: 'AI unavailable' };
+    // Sanity-check: AI може повернути null або кривий JSON без .room — фронт
+    // тоді крашиться на draft.room.name. Перетворюємо обидва випадки на 503.
+    if (!draft || !draft.room) {
+      throw new ServiceUnavailableException('AI unavailable');
     }
     return draft;
   }

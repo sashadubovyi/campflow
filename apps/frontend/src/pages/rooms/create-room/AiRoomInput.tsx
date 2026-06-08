@@ -18,6 +18,9 @@ export function AiRoomInput({ onClose, onDraft }: Props) {
   async function handleGenerate() {
     if (prompt.trim().length < 10) return;
     const result = await aiDraft.mutateAsync(prompt.trim());
+    // Захист від кривого тіла відповіді: якщо backend з якоїсь причини
+    // повернув не RoomDraft — не перемикаємось у preview, показуємо error.
+    if (!result || !result.room) return;
     onDraft(result);
   }
 
