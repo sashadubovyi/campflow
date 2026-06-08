@@ -90,7 +90,11 @@
     "editRoomTitle": "Edit room",
     "cover": "Cover",
     "addCover": "Add cover",
-    "changeCover": "Change cover"
+    "changeCover": "Change cover",
+    "publicTitle": "Public",
+    "privateTitle": "Private",
+    "publicHint": "Visible in the «&u» feed",
+    "privateHint": "Invite-only access"
   },
   "nav": {
     "home": "Rooms",

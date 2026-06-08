@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { RoomDetails } from '../../shared/api/rooms.api';
 import { useUpdateRoom, useUploadRoomCover } from '../../shared/api/rooms.hooks';
 import { CoverUploadField } from './CoverUploadField';
+import { PublicToggle } from './PublicToggle';
 
 interface Props {
   room: RoomDetails;
@@ -25,6 +26,7 @@ export function EditRoomModal({ room, onClose }: Props) {
   const [description, setDescription] = useState(room.description ?? '');
   const [startsAt, setStartsAt] = useState(toLocalInput(room.startsAt));
   const [endsAt, setEndsAt] = useState(toLocalInput(room.endsAt));
+  const [isPublic, setIsPublic] = useState(room.isPublic);
 
   function handleCoverSelected(file: File) {
     uploadCover.mutate(file);
@@ -38,6 +40,7 @@ export function EditRoomModal({ room, onClose }: Props) {
       description: description.trim() || undefined,
       startsAt: startsAt ? new Date(startsAt).toISOString() : null,
       endsAt: endsAt ? new Date(endsAt).toISOString() : null,
+      isPublic,
     });
     onClose();
   }
@@ -112,6 +115,8 @@ export function EditRoomModal({ room, onClose }: Props) {
               />
             </div>
           </div>
+
+          <PublicToggle isPublic={isPublic} onChange={setIsPublic} />
 
           {updateRoom.isError && (
             <p className="text-red-500 text-sm bg-red-50 rounded-lg px-3 py-2">

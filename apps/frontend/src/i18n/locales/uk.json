@@ -90,7 +90,11 @@
     "editRoomTitle": "Редагувати кімнату",
     "cover": "Обкладинка",
     "addCover": "Додати обкладинку",
-    "changeCover": "Змінити обкладинку"
+    "changeCover": "Змінити обкладинку",
+    "publicTitle": "Публічна",
+    "privateTitle": "Приватна",
+    "publicHint": "Видна всім у стрічці «&u»",
+    "privateHint": "Доступ тільки за запрошенням"
   },
   "nav": {
     "home": "Кімнати",

@@ -8,6 +8,13 @@ export function useRooms() {
   });
 }
 
+export function usePublicRooms() {
+  return useQuery({
+    queryKey: ['rooms', 'public'],
+    queryFn: roomsApi.listPublic,
+  });
+}
+
 export function useCreateRoom() {
   const qc = useQueryClient();
   return useMutation({

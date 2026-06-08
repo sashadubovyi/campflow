@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useCreateRoom } from '../../../shared/api/rooms.hooks';
 import { roomsApi } from '../../../shared/api/rooms.api';
 import { CoverUploadField } from '../CoverUploadField';
+import { PublicToggle } from '../PublicToggle';
 
 interface FormValues {
   name: string;
@@ -22,6 +23,7 @@ export function ManualRoomForm({ onClose, onCreated }: Props) {
   const createRoom = useCreateRoom();
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [uploadingCover, setUploadingCover] = useState(false);
+  const [isPublic, setIsPublic] = useState(false);
   const { register, handleSubmit, formState: { errors } } = useForm<FormValues>();
 
   async function onSubmit(values: FormValues) {
@@ -30,6 +32,7 @@ export function ManualRoomForm({ onClose, onCreated }: Props) {
       description: values.description || undefined,
       startsAt: values.startsAt || undefined,
       endsAt: values.endsAt || undefined,
+      isPublic,
     });
     if (coverFile) {
       setUploadingCover(true);
@@ -94,6 +97,8 @@ export function ManualRoomForm({ onClose, onCreated }: Props) {
           />
         </div>
       </div>
+
+      <PublicToggle isPublic={isPublic} onChange={setIsPublic} />
 
       {createRoom.isError && (
         <p className="text-red-500 text-sm bg-red-50 rounded-lg px-3 py-2">{t('common.error')}</p>

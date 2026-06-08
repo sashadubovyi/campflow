@@ -77,6 +77,11 @@ export class RoomsController {
     return this.roomsService.listMyRooms(user.id);
   }
 
+  @Get('public')
+  listPublic(@CurrentUser() user: AuthenticatedUser) {
+    return this.roomsService.listPublicRooms(user.id);
+  }
+
   @Post()
   create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateRoomDto) {
     return this.roomsService.createRoom(user.id, dto);
