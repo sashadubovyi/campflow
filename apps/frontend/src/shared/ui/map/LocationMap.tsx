@@ -54,19 +54,26 @@ interface Props {
   fitBounds?: boolean;
 }
 
-// Допоміжний компонент, який підлаштовує камеру під bounds
+// Допоміжний компонент, який підлаштовує камеру під bounds.
+// Залежність [points.length, map] (не [points, map]) — щоб не пересмикувати
+// камеру при кожному re-render parent'а, коли масив points створено наново
+// з тими ж даними. setTimeout 100мс — дає Leaflet остаточно відмалювати
+// pane перед setView/fitBounds; без цього маркери інколи "клацали".
 function FitBounds({ points }: { points: MapPoint[] }) {
   const map = useMap();
 
   useEffect(() => {
     if (points.length === 0) return;
-    if (points.length === 1) {
-      map.setView([points[0]!.latitude, points[0]!.longitude], 13);
-      return;
-    }
-    const bounds = L.latLngBounds(points.map((p) => [p.latitude, p.longitude]));
-    map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
-  }, [points, map]);
+    const timer = setTimeout(() => {
+      if (points.length === 1) {
+        map.setView([points[0]!.latitude, points[0]!.longitude], 13);
+      } else {
+        const bounds = L.latLngBounds(points.map((p) => [p.latitude, p.longitude]));
+        map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [points.length, map]);
 
   return null;
 }
