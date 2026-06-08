@@ -106,6 +106,8 @@
   },
   "feed": {
     "join": "Присоединиться",
+    "requestJoin": "Подать заявку",
+    "requestSent": "Заявка отправлена",
     "alreadyMember": "Вы в комнате",
     "emptyTitle": "В ленте пока пусто",
     "emptyHint": "Создайте первое событие и сделайте его публичным — или присоединитесь по коду."
@@ -327,10 +329,16 @@
     "accepted": "✓ Принято",
     "declined": "✕ Отказано",
     "cancelled": "⊘ Отменено",
+    "reject": "Отклонить",
     "inviteText": "{{name}} пригласил тебя в",
+    "joinRequestText": "хочет присоединиться к",
+    "joinAccepted": "Принято",
+    "joinRejected": "Отклонено",
     "kinds": {
       "inviteAccepted": "Приглашение в «{{room}}» принято",
       "inviteDeclined": "Приглашение в «{{room}}» отклонено",
+      "joinAccepted": "Ваш запрос на «{{room}}» принят",
+      "joinRejected": "Ваш запрос на «{{room}}» отклонён",
       "memberRemoved": "Вы удалены из комнаты «{{room}}»",
       "adminTransferred": "Вы назначены администратором комнаты «{{room}}»",
       "deletionWarning": "Комната «{{room}}» скоро будет удалена",

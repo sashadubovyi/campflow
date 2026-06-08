@@ -372,6 +372,9 @@ enum NotificationKind {
   room_invite
   room_invite_accepted
   room_invite_declined
+  join_request
+  join_request_accepted
+  join_request_rejected
   member_removed
   room_admin_transferred
   room_deletion_warning

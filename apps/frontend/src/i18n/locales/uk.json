@@ -106,6 +106,8 @@
   },
   "feed": {
     "join": "Приєднатись",
+    "requestJoin": "Подати запит",
+    "requestSent": "Запит надіслано",
     "alreadyMember": "Ви в кімнаті",
     "emptyTitle": "Поки порожньо у стрічці",
     "emptyHint": "Створіть першу подію і зробіть її публічною — або приєднайтесь за кодом запрошення."
@@ -327,10 +329,16 @@
     "accepted": "✓ Прийнято",
     "declined": "✕ Відмовлено",
     "cancelled": "⊘ Скасовано",
+    "reject": "Відхилити",
     "inviteText": "{{name}} запросив тебе в",
+    "joinRequestText": "хоче приєднатись до",
+    "joinAccepted": "Прийнято",
+    "joinRejected": "Відхилено",
     "kinds": {
       "inviteAccepted": "Запрошення в «{{room}}» прийнято",
       "inviteDeclined": "Запрошення в «{{room}}» не прийнято",
+      "joinAccepted": "Ваш запит на «{{room}}» прийнято",
+      "joinRejected": "Ваш запит на «{{room}}» відхилено",
       "memberRemoved": "Вас видалено з кімнати «{{room}}»",
       "adminTransferred": "Вас призначено адміністратором кімнати «{{room}}»",
       "deletionWarning": "Кімната «{{room}}» скоро буде видалена",

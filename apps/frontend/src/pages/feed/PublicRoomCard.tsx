@@ -1,8 +1,9 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Users, Calendar, Check, Loader2 } from 'lucide-react';
+import { Users, Calendar, Check, Loader2, Clock } from 'lucide-react';
 import type { PublicRoomItem } from '../../shared/api/rooms.api';
-import { useJoinPublicRoom } from '../../shared/api/rooms.hooks';
+import { useRequestJoin } from '../../shared/api/rooms.hooks';
 import { Avatar } from '../../shared/ui';
 import { getMediaUrl } from '../../shared/lib/getMediaUrl';
 
@@ -22,7 +23,8 @@ function formatDate(iso: string | null, locale: string): string {
 export function PublicRoomCard({ room }: Props) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const join = useJoinPublicRoom();
+  const requestJoin = useRequestJoin();
+  const [requested, setRequested] = useState(false);
 
   function handleClick() {
     if (room.isMember) {
@@ -32,8 +34,8 @@ export function PublicRoomCard({ room }: Props) {
 
   async function handleJoin(e: React.MouseEvent) {
     e.stopPropagation();
-    const details = await join.mutateAsync(room.id);
-    navigate(`/rooms/${details.id}`);
+    await requestJoin.mutateAsync(room.id);
+    setRequested(true);
   }
 
   return (
@@ -107,14 +109,22 @@ export function PublicRoomCard({ room }: Props) {
             <Check size={14} />
             {t('feed.alreadyMember', 'Ви в кімнаті')}
           </button>
+        ) : requested ? (
+          <button
+            disabled
+            className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-amber-50 text-amber-600 text-xs font-semibold"
+          >
+            <Clock size={14} />
+            {t('feed.requestSent', 'Запит надіслано')}
+          </button>
         ) : (
           <button
             onClick={handleJoin}
-            disabled={join.isPending}
+            disabled={requestJoin.isPending}
             className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-brand-gradient hover:bg-brand-gradient-hover disabled:opacity-60 text-white text-xs font-semibold transition"
           >
-            {join.isPending ? <Loader2 size={14} className="animate-spin" /> : null}
-            {t('feed.join', 'Приєднатись')}
+            {requestJoin.isPending ? <Loader2 size={14} className="animate-spin" /> : null}
+            {t('feed.requestJoin', 'Подати запит')}
           </button>
         )}
       </div>

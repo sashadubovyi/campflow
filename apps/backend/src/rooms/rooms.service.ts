@@ -277,6 +277,134 @@ export class RoomsService {
     return this.getRoom(userId, room.id);
   }
 
+  // Запит на приєднання до публічної кімнати — створюємо сповіщення усім адмінам.
+  async requestJoin(userId: string, roomId: string) {
+    const room = await this.prisma.room.findUnique({
+      where: { id: roomId },
+      include: {
+        members: { where: { role: 'admin' }, select: { userId: true } },
+      },
+    });
+    if (!room || room.archivedAt) throw new NotFoundException('Room not found');
+    if (!room.isPublic) throw new ForbiddenException('Room is not public');
+
+    const existing = await this.prisma.roomMember.findUnique({
+      where: { roomId_userId: { roomId: room.id, userId } },
+    });
+    if (existing) throw new ConflictException('You are already a member of this room');
+
+    // Запобігаємо дублюванню активних запитів (один pending запит на кімнату)
+    const recent = await this.prisma.notification.findFirst({
+      where: {
+        kind: 'join_request',
+        userId: { in: room.members.map((m) => m.userId) },
+        payload: { path: ['requesterId'], equals: userId },
+        AND: [{ payload: { path: ['roomId'], equals: room.id } }],
+        readAt: null,
+      },
+    });
+    if (recent) throw new ConflictException('Join request is already pending');
+
+    const requester = await this.prisma.user.findUniqueOrThrow({
+      where: { id: userId },
+      select: { id: true, username: true, fullName: true, avatarUrl: true },
+    });
+
+    // Один notification на кожного адміна
+    for (const admin of room.members) {
+      await this.notifications.create(admin.userId, 'join_request', {
+        roomId: room.id,
+        roomName: room.name,
+        requester,
+      });
+    }
+
+    return { ok: true };
+  }
+
+  async acceptJoinRequest(adminId: string, notificationId: string) {
+    const notification = await this.prisma.notification.findUnique({
+      where: { id: notificationId },
+    });
+    if (!notification || notification.userId !== adminId) {
+      throw new NotFoundException('Notification not found');
+    }
+    if (notification.kind !== 'join_request') {
+      throw new BadRequestException('Notification is not a join request');
+    }
+
+    const payload = notification.payload as {
+      roomId?: string;
+      roomName?: string;
+      requester?: { id: string; fullName: string };
+    };
+    const { roomId, requester } = payload;
+    if (!roomId || !requester?.id) {
+      throw new BadRequestException('Malformed payload');
+    }
+
+    await this.assertAdmin(adminId, roomId);
+
+    const existing = await this.prisma.roomMember.findUnique({
+      where: { roomId_userId: { roomId, userId: requester.id } },
+    });
+    if (!existing) {
+      await this.prisma.roomMember.create({
+        data: { roomId, userId: requester.id, role: 'member' },
+      });
+      await this.touchActivity(roomId);
+    }
+
+    await this.prisma.notification.update({
+      where: { id: notificationId },
+      data: { readAt: new Date() },
+    });
+
+    // Сповістити заявника, що його прийняли
+    await this.notifications.create(requester.id, 'join_request_accepted', {
+      roomId,
+      roomName: payload.roomName ?? '',
+    });
+
+    return { ok: true };
+  }
+
+  async rejectJoinRequest(adminId: string, notificationId: string) {
+    const notification = await this.prisma.notification.findUnique({
+      where: { id: notificationId },
+    });
+    if (!notification || notification.userId !== adminId) {
+      throw new NotFoundException('Notification not found');
+    }
+    if (notification.kind !== 'join_request') {
+      throw new BadRequestException('Notification is not a join request');
+    }
+
+    const payload = notification.payload as {
+      roomId?: string;
+      roomName?: string;
+      requester?: { id: string };
+    };
+    const { roomId, requester } = payload;
+    if (!roomId || !requester?.id) {
+      throw new BadRequestException('Malformed payload');
+    }
+
+    await this.assertAdmin(adminId, roomId);
+
+    await this.prisma.notification.update({
+      where: { id: notificationId },
+      data: { readAt: new Date() },
+    });
+
+    await this.notifications.create(requester.id, 'join_request_rejected', {
+      roomId,
+      roomName: payload.roomName ?? '',
+    });
+
+    return { ok: true };
+  }
+
   async joinByCode(userId: string, inviteCode: string) {
     const room = await this.prisma.room.findUnique({
       where: { inviteCode },

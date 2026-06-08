@@ -106,6 +106,8 @@
   },
   "feed": {
     "join": "Join",
+    "requestJoin": "Request to join",
+    "requestSent": "Request sent",
     "alreadyMember": "You are a member",
     "emptyTitle": "The feed is empty",
     "emptyHint": "Create the first event and make it public — or join with an invite code."
@@ -327,10 +329,16 @@
     "accepted": "✓ Accepted",
     "declined": "✕ Declined",
     "cancelled": "⊘ Cancelled",
+    "reject": "Reject",
     "inviteText": "{{name}} invited you to",
+    "joinRequestText": "wants to join",
+    "joinAccepted": "Accepted",
+    "joinRejected": "Rejected",
     "kinds": {
       "inviteAccepted": "Invitation to «{{room}}» was accepted",
       "inviteDeclined": "Invitation to «{{room}}» was declined",
+      "joinAccepted": "Your request to join «{{room}}» was accepted",
+      "joinRejected": "Your request to join «{{room}}» was rejected",
       "memberRemoved": "You were removed from «{{room}}»",
       "adminTransferred": "You were made admin of «{{room}}»",
       "deletionWarning": "Room «{{room}}» will be deleted soon",

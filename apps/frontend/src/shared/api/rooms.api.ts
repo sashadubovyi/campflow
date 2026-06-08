@@ -92,6 +92,18 @@ export const roomsApi = {
     const { data } = await api.post<RoomDetails>(`/rooms/${id}/join-public`);
     return data;
   },
+  async requestJoin(id: string): Promise<{ ok: true }> {
+    const { data } = await api.post<{ ok: true }>(`/rooms/${id}/request-join`);
+    return data;
+  },
+  async acceptJoinRequest(notificationId: string): Promise<{ ok: true }> {
+    const { data } = await api.post<{ ok: true }>(`/rooms/join-requests/${notificationId}/accept`);
+    return data;
+  },
+  async rejectJoinRequest(notificationId: string): Promise<{ ok: true }> {
+    const { data } = await api.post<{ ok: true }>(`/rooms/join-requests/${notificationId}/reject`);
+    return data;
+  },
   async get(id: string): Promise<RoomDetails> {
     const { data } = await api.get<RoomDetails>(`/rooms/${id}`);
     return data;

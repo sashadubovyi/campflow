@@ -45,6 +45,37 @@ export function useJoinPublicRoom() {
   });
 }
 
+export function useRequestJoin() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (roomId: string) => roomsApi.requestJoin(roomId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['rooms', 'public'] });
+    },
+  });
+}
+
+export function useAcceptJoinRequest() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (notificationId: string) => roomsApi.acceptJoinRequest(notificationId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['notifications'] });
+      qc.invalidateQueries({ queryKey: ['rooms'] });
+    },
+  });
+}
+
+export function useRejectJoinRequest() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (notificationId: string) => roomsApi.rejectJoinRequest(notificationId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['notifications'] });
+    },
+  });
+}
+
 export function useRoom(id: string) {
   return useQuery({
     queryKey: ['room', id],

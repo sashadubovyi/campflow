@@ -2,11 +2,12 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useNotifications, useMarkRead, useMarkAllRead } from '../shared/api/notifications.hooks';
 import { useAcceptInvite, useDeclineInvite, useDeferInvite } from '../shared/api/invites.hooks';
+import { useAcceptJoinRequest, useRejectJoinRequest } from '../shared/api/rooms.hooks';
 import { Avatar } from '../shared/ui/Avatar';
 import { relativeTime } from '../shared/lib/relativeTime';
 import type { NotificationItem } from '../shared/api/notifications.api';
 import { BackButton, PageHeader } from '../shared/ui';
-import { Mail, CheckCircle, XCircle, UserX, Crown, Clock, Bell, CheckCheck } from 'lucide-react';
+import { Mail, CheckCircle, XCircle, UserX, Crown, Clock, Bell, CheckCheck, UserPlus } from 'lucide-react';
 
 export function NotificationsPage() {
   const { t } = useTranslation();
@@ -70,6 +71,9 @@ function NotificationCard({ n }: { n: NotificationItem }) {
 
   if (n.kind === 'room_invite') {
     return <InviteCard n={n} isUnread={isUnread} onClick={handleClick} />;
+  }
+  if (n.kind === 'join_request') {
+    return <JoinRequestCard n={n} isUnread={isUnread} onClick={handleClick} />;
   }
 
   return <SystemCard n={n} isUnread={isUnread} onClick={handleClick} />;
@@ -201,6 +205,97 @@ function InviteCard({
   );
 }
 
+function JoinRequestCard({
+  n,
+  isUnread,
+  onClick,
+}: {
+  n: NotificationItem;
+  isUnread: boolean;
+  onClick: () => void;
+}) {
+  const { t } = useTranslation();
+  const payload = n.payload as {
+    roomId: string;
+    roomName: string;
+    requester: { id: string; username: string; fullName: string; avatarUrl: string | null };
+  };
+  const accept = useAcceptJoinRequest();
+  const reject = useRejectJoinRequest();
+  const isDone = accept.isSuccess || reject.isSuccess;
+  const status: 'pending' | 'accepted' | 'rejected' = accept.isSuccess
+    ? 'accepted'
+    : reject.isSuccess
+      ? 'rejected'
+      : 'pending';
+
+  async function handleAccept() {
+    onClick();
+    await accept.mutateAsync(n.id);
+  }
+  function handleReject() {
+    onClick();
+    reject.mutate(n.id);
+  }
+
+  const loading = accept.isPending || reject.isPending;
+
+  return (
+    <li
+      className={`bg-white rounded-2xl border shadow-sm p-4 transition ${
+        isUnread && !isDone ? 'border-accent-500/30 bg-accent-500/5' : 'border-neutral-100'
+      } ${isDone ? 'opacity-60' : ''}`}
+    >
+      <div className="flex items-start gap-3">
+        <Avatar
+          fullName={payload.requester.fullName}
+          avatarUrl={payload.requester.avatarUrl}
+          size={44}
+        />
+        <div className="flex-1 min-w-0">
+          <p className="text-sm text-neutral-900">
+            <span className="font-semibold">{payload.requester.fullName}</span>{' '}
+            <span className="text-neutral-700">
+              {t('notifications.joinRequestText', 'хоче приєднатись до')}
+            </span>{' '}
+            <span className="font-semibold">«{payload.roomName}»</span>
+          </p>
+          <p className="text-[10px] text-neutral-400 mt-1.5">{relativeTime(n.createdAt)}</p>
+
+          {status === 'pending' && (
+            <div className="mt-3 flex gap-2">
+              <button
+                onClick={handleAccept}
+                disabled={loading}
+                className="bg-brand-gradient hover:bg-brand-gradient-hover disabled:opacity-50 text-white text-xs font-semibold px-4 py-1.5 rounded-lg transition"
+              >
+                {accept.isPending ? t('notifications.accepting') : t('notifications.accept')}
+              </button>
+              <button
+                onClick={handleReject}
+                disabled={loading}
+                className="text-red-500 hover:text-red-700 disabled:opacity-50 text-xs font-semibold px-3 py-1.5 rounded-lg transition"
+              >
+                {t('notifications.reject', 'Відхилити')}
+              </button>
+            </div>
+          )}
+          {status === 'accepted' && (
+            <p className="mt-2 text-xs text-accent-600 font-semibold">
+              {t('notifications.joinAccepted', 'Прийнято')}
+            </p>
+          )}
+          {status === 'rejected' && (
+            <p className="mt-2 text-xs text-neutral-400">
+              {t('notifications.joinRejected', 'Відхилено')}
+            </p>
+          )}
+        </div>
+      </div>
+    </li>
+  );
+}
+
 function SystemCard({
   n,
   isUnread,
@@ -232,10 +327,13 @@ function SystemCard({
 }
 
 function iconForKind(kind: NotificationItem['kind']) {
-  const map = {
+  const map: Partial<Record<NotificationItem['kind'], React.ReactNode>> = {
     room_invite: <Mail size={18} className="text-neutral-500" />,
     room_invite_accepted: <CheckCircle size={18} className="text-green-500" />,
     room_invite_declined: <XCircle size={18} className="text-red-400" />,
+    join_request: <UserPlus size={18} className="text-accent-600" />,
+    join_request_accepted: <CheckCircle size={18} className="text-green-500" />,
+    join_request_rejected: <XCircle size={18} className="text-red-400" />,
     member_removed: <UserX size={18} className="text-neutral-500" />,
     room_admin_transferred: <Crown size={18} className="text-amber-500" />,
     room_deletion_warning: <Clock size={18} className="text-orange-400" />,
@@ -253,6 +351,10 @@ function useTextForKind(n: NotificationItem): string {
       return t('notifications.kinds.inviteAccepted', { room });
     case 'room_invite_declined':
       return t('notifications.kinds.inviteDeclined', { room });
+    case 'join_request_accepted':
+      return t('notifications.kinds.joinAccepted', { room, defaultValue: `Ваш запит на «${room}» прийнято` });
+    case 'join_request_rejected':
+      return t('notifications.kinds.joinRejected', { room, defaultValue: `Ваш запит на «${room}» відхилено` });
     case 'member_removed':
       return t('notifications.kinds.memberRemoved', { room });
     case 'room_admin_transferred':

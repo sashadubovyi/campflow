@@ -98,6 +98,36 @@ export class RoomsController {
     return this.roomsService.joinPublic(user.id, id);
   }
 
+  @Post(':id/request-join')
+  @HttpCode(HttpStatus.OK)
+  requestJoin(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ) {
+    return this.roomsService.requestJoin(user.id, id);
+  }
+
+  // Адмін приймає/відхиляє запит на приєднання (id = notification id).
+  // Маршрутизуємо через /rooms/join-requests/:id щоб уникнути циклу
+  // NotificationsController → RoomsService.
+  @Post('join-requests/:id/accept')
+  @HttpCode(HttpStatus.OK)
+  acceptJoinRequest(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ) {
+    return this.roomsService.acceptJoinRequest(user.id, id);
+  }
+
+  @Post('join-requests/:id/reject')
+  @HttpCode(HttpStatus.OK)
+  rejectJoinRequest(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ) {
+    return this.roomsService.rejectJoinRequest(user.id, id);
+  }
+
   @Get(':id')
   getRoom(@CurrentUser() user: AuthenticatedUser, @Param('id', new ParseUUIDPipe()) id: string) {
     return this.roomsService.getRoom(user.id, id);
