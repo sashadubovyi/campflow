@@ -76,19 +76,51 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    // Backfill: для юзерів, зареєстрованих до правила 'username ASCII only',
+    // нормалізуємо username при першому входи. Один раз на юзера.
+    const normalizedUsername = await this.normalizeUsernameIfNeeded(
+      user.id,
+      user.username,
+      user.email,
+      user.fullName,
+    );
+
     const tokens = await this.issueTokens(user.id, user.email, meta);
 
     return {
       user: {
         id: user.id,
         email: user.email,
-        username: user.username,
+        username: normalizedUsername,
         fullName: user.fullName,
         avatarUrl: user.avatarUrl,
         locale: user.locale,
       },
       ...tokens,
     };
+  }
+
+  /**
+   * Якщо поточний username має не-ASCII символи, генерує новий унікальний
+   * латинський і апдейтить рядок у БД. Повертає актуальний username.
+   */
+  private async normalizeUsernameIfNeeded(
+    userId: string,
+    username: string,
+    email: string,
+    fullName: string,
+  ): Promise<string> {
+    if (/^[a-z0-9_-]+$/.test(username)) return username;
+
+    this.logger.log(
+      `Backfill: normalizing non-ASCII username "${username}" for user ${userId}`,
+    );
+    const next = await this.generateUniqueUsername(email, fullName);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { username: next, usernameChangedAt: new Date() },
+    });
+    return next;
   }
 
   async refresh(rawRefreshToken: string, meta: { userAgent?: string; ip?: string }) {
