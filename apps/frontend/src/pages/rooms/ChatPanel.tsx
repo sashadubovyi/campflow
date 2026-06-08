@@ -9,6 +9,8 @@ import type { Message } from '../../shared/api/chat.api';
 interface Props {
   roomId: string;
   roomName: string;
+  importantOnly?: boolean;
+  onHasImportantChange?: (has: boolean) => void;
 }
 
 function formatTime(iso: string, locale: string): string {
@@ -19,7 +21,7 @@ function formatTime(iso: string, locale: string): string {
   });
 }
 
-export function ChatPanel({ roomId, roomName }: Props) {
+export function ChatPanel({ roomId, roomName: _roomName, importantOnly = false, onHasImportantChange }: Props) {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const { messages, isLoading, typingUsers, sendMessage, deleteMessage, toggleImportant, emitTyping } =
@@ -31,6 +33,13 @@ export function ChatPanel({ roomId, roomName }: Props) {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  const hasImportant = messages.some((m) => m.isImportant);
+  useEffect(() => {
+    onHasImportantChange?.(hasImportant);
+  }, [hasImportant, onHasImportantChange]);
+
+  const visibleMessages = importantOnly ? messages.filter((m) => m.isImportant) : messages;
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setText(e.target.value);
@@ -65,17 +74,19 @@ export function ChatPanel({ roomId, roomName }: Props) {
           </p>
         )}
 
-        {!isLoading && messages.length === 0 && (
+        {!isLoading && visibleMessages.length === 0 && (
           <div className="h-full flex items-center justify-center">
             <div className="text-center text-neutral-400">
               <MessageCircle size={36} className="text-neutral-300 mb-2 mx-auto" />
-              <p className="text-sm">{t('chat.noMessages')}</p>
+              <p className="text-sm">
+                {importantOnly ? t('chat.noImportantMessages', 'Немає важливих повідомлень') : t('chat.noMessages')}
+              </p>
             </div>
           </div>
         )}
 
-        {messages.map((m, i) => {
-          const prev = messages[i - 1];
+        {visibleMessages.map((m, i) => {
+          const prev = visibleMessages[i - 1];
           const showAvatar =
             m.type !== 'system' &&
             m.authorId !== user?.id &&

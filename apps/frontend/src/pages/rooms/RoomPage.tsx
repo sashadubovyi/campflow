@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ChevronLeft, Users, Info, ChevronDown, ChevronUp, X, Trash2, Pencil } from 'lucide-react';
+import { ChevronLeft, Users, Info, ChevronDown, ChevronUp, X, Trash2, Pencil, Star } from 'lucide-react';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { useRoom } from '../../shared/api/rooms.hooks';
 import { useAuth } from '../../shared/store/useAuth';
@@ -30,6 +30,8 @@ export function RoomPage() {
   usePresence(id ?? '');
   const [showMembers, setShowMembers] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [importantOnly, setImportantOnly] = useState(false);
+  const [hasImportant, setHasImportant] = useState(false);
   const archiveRoom = useArchiveRoom();
 
   if (isLoading) {
@@ -67,7 +69,28 @@ export function RoomPage() {
       currentUserId={user?.id ?? ''}
     />
   );
-  const chat = <ChatPanel roomId={room.id} roomName={room.name} />;
+  const chat = (
+    <ChatPanel
+      roomId={room.id}
+      roomName={room.name}
+      importantOnly={importantOnly}
+      onHasImportantChange={setHasImportant}
+    />
+  );
+
+  const importantStar = hasImportant && (
+    <button
+      onClick={() => setImportantOnly((v) => !v)}
+      title={t('chat.importantFilter', 'Тільки важливі')}
+      className={`flex items-center justify-center w-9 h-9 rounded-xl transition ${
+        importantOnly
+          ? 'bg-amber-50 text-amber-500'
+          : 'text-neutral-400 hover:bg-neutral-100 hover:text-amber-500'
+      }`}
+    >
+      <Star size={16} className={importantOnly ? 'fill-amber-400' : ''} />
+    </button>
+  );
 
   const closeBtn = isAdmin && !isClosed && (
     <button
@@ -96,8 +119,9 @@ export function RoomPage() {
       <div className="h-full flex flex-col bg-neutral-50 overflow-hidden">
         {/* Хедер */}
         <header className="bg-white border-b border-neutral-100 shrink-0 px-4 h-14 flex items-center">
-          <div className="flex items-center justify-start min-w-[2.5rem] shrink-0">
+          <div className="flex items-center justify-start gap-1 min-w-[2.5rem] shrink-0">
             <BackButton />
+            {importantStar}
           </div>
           <div className="flex-1 flex items-center justify-center gap-2 px-2 min-w-0">
             {room.coverUrl && (
@@ -245,6 +269,7 @@ export function RoomPage() {
         >
           <ChevronLeft size={20} />
         </button>
+        {importantStar}
         <div className="flex-1 flex items-center justify-center gap-2 px-1 min-w-0">
           {room.coverUrl && (
             <img

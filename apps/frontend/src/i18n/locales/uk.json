@@ -115,7 +115,9 @@
     "delete": "Видалити",
     "deleteConfirm": "Видалити це повідомлення?",
     "retry": "Повторити",
-    "send": "Надіслати"
+    "send": "Надіслати",
+    "importantFilter": "Тільки важливі",
+    "noImportantMessages": "Немає важливих повідомлень"
   },
   "events": {
     "emptyList": "Поки немає подій",

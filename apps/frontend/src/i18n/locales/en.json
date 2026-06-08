@@ -115,7 +115,9 @@
     "delete": "Delete",
     "deleteConfirm": "Delete this message?",
     "retry": "Retry",
-    "send": "Send"
+    "send": "Send",
+    "importantFilter": "Important only",
+    "noImportantMessages": "No important messages"
   },
   "events": {
     "emptyList": "No events yet",

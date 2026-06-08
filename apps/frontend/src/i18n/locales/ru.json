@@ -115,7 +115,9 @@
     "delete": "Удалить",
     "deleteConfirm": "Удалить это сообщение?",
     "retry": "Повторить",
-    "send": "Отправить"
+    "send": "Отправить",
+    "importantFilter": "Только важные",
+    "noImportantMessages": "Нет важных сообщений"
   },
   "events": {
     "emptyList": "Пока нет событий",
