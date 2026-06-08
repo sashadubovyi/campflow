@@ -8,11 +8,12 @@ import { UserSearch, Link, CheckCircle, Ampersand } from 'lucide-react';
 interface Props {
   roomId: string;
   inviteCode: string;
+  iconOnly?: boolean;
 }
 
 type Tab = 'username' | 'link';
 
-export function InviteButton({ roomId, inviteCode }: Props) {
+export function InviteButton({ roomId, inviteCode, iconOnly = false }: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<Tab>('username');
@@ -41,10 +42,14 @@ export function InviteButton({ roomId, inviteCode }: Props) {
         onClick={() => setOpen(true)}
         title={t('rooms.invite')}
         aria-label={t('rooms.invite')}
-        className="w-full flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl transition bg-accent-50 text-accent-500 shadow-card hover:bg-accent-100 hover:shadow-card-lg text-sm font-semibold"
+        className={
+          iconOnly
+            ? 'w-full flex items-center justify-center py-2 rounded-xl bg-accent-50 text-accent-500 hover:bg-accent-100 transition'
+            : 'w-full flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl transition bg-accent-50 text-accent-500 shadow-card hover:bg-accent-100 hover:shadow-card-lg text-sm font-semibold'
+        }
       >
         <Ampersand size={16} />
-        <span className="text-xs font-semibold">{t('rooms.invite')}</span>
+        {!iconOnly && <span className="text-xs font-semibold">{t('rooms.invite')}</span>}
       </button>
 
       {open && (
