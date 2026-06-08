@@ -10,11 +10,29 @@ export interface RoomListItem {
   endsAt: string | null;
   ownerId: string;
   memberCount: number;
+  isPublic: boolean;
   status?: 'open' | 'closed';
   closedAt?: string | null;
   createdAt: string;
   updatedAt: string;
   admin: { id: string; fullName: string; avatarUrl: string | null } | null;
+}
+
+export interface PublicRoomItem {
+  id: string;
+  name: string;
+  description: string | null;
+  coverUrl: string | null;
+  startsAt: string | null;
+  endsAt: string | null;
+  ownerId: string;
+  memberCount: number;
+  isPublic: boolean;
+  status: 'active' | 'closed';
+  createdAt: string;
+  updatedAt: string;
+  admin: { id: string; fullName: string; avatarUrl: string | null } | null;
+  isMember: boolean;
 }
 
 export interface RoomMember {
@@ -42,6 +60,7 @@ export interface CreateRoomPayload {
   description?: string;
   startsAt?: string;
   endsAt?: string;
+  isPublic?: boolean;
 }
 
 export interface UpdateRoomPayload {
@@ -49,11 +68,16 @@ export interface UpdateRoomPayload {
   description?: string;
   startsAt?: string | null;
   endsAt?: string | null;
+  isPublic?: boolean;
 }
 
 export const roomsApi = {
   async list(): Promise<RoomListItem[]> {
     const { data } = await api.get<RoomListItem[]>('/rooms');
+    return data;
+  },
+  async listPublic(): Promise<PublicRoomItem[]> {
+    const { data } = await api.get<PublicRoomItem[]>('/rooms/public');
     return data;
   },
   async create(payload: CreateRoomPayload): Promise<RoomListItem> {
@@ -62,6 +86,10 @@ export const roomsApi = {
   },
   async join(inviteCode: string): Promise<RoomDetails> {
     const { data } = await api.post<RoomDetails>('/rooms/join', { inviteCode });
+    return data;
+  },
+  async joinPublic(id: string): Promise<RoomDetails> {
+    const { data } = await api.post<RoomDetails>(`/rooms/${id}/join-public`);
     return data;
   },
   async get(id: string): Promise<RoomDetails> {
@@ -76,6 +104,14 @@ export const roomsApi = {
   },
   async update(id: string, payload: UpdateRoomPayload): Promise<RoomDetails> {
     const { data } = await api.patch<RoomDetails>(`/rooms/${id}`, payload);
+    return data;
+  },
+  async uploadCover(id: string, file: File): Promise<{ coverUrl: string }> {
+    const form = new FormData();
+    form.append('cover', file);
+    const { data } = await api.post<{ coverUrl: string }>(`/rooms/${id}/cover`, form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
     return data;
   },
 };

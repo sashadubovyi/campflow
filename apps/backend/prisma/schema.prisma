@@ -134,6 +134,7 @@ model Room {
   endsAt           DateTime?   @map("ends_at") @db.Date
   eventDate        DateTime?   @map("event_date") @db.Date
   status           RoomStatus  @default(active)
+  isPublic         Boolean     @default(false) @map("is_public")
   lastActivityAt   DateTime    @default(now()) @map("last_activity_at") @db.Timestamptz()
   deletionWarnedAt DateTime?   @map("deletion_warned_at") @db.Timestamptz()
   closedAt         DateTime?   @map("closed_at") @db.Timestamptz()
@@ -152,6 +153,7 @@ model Room {
   @@index([inviteCode])
   @@index([status, lastActivityAt])
   @@index([status, eventDate])
+  @@index([isPublic])
   @@map("rooms")
 }
 

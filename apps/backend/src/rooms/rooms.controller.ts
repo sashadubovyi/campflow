@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -9,7 +10,15 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Req,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ConfigService } from '@nestjs/config';
+import { diskStorage } from 'multer';
+import { extname, join } from 'path';
+import type { Request } from 'express';
 import { RoomsService } from './rooms.service';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
@@ -19,11 +28,32 @@ import { AiService } from '../ai/ai.service';
 import { AiDraftRoomDto } from './dto/ai-draft-room.dto';
 import { AiCommitRoomDto } from './dto/ai-commit-room.dto';
 
+const coverStorage = diskStorage({
+  destination: join(__dirname, '..', '..', 'uploads', 'covers'),
+  filename: (_req, file, cb) => {
+    const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    cb(null, `${unique}${extname(file.originalname)}`);
+  },
+});
+
+function coverFilter(
+  _req: unknown,
+  file: Express.Multer.File,
+  cb: (err: Error | null, accept: boolean) => void,
+) {
+  if (['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new BadRequestException('Only jpeg/png/webp allowed'), false);
+  }
+}
+
 @Controller('rooms')
 export class RoomsController {
   constructor(
     private readonly roomsService: RoomsService,
     private readonly aiService: AiService,
+    private readonly config: ConfigService,
   ) {}
 
   @Post('ai-draft')
@@ -47,6 +77,11 @@ export class RoomsController {
     return this.roomsService.listMyRooms(user.id);
   }
 
+  @Get('public')
+  listPublic(@CurrentUser() user: AuthenticatedUser) {
+    return this.roomsService.listPublicRooms(user.id);
+  }
+
   @Post()
   create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateRoomDto) {
     return this.roomsService.createRoom(user.id, dto);
@@ -56,6 +91,15 @@ export class RoomsController {
   @HttpCode(HttpStatus.OK)
   join(@CurrentUser() user: AuthenticatedUser, @Body() dto: JoinRoomDto) {
     return this.roomsService.joinByCode(user.id, dto.inviteCode);
+  }
+
+  @Post(':id/join-public')
+  @HttpCode(HttpStatus.OK)
+  joinPublic(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ) {
+    return this.roomsService.joinPublic(user.id, id);
   }
 
   @Get(':id')
@@ -70,6 +114,27 @@ export class RoomsController {
     @Body() dto: UpdateRoomDto,
   ) {
     return this.roomsService.updateRoom(user.id, id, dto);
+  }
+
+  @Post(':id/cover')
+  @UseInterceptors(
+    FileInterceptor('cover', {
+      storage: coverStorage,
+      fileFilter: coverFilter,
+      limits: { fileSize: 10 * 1024 * 1024 },
+    }),
+  )
+  async uploadCover(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req: Request,
+  ) {
+    if (!file) throw new BadRequestException('No file uploaded');
+    const port = this.config.get<number>('PORT', 3001);
+    const baseUrl = `${req.protocol}://${req.hostname}:${port}`;
+    const coverUrl = `${baseUrl}/uploads/covers/${file.filename}`;
+    return this.roomsService.updateCover(user.id, id, coverUrl);
   }
 
   @Post(':id/regenerate-invite')

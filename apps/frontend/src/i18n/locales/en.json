@@ -87,14 +87,28 @@
     "confirmDelete": "Confirm delete",
     "deleteConfirmText": "Are you sure you want to delete «{{name}}»? This cannot be undone.",
     "editRoom": "Edit",
-    "editRoomTitle": "Edit room"
+    "editRoomTitle": "Edit room",
+    "cover": "Cover",
+    "addCover": "Add cover",
+    "changeCover": "Change cover",
+    "publicTitle": "Public",
+    "privateTitle": "Private",
+    "publicHint": "Visible in the «&u» feed",
+    "privateHint": "Invite-only access"
   },
   "nav": {
     "home": "Rooms",
+    "feed": "&u",
     "chat": "Chat",
     "map": "Map",
     "events": "My events",
     "profile": "Profile"
+  },
+  "feed": {
+    "join": "Join",
+    "alreadyMember": "You are a member",
+    "emptyTitle": "The feed is empty",
+    "emptyHint": "Create the first event and make it public — or join with an invite code."
   },
   "chat": {
     "placeholder": "Type a message",
@@ -108,12 +122,16 @@
     "delete": "Delete",
     "deleteConfirm": "Delete this message?",
     "retry": "Retry",
-    "send": "Send"
+    "send": "Send",
+    "importantFilter": "Important only",
+    "noImportantMessages": "No important messages"
   },
   "events": {
     "emptyList": "No events yet",
     "emptyMap": "No events on map",
-    "emptyCalendar": "No scheduled events"
+    "emptyCalendar": "No scheduled events",
+    "approvedItems": "Approved",
+    "openRoom": "Open room"
   },
   "polls": {
     "title": "Polls",

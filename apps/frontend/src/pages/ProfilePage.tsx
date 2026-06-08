@@ -11,14 +11,14 @@ import {
   Cake,
   MapPin,
   Pencil,
-  Calendar,
   ShieldCheck,
   LogOut,
   ChevronRight,
   Eye,
   type LucideIcon,
 } from 'lucide-react';
-import { useProfile } from '../shared/api/profile.hooks';
+import { useProfile, useMyProfile } from '../shared/api/profile.hooks';
+import type { PublicProfile, MyProfile, Visibility } from '../shared/api/profile.api';
 import { useAuth } from '../shared/store/useAuth';
 import { relativeTime } from '../shared/lib/relativeTime';
 import { cn, PageHeader, BackButton } from '../shared/ui';
@@ -29,6 +29,21 @@ import { useBlockUser } from '../shared/api/blocks.hooks';
 function initials(name: string): string {
   const p = name.trim().split(/\s+/);
   return (p.length >= 2 ? p[0]![0]! + p[1]![0]! : name.slice(0, 2)).toUpperCase();
+}
+
+function maskAsPublic(profile: PublicProfile, my: MyProfile | undefined): PublicProfile {
+  if (!my) return profile;
+  const onlyIfPublic = (visibility: Visibility, value: string | null) =>
+    visibility === 'public' ? value : null;
+  return {
+    ...profile,
+    email: onlyIfPublic(my.emailVisibility, profile.email),
+    phone: onlyIfPublic(my.phoneVisibility, profile.phone),
+    telegram: onlyIfPublic(my.telegramVisibility, profile.telegram),
+    whatsapp: onlyIfPublic(my.whatsappVisibility, profile.whatsapp),
+    instagram: onlyIfPublic(my.instagramVisibility, profile.instagram),
+    facebook: onlyIfPublic(my.facebookVisibility, profile.facebook),
+  };
 }
 
 function calculateAge(birthDate: string | null): number | null {
@@ -73,6 +88,7 @@ export function ProfilePage() {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const { data: profile, isLoading, isError } = useProfile(username ?? '');
+  const { data: myProfile } = useMyProfile();
 
   if (isLoading) {
     return (
@@ -160,11 +176,6 @@ export function ProfilePage() {
                 onClick={() => navigate('/contacts')}
               />
               <MenuRow
-                icon={<Calendar size={19} />}
-                label={t('profile.menu.calendar')}
-                onClick={() => navigate('/calendar')}
-              />
-              <MenuRow
                 icon={<ShieldCheck size={19} />}
                 label={t('profile.menu.privacy')}
                 onClick={() => navigate('/settings/blocked')}
@@ -187,7 +198,7 @@ export function ProfilePage() {
       </main>
       </div>
 
-      {/* Модалка публічного профілю */}
+      {/* Модалка публічного профілю — приховуємо поля з visibility != 'public' */}
       <Modal
         open={showPreview && profile.isSelf}
         onClose={() => setShowPreview(false)}
@@ -202,7 +213,7 @@ export function ProfilePage() {
               <p className="text-neutral-400 text-sm">@{profile.username}</p>
             </div>
           </div>
-          <PublicDetails profile={profile} age={age} />
+          <PublicDetails profile={maskAsPublic(profile, myProfile)} age={age} />
           <button
             onClick={() => { setShowPreview(false); navigate('/settings/profile'); }}
             className="w-full bg-brand-gradient hover:bg-brand-gradient-hover text-white font-semibold py-3 rounded-xl transition text-sm"
@@ -248,7 +259,7 @@ function PublicDetails({
   profile,
   age,
 }: {
-  profile: import('../shared/api/profile.api').PublicProfile;
+  profile: PublicProfile;
   age: number | null;
 }) {
   const { t } = useTranslation();

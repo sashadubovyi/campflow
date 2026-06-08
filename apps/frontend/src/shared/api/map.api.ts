@@ -4,6 +4,7 @@ export interface MapPoint {
   id: string;
   roomId: string;
   roomName: string;
+  roomCoverUrl: string | null;
   label: string;
   address: string | null;
   latitude: number;

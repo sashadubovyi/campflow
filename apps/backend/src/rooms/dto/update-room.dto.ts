@@ -1,4 +1,4 @@
-import { IsDateString, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import { IsBoolean, IsDateString, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class UpdateRoomDto {
   @IsOptional()
@@ -19,4 +19,8 @@ export class UpdateRoomDto {
   @IsOptional()
   @IsDateString()
   endsAt?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  isPublic?: boolean;
 }

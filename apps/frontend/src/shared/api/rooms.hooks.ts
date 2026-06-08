@@ -8,6 +8,13 @@ export function useRooms() {
   });
 }
 
+export function usePublicRooms() {
+  return useQuery({
+    queryKey: ['rooms', 'public'],
+    queryFn: roomsApi.listPublic,
+  });
+}
+
 export function useCreateRoom() {
   const qc = useQueryClient();
   return useMutation({
@@ -22,6 +29,16 @@ export function useJoinRoom() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (inviteCode: string) => roomsApi.join(inviteCode),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['rooms'] });
+    },
+  });
+}
+
+export function useJoinPublicRoom() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (roomId: string) => roomsApi.joinPublic(roomId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['rooms'] });
     },
@@ -64,6 +81,17 @@ export function useUpdateRoom(roomId: string) {
     mutationFn: (payload: UpdateRoomPayload) => roomsApi.update(roomId, payload),
     onSuccess: (updated) => {
       qc.setQueryData(['room', roomId], updated);
+      qc.invalidateQueries({ queryKey: ['rooms'] });
+    },
+  });
+}
+
+export function useUploadRoomCover(roomId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (file: File) => roomsApi.uploadCover(roomId, file),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['room', roomId] });
       qc.invalidateQueries({ queryKey: ['rooms'] });
     },
   });

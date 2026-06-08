@@ -1,6 +1,10 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useCreateRoom } from '../../../shared/api/rooms.hooks';
+import { roomsApi } from '../../../shared/api/rooms.api';
+import { CoverUploadField } from '../CoverUploadField';
+import { PublicToggle } from '../PublicToggle';
 
 interface FormValues {
   name: string;
@@ -17,6 +21,9 @@ interface Props {
 export function ManualRoomForm({ onClose, onCreated }: Props) {
   const { t } = useTranslation();
   const createRoom = useCreateRoom();
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [uploadingCover, setUploadingCover] = useState(false);
+  const [isPublic, setIsPublic] = useState(false);
   const { register, handleSubmit, formState: { errors } } = useForm<FormValues>();
 
   async function onSubmit(values: FormValues) {
@@ -25,12 +32,27 @@ export function ManualRoomForm({ onClose, onCreated }: Props) {
       description: values.description || undefined,
       startsAt: values.startsAt || undefined,
       endsAt: values.endsAt || undefined,
+      isPublic,
     });
+    if (coverFile) {
+      setUploadingCover(true);
+      try {
+        await roomsApi.uploadCover(room.id, coverFile);
+      } catch {
+        // Cover upload failed silently — room is still created
+      } finally {
+        setUploadingCover(false);
+      }
+    }
     onCreated(room.id);
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <CoverUploadField
+        onFileSelected={setCoverFile}
+        isUploading={uploadingCover}
+      />
       <div>
         <label className="block text-sm font-medium text-neutral-700 mb-1.5">
           {t('rooms.roomName')}
@@ -75,6 +97,8 @@ export function ManualRoomForm({ onClose, onCreated }: Props) {
           />
         </div>
       </div>
+
+      <PublicToggle isPublic={isPublic} onChange={setIsPublic} />
 
       {createRoom.isError && (
         <p className="text-red-500 text-sm bg-red-50 rounded-lg px-3 py-2">{t('common.error')}</p>

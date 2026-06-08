@@ -35,6 +35,7 @@ export class RoomsService {
         description: dto.description,
         ownerId: userId,
         inviteCode,
+        isPublic: dto.isPublic ?? false,
         startsAt: dto.startsAt ? new Date(dto.startsAt) : null,
         endsAt: dto.endsAt ? new Date(dto.endsAt) : null,
         members: {
@@ -135,7 +136,7 @@ export class RoomsService {
       select: {
         id: true, name: true, description: true, coverUrl: true,
         inviteCode: true, startsAt: true, endsAt: true, ownerId: true,
-        createdAt: true, updatedAt: true, status: true,
+        createdAt: true, updatedAt: true, status: true, isPublic: true,
         _count: { select: { members: true } },
         members: {
           where: { role: 'admin' },
@@ -149,6 +150,55 @@ export class RoomsService {
     });
 
     return rooms.map((r) => this.serializeRoom(r));
+  }
+
+  async listPublicRooms(viewerId: string) {
+    const rooms = await this.prisma.room.findMany({
+      where: {
+        archivedAt: null,
+        isPublic: true,
+        status: 'active',
+      },
+      select: {
+        id: true, name: true, description: true, coverUrl: true,
+        startsAt: true, endsAt: true, ownerId: true,
+        createdAt: true, updatedAt: true, status: true, isPublic: true,
+        _count: { select: { members: true } },
+        members: {
+          where: { role: 'admin' },
+          take: 1,
+          include: {
+            user: { select: { id: true, fullName: true, avatarUrl: true } },
+          },
+        },
+      },
+      orderBy: { lastActivityAt: 'desc' },
+      take: 100,
+    });
+
+    const myMemberships = await this.prisma.roomMember.findMany({
+      where: { userId: viewerId, roomId: { in: rooms.map((r) => r.id) } },
+      select: { roomId: true },
+    });
+    const memberSet = new Set(myMemberships.map((m) => m.roomId));
+
+    return rooms.map((r) => ({
+      // public listing — without inviteCode, leaving fields needed for cards
+      id: r.id,
+      name: r.name,
+      description: r.description,
+      coverUrl: r.coverUrl,
+      startsAt: r.startsAt,
+      endsAt: r.endsAt,
+      ownerId: r.ownerId,
+      memberCount: r._count.members,
+      isPublic: r.isPublic,
+      createdAt: r.createdAt,
+      updatedAt: r.updatedAt,
+      admin: r.members[0]?.user ?? null,
+      status: r.status,
+      isMember: memberSet.has(r.id),
+    }));
   }
 
   async getRoom(userId: string, roomId: string) {
@@ -194,6 +244,23 @@ export class RoomsService {
     };
   }
 
+  async joinPublic(userId: string, roomId: string) {
+    const room = await this.prisma.room.findUnique({ where: { id: roomId } });
+    if (!room || room.archivedAt) throw new NotFoundException('Room not found');
+    if (!room.isPublic) throw new ForbiddenException('Room is not public');
+
+    const existing = await this.prisma.roomMember.findUnique({
+      where: { roomId_userId: { roomId: room.id, userId } },
+    });
+    if (existing) throw new ConflictException('You are already a member of this room');
+
+    await this.prisma.roomMember.create({
+      data: { roomId: room.id, userId, role: 'member' },
+    });
+    await this.touchActivity(room.id);
+    return this.getRoom(userId, room.id);
+  }
+
   async joinByCode(userId: string, inviteCode: string) {
     const room = await this.prisma.room.findUnique({
       where: { inviteCode },
@@ -229,6 +296,7 @@ export class RoomsService {
       data: {
         name: dto.name,
         description: dto.description,
+        isPublic: dto.isPublic,
         startsAt: dto.startsAt ? new Date(dto.startsAt) : undefined,
         endsAt: dto.endsAt ? new Date(dto.endsAt) : undefined,
       },
@@ -236,6 +304,15 @@ export class RoomsService {
     });
 
     return this.serializeRoom(room);
+  }
+
+  async updateCover(userId: string, roomId: string, coverUrl: string) {
+    await this.assertAdmin(userId, roomId);
+    await this.prisma.room.update({
+      where: { id: roomId },
+      data: { coverUrl },
+    });
+    return { coverUrl };
   }
 
   async regenerateInvite(userId: string, roomId: string) {
@@ -281,6 +358,7 @@ export class RoomsService {
     ownerId: string;
     createdAt: Date;
     updatedAt: Date;
+    isPublic?: boolean;
     _count: { members: number };
     members?: { user: { id: string; fullName: string; avatarUrl: string | null } }[];
     status?: string;
@@ -295,6 +373,7 @@ export class RoomsService {
       endsAt: room.endsAt,
       ownerId: room.ownerId,
       memberCount: room._count.members,
+      isPublic: room.isPublic ?? false,
       createdAt: room.createdAt,
       updatedAt: room.updatedAt,
       admin: room.members?.[0]?.user ?? null,

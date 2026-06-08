@@ -1,96 +1,101 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Search, X } from 'lucide-react';
-import { useRooms } from '../shared/api/rooms.hooks';
-import { RoomsHeader } from './rooms/RoomsHeader';
-import { RoomsEmpty } from './rooms/RoomsEmpty';
-import { RoomsList } from './rooms/RoomsList';
+import { Plus, Ampersand } from 'lucide-react';
+import { usePublicRooms } from '../shared/api/rooms.hooks';
+import { PublicRoomCard } from './feed/PublicRoomCard';
+import { PageHeader } from '../shared/ui';
 import { CreateRoomModal } from './rooms/CreateRoomModal';
 import { JoinRoomModal } from './rooms/JoinRoomModal';
 
 export function RoomsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { data: rooms, isLoading, isError } = useRooms();
+  const { data: rooms, isLoading, isError } = usePublicRooms();
   const [showCreate, setShowCreate] = useState(false);
   const [showJoin, setShowJoin] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [query, setQuery] = useState('');
-
-  function openRoom(id: string) {
-    navigate(`/rooms/${id}`);
-  }
-
-  const filtered = rooms
-    ? query.trim()
-      ? rooms.filter((r) => r.name.toLowerCase().includes(query.toLowerCase()))
-      : rooms
-    : [];
 
   return (
     <div className="h-full flex flex-col bg-neutral-50 overflow-hidden">
-      <RoomsHeader
-        onCreateClick={() => setShowCreate(true)}
-        onJoinClick={() => setShowJoin(true)}
-        onSearchClick={() => {
-          setSearchOpen((v) => !v);
-          setQuery('');
-        }}
-        searchOpen={searchOpen}
+      <PageHeader
+        title={<span className="font-display">&amp;u</span>}
+        left={
+          <button
+            onClick={() => setShowJoin(true)}
+            title={t('rooms.joinByCode')}
+            className="flex items-center justify-center w-9 h-9 rounded-xl bg-accent-50 text-accent-500 hover:bg-accent-100 transition"
+          >
+            <Ampersand size={18} />
+          </button>
+        }
+        right={
+          <button
+            onClick={() => setShowCreate(true)}
+            title={t('common.create')}
+            className="flex items-center gap-1.5 bg-brand-gradient hover:bg-brand-gradient-hover text-white rounded-xl px-3 h-9 text-sm font-semibold transition"
+          >
+            <Plus size={16} />
+            <span className="hidden md:inline">{t('common.create')}</span>
+          </button>
+        }
       />
 
-      {/* Поле пошуку */}
-      {searchOpen && (
-        <div className="bg-white border-b border-neutral-100 px-4 md:px-6 py-2 flex items-center gap-2">
-          <Search size={16} className="text-neutral-400 shrink-0" />
-          <input
-            autoFocus
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={t('rooms.searchPlaceholder')}
-            className="flex-1 text-sm outline-none bg-transparent text-neutral-900 placeholder:text-neutral-400"
-          />
-          {query && (
-            <button onClick={() => setQuery('')} className="text-neutral-400 hover:text-neutral-600">
-              <X size={15} />
-            </button>
-          )}
-        </div>
-      )}
-
       <div className="flex-1 overflow-y-auto">
-        <main className="px-4 md:px-6 py-6">
+        <main className="max-w-5xl mx-auto w-full px-4 md:px-6 py-4">
           {isLoading && (
-            <p className="text-neutral-400 animate-pulse text-center">{t('common.loading')}</p>
+            <p className="text-neutral-400 animate-pulse text-center py-12">{t('common.loading')}</p>
           )}
           {isError && (
             <p className="text-danger-700 bg-danger-100 rounded-lg px-4 py-3 text-center">
               {t('common.error')}
             </p>
           )}
-          {!isLoading && !isError && filtered.length === 0 && query && (
-            <p className="text-neutral-400 text-center text-sm py-10">
-              {t('rooms.searchEmpty', { query })}
-            </p>
+          {!isLoading && !isError && (!rooms || rooms.length === 0) && (
+            <div className="text-center py-16 px-6">
+              <p className="text-lg font-semibold text-neutral-900 mb-2">
+                {t('feed.emptyTitle', 'Поки порожньо у стрічці')}
+              </p>
+              <p className="text-sm text-neutral-500 mb-6">
+                {t(
+                  'feed.emptyHint',
+                  'Створіть першу подію і зробіть її публічною — або приєднайтесь за кодом запрошення.',
+                )}
+              </p>
+              <button
+                onClick={() => setShowCreate(true)}
+                className="inline-flex items-center gap-1.5 bg-brand-gradient hover:bg-brand-gradient-hover text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition"
+              >
+                <Plus size={16} />
+                {t('rooms.createNew', '+ Створити кімнату')}
+              </button>
+            </div>
           )}
-          {!isLoading && !isError && filtered.length === 0 && !query && (
-            <RoomsEmpty onCreateClick={() => setShowCreate(true)} />
+          {rooms && rooms.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+              {rooms.map((room) => (
+                <PublicRoomCard key={room.id} room={room} />
+              ))}
+            </div>
           )}
-          {filtered.length > 0 && <RoomsList rooms={filtered} onOpen={openRoom} />}
         </main>
       </div>
 
       {showCreate && (
         <CreateRoomModal
           onClose={() => setShowCreate(false)}
-          onCreated={(id) => { setShowCreate(false); openRoom(id); }}
+          onCreated={(id) => {
+            setShowCreate(false);
+            navigate(`/rooms/${id}`);
+          }}
         />
       )}
       {showJoin && (
         <JoinRoomModal
           onClose={() => setShowJoin(false)}
-          onJoined={(id) => { setShowJoin(false); openRoom(id); }}
+          onJoined={(id) => {
+            setShowJoin(false);
+            navigate(`/rooms/${id}`);
+          }}
         />
       )}
     </div>
