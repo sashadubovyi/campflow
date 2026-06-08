@@ -7,6 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import type { JwtPayload } from './strategies/jwt.strategy';
+import { toLatinSlug } from './utils/username';
 
 interface TokensPair {
   accessToken: string;
@@ -34,7 +35,7 @@ export class AuthService {
       throw new ConflictException('Email already in use');
     }
 
-    const username = await this.generateUniqueUsername(dto.email);
+    const username = await this.generateUniqueUsername(dto.email, dto.fullName);
     const passwordHash = await bcrypt.hash(dto.password, this.BCRYPT_ROUNDS);
 
     const user = await this.prisma.user.create({
@@ -166,12 +167,12 @@ export class AuthService {
     return parseInt(days, 10);
   }
 
-  private async generateUniqueUsername(email: string): Promise<string> {
-    const base = email
-      .split('@')[0]!
-      .toLowerCase()
-      .replace(/[^a-z0-9_]/g, '_')
-      .slice(0, 24);
+  private async generateUniqueUsername(email: string, fullName?: string): Promise<string> {
+    // Спершу пробуємо локальну частину email; для кириличних — транслітеруємо.
+    // Якщо нічого корисного — пробуємо ПІБ. Якщо й там нема — 'user'.
+    const fromEmail = toLatinSlug(email.split('@')[0] ?? '').slice(0, 24);
+    const fromName = fullName ? toLatinSlug(fullName).slice(0, 24) : '';
+    const base = fromEmail.length >= 2 ? fromEmail : fromName.length >= 2 ? fromName : 'user';
 
     let candidate = base;
     let exists = await this.prisma.user.findUnique({ where: { username: candidate } });
