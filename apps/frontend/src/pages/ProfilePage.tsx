@@ -100,7 +100,10 @@ export function ProfilePage() {
     navigate('/login');
   }
 
-  if (isLoading) {
+  // Поки немає username у URL або запит ще не стартував — показуємо loading,
+  // а не «Користувача не знайдено»: useQuery з enabled:false дає
+  // isLoading=false і data=undefined, що раніше сприймалось як 404.
+  if (!username || isLoading) {
     return (
       <div className="h-full flex items-center justify-center text-neutral-400 animate-pulse">
         {t('common.loading')}

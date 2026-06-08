@@ -134,22 +134,32 @@ export class UsersService {
     const isContact = await this.contacts.isContact(viewerId, user.id);
     const isMutual = await this.contacts.isMutual(viewerId, user.id);
 
-    // Статистика для публічного профілю
+    // Статистика для публічного профілю. Для нових юзерів count = 0;
+    // навіть якщо запит зламається — повертаємо 0, щоб профіль не падав на 500.
+    const safeCount = async (p: Promise<number>): Promise<number> => {
+      try {
+        return await p;
+      } catch {
+        return 0;
+      }
+    };
     const [contactsCount, sharedRoomsCount] = await Promise.all([
-      this.prisma.contact.count({ where: { ownerId: user.id } }),
-      user.id === viewerId
-        ? this.prisma.roomMember.count({
-            where: { userId: user.id, room: { archivedAt: null } },
-          })
-        : this.prisma.room.count({
-            where: {
-              archivedAt: null,
-              AND: [
-                { members: { some: { userId: user.id } } },
-                { members: { some: { userId: viewerId } } },
-              ],
-            },
-          }),
+      safeCount(this.prisma.contact.count({ where: { ownerId: user.id } })),
+      safeCount(
+        user.id === viewerId
+          ? this.prisma.roomMember.count({
+              where: { userId: user.id, room: { archivedAt: null } },
+            })
+          : this.prisma.room.count({
+              where: {
+                archivedAt: null,
+                AND: [
+                  { members: { some: { userId: user.id } } },
+                  { members: { some: { userId: viewerId } } },
+                ],
+              },
+            }),
+      ),
     ]);
 
     // Хелпер: чи показувати поле згідно з visibility
