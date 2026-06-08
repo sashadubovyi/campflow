@@ -238,6 +238,15 @@ export class RoomsService {
     return this.serializeRoom(room);
   }
 
+  async updateCover(userId: string, roomId: string, coverUrl: string) {
+    await this.assertAdmin(userId, roomId);
+    await this.prisma.room.update({
+      where: { id: roomId },
+      data: { coverUrl },
+    });
+    return { coverUrl };
+  }
+
   async regenerateInvite(userId: string, roomId: string) {
     await this.assertAdmin(userId, roomId);
     const inviteCode = generateInviteCode();

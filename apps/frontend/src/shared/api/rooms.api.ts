@@ -78,4 +78,12 @@ export const roomsApi = {
     const { data } = await api.patch<RoomDetails>(`/rooms/${id}`, payload);
     return data;
   },
+  async uploadCover(id: string, file: File): Promise<{ coverUrl: string }> {
+    const form = new FormData();
+    form.append('cover', file);
+    const { data } = await api.post<{ coverUrl: string }>(`/rooms/${id}/cover`, form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return data;
+  },
 };

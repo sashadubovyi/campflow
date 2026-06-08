@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { RoomDetails } from '../../shared/api/rooms.api';
-import { useUpdateRoom } from '../../shared/api/rooms.hooks';
+import { useUpdateRoom, useUploadRoomCover } from '../../shared/api/rooms.hooks';
+import { CoverUploadField } from './CoverUploadField';
 
 interface Props {
   room: RoomDetails;
@@ -19,10 +20,15 @@ function toLocalInput(iso: string | null | undefined): string {
 export function EditRoomModal({ room, onClose }: Props) {
   const { t } = useTranslation();
   const updateRoom = useUpdateRoom(room.id);
+  const uploadCover = useUploadRoomCover(room.id);
   const [name, setName] = useState(room.name);
   const [description, setDescription] = useState(room.description ?? '');
   const [startsAt, setStartsAt] = useState(toLocalInput(room.startsAt));
   const [endsAt, setEndsAt] = useState(toLocalInput(room.endsAt));
+
+  function handleCoverSelected(file: File) {
+    uploadCover.mutate(file);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -50,6 +56,12 @@ export function EditRoomModal({ room, onClose }: Props) {
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <CoverUploadField
+            initialUrl={room.coverUrl}
+            onFileSelected={handleCoverSelected}
+            isUploading={uploadCover.isPending}
+          />
+
           <div>
             <label className="block text-sm font-medium text-neutral-700 mb-1.5">
               {t('rooms.roomName')}

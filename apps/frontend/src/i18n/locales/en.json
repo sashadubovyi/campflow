@@ -87,7 +87,10 @@
     "confirmDelete": "Confirm delete",
     "deleteConfirmText": "Are you sure you want to delete «{{name}}»? This cannot be undone.",
     "editRoom": "Edit",
-    "editRoomTitle": "Edit room"
+    "editRoomTitle": "Edit room",
+    "cover": "Cover",
+    "addCover": "Add cover",
+    "changeCover": "Change cover"
   },
   "nav": {
     "home": "Rooms",

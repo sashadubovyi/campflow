@@ -68,3 +68,14 @@ export function useUpdateRoom(roomId: string) {
     },
   });
 }
+
+export function useUploadRoomCover(roomId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (file: File) => roomsApi.uploadCover(roomId, file),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['room', roomId] });
+      qc.invalidateQueries({ queryKey: ['rooms'] });
+    },
+  });
+}

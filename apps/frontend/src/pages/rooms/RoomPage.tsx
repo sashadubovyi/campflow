@@ -99,9 +99,18 @@ export function RoomPage() {
           <div className="flex items-center justify-start min-w-[2.5rem] shrink-0">
             <BackButton />
           </div>
-          <h1 className="flex-1 font-display text-lg font-bold text-neutral-900 text-center truncate px-2">
-            {room.name}
-          </h1>
+          <div className="flex-1 flex items-center justify-center gap-2 px-2 min-w-0">
+            {room.coverUrl && (
+              <img
+                src={room.coverUrl}
+                alt=""
+                className="w-8 h-8 rounded-lg object-cover shrink-0"
+              />
+            )}
+            <h1 className="font-display text-lg font-bold text-neutral-900 truncate">
+              {room.name}
+            </h1>
+          </div>
           <div className="flex items-center justify-end gap-1.5 shrink-0">
             {isAdmin && !isClosed && (
               <button
@@ -235,9 +244,18 @@ export function RoomPage() {
         >
           <ChevronLeft size={20} />
         </button>
-        <h1 className="flex-1 font-display text-lg font-bold text-neutral-900 truncate text-center px-1">
-          {room.name}
-        </h1>
+        <div className="flex-1 flex items-center justify-center gap-2 px-1 min-w-0">
+          {room.coverUrl && (
+            <img
+              src={room.coverUrl}
+              alt=""
+              className="w-8 h-8 rounded-lg object-cover shrink-0"
+            />
+          )}
+          <h1 className="font-display text-lg font-bold text-neutral-900 truncate">
+            {room.name}
+          </h1>
+        </div>
         <button
           onClick={() => setMobileView((v) => (v === 'members' ? 'chat' : 'members'))}
           className={`p-2 rounded-lg transition ${mobileView === 'members' ? 'text-accent-600 bg-accent-50' : 'text-neutral-500 hover:text-accent-600'}`}
