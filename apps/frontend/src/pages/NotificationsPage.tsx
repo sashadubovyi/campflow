@@ -19,7 +19,7 @@ export function NotificationsPage() {
   return (
     <div className="h-full flex flex-col bg-neutral-50 font-body">
       <PageHeader
-        title={t('notifications.title')}
+        title={<span className="font-display">&amp; Notifications</span>}
         left={<BackButton />}
         right={
           unreadCount > 0 ? (

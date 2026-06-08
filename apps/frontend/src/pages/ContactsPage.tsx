@@ -28,7 +28,7 @@ export function ContactsPage() {
 
   return (
     <div className="h-full flex flex-col bg-neutral-50 font-body">
-      <PageHeader title={t('contacts.title')} left={<BackButton />} />
+      <PageHeader title={<span className="font-display">&amp; Friends</span>} left={<BackButton />} />
 
       <main className="flex-1 overflow-y-auto max-w-2xl mx-auto w-full px-4 md:px-6 py-6">
         {/* Tabs */}

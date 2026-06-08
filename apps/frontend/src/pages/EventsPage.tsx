@@ -350,7 +350,7 @@ export function EventsPage() {
   return (
     <div className="h-full flex flex-col">
       <PageHeader
-        title={t('nav.events')}
+        title={<span className="font-display">&amp; Events</span>}
         left={mobileLeft}
         right={headerRight}
       />
