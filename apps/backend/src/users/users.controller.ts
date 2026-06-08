@@ -7,15 +7,12 @@ import {
   Patch,
   Post,
   Query,
-  Req,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ConfigService } from '@nestjs/config';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
-import type { Request } from 'express';
 import { UsersService } from './users.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { CurrentUser, AuthenticatedUser } from '../auth/decorators/current-user.decorator';
@@ -42,10 +39,7 @@ function avatarFilter(
 
 @Controller('users')
 export class UsersController {
-  constructor(
-    private readonly usersService: UsersService,
-    private readonly config: ConfigService,
-  ) {}
+  constructor(private readonly usersService: UsersService) {}
 
   @Get('me')
   getMe(@CurrentUser() user: AuthenticatedUser) {
@@ -68,12 +62,9 @@ export class UsersController {
   async uploadAvatar(
     @CurrentUser() user: AuthenticatedUser,
     @UploadedFile() file: Express.Multer.File,
-    @Req() req: Request,
   ) {
     if (!file) throw new BadRequestException('No file uploaded');
-    const port = this.config.get<number>('PORT', 3001);
-    const baseUrl = `${req.protocol}://${req.hostname}:${port}`;
-    const avatarUrl = `${baseUrl}/uploads/avatars/${file.filename}`;
+    const avatarUrl = `/uploads/avatars/${file.filename}`;
     return this.usersService.updateAvatar(user.id, avatarUrl);
   }
 

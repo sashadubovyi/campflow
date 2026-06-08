@@ -90,6 +90,12 @@ export function ProfilePage() {
   const { logout } = useAuth();
   const { data: profile, isLoading, isError } = useProfile(username ?? '');
   const { data: myProfile } = useMyProfile();
+  const [showPreview, setShowPreview] = useState(false);
+
+  async function handleLogout() {
+    await logout();
+    navigate('/login');
+  }
 
   if (isLoading) {
     return (
@@ -114,12 +120,6 @@ export function ProfilePage() {
   }
 
   const age = calculateAge(profile.birthDate);
-  const [showPreview, setShowPreview] = useState(false);
-
-  async function handleLogout() {
-    await logout();
-    navigate('/login');
-  }
 
   return (
     <div className="h-full flex flex-col bg-neutral-50 overflow-hidden">

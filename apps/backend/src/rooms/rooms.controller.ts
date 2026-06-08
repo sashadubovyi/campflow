@@ -10,15 +10,12 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
-  Req,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ConfigService } from '@nestjs/config';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
-import type { Request } from 'express';
 import { RoomsService } from './rooms.service';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
@@ -53,7 +50,6 @@ export class RoomsController {
   constructor(
     private readonly roomsService: RoomsService,
     private readonly aiService: AiService,
-    private readonly config: ConfigService,
   ) {}
 
   @Post('ai-draft')
@@ -128,12 +124,9 @@ export class RoomsController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id', new ParseUUIDPipe()) id: string,
     @UploadedFile() file: Express.Multer.File,
-    @Req() req: Request,
   ) {
     if (!file) throw new BadRequestException('No file uploaded');
-    const port = this.config.get<number>('PORT', 3001);
-    const baseUrl = `${req.protocol}://${req.hostname}:${port}`;
-    const coverUrl = `${baseUrl}/uploads/covers/${file.filename}`;
+    const coverUrl = `/uploads/covers/${file.filename}`;
     return this.roomsService.updateCover(user.id, id, coverUrl);
   }
 
