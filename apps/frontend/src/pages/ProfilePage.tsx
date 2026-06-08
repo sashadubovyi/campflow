@@ -131,21 +131,7 @@ export function ProfilePage() {
         left={profile.isSelf ? undefined : <BackButton />}
       />
       <div className="flex-1 overflow-y-auto">
-      {/* Cover photo banner */}
-      <div
-        className={`relative w-full h-32 md:h-48 ${
-          profile.coverUrl ? 'bg-neutral-100' : 'bg-gradient-to-br from-accent-100 via-accent-50 to-neutral-50'
-        }`}
-      >
-        {profile.coverUrl && (
-          <img
-            src={getMediaUrl(profile.coverUrl)}
-            alt=""
-            className="w-full h-full object-cover"
-          />
-        )}
-      </div>
-      <main className="px-4 md:px-6 pb-6 space-y-4 -mt-10">
+      <main className="px-4 md:px-6 py-6 space-y-4">
         {/* Header card */}
         <section className="bg-white rounded-card shadow-card p-6">
           <div className="flex items-center gap-5">

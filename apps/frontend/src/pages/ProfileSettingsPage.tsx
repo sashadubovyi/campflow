@@ -1,70 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useMyProfile, useUpdateMyProfile, useUploadAvatar, useUploadProfileCover } from '../shared/api/profile.hooks';
+import { useMyProfile, useUpdateMyProfile, useUploadAvatar } from '../shared/api/profile.hooks';
 import { getMediaUrl } from '../shared/lib/getMediaUrl';
 import type { Visibility, Gender, MyProfile } from '../shared/api/profile.api';
-import { Mail, Phone, Send, MessageCircle, Camera, ImagePlus, Users, Loader2, type LucideIcon } from 'lucide-react';
+import { Mail, Phone, Send, MessageCircle, Camera, Users, type LucideIcon } from 'lucide-react';
 import { BackButton } from '../shared/ui';
 
 function initials(name: string) {
   const p = name.trim().split(/\s+/);
   return (p.length >= 2 ? p[0]![0]! + p[1]![0]! : name.slice(0, 2)).toUpperCase();
-}
-
-function CoverUpload({ coverUrl }: { coverUrl: string | null }) {
-  const uploadCover = useUploadProfileCover();
-  const fileRef = useRef<HTMLInputElement>(null);
-  const [preview, setPreview] = useState<string | null>(null);
-
-  function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setPreview(URL.createObjectURL(file));
-    uploadCover.mutate(file, { onError: () => setPreview(null) });
-  }
-
-  const src = preview ?? (coverUrl ? getMediaUrl(coverUrl) : null);
-
-  return (
-    <button
-      type="button"
-      onClick={() => fileRef.current?.click()}
-      className="group relative w-full h-32 md:h-40 rounded-2xl overflow-hidden border border-neutral-100 bg-neutral-100 transition"
-    >
-      {src ? (
-        <img src={src} alt="" className="w-full h-full object-cover" />
-      ) : (
-        <div className="w-full h-full bg-gradient-to-br from-accent-100 via-accent-50 to-neutral-50 flex flex-col items-center justify-center gap-1 text-neutral-400">
-          <ImagePlus size={26} />
-          <span className="text-xs font-medium">Додати обкладинку</span>
-        </div>
-      )}
-      <span className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition flex items-center justify-center">
-        <span className="opacity-0 group-hover:opacity-100 transition flex items-center gap-2 px-3 py-1.5 rounded-lg bg-black/60 text-white text-xs font-semibold">
-          <Camera size={14} />
-          {src ? 'Змінити обкладинку' : 'Завантажити'}
-        </span>
-      </span>
-      {!src && (
-        <span className="absolute bottom-2 right-2 md:hidden w-9 h-9 bg-accent-500 rounded-full border-2 border-white flex items-center justify-center">
-          <Camera size={16} className="text-white" />
-        </span>
-      )}
-      {uploadCover.isPending && (
-        <span className="absolute inset-0 bg-black/40 flex items-center justify-center">
-          <Loader2 size={20} className="text-white animate-spin" />
-        </span>
-      )}
-      <input
-        ref={fileRef}
-        type="file"
-        accept="image/jpeg,image/png,image/webp"
-        className="hidden"
-        onChange={handleFile}
-      />
-    </button>
-  );
 }
 
 function AvatarUpload({ avatarUrl, fullName }: { avatarUrl: string | null; fullName: string }) {
@@ -259,7 +204,6 @@ export function ProfileSettingsPage() {
       </header>
 
       <main className="max-w-2xl mx-auto px-4 md:px-6 py-6 space-y-4">
-        <CoverUpload coverUrl={profile.coverUrl} />
         <AvatarUpload avatarUrl={profile.avatarUrl} fullName={profile.fullName ?? ''} />
         <Section title={t('profile.sections.basic')}>
           <Field label={t('profile.fields.name')}>
