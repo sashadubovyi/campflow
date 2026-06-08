@@ -98,10 +98,17 @@
   },
   "nav": {
     "home": "Rooms",
+    "feed": "&u",
     "chat": "Chat",
     "map": "Map",
     "events": "My events",
     "profile": "Profile"
+  },
+  "feed": {
+    "join": "Join",
+    "alreadyMember": "You are a member",
+    "emptyTitle": "The feed is empty",
+    "emptyHint": "Create the first event and make it public — or join with an invite code."
   },
   "chat": {
     "placeholder": "Type a message",

@@ -88,6 +88,10 @@ export const roomsApi = {
     const { data } = await api.post<RoomDetails>('/rooms/join', { inviteCode });
     return data;
   },
+  async joinPublic(id: string): Promise<RoomDetails> {
+    const { data } = await api.post<RoomDetails>(`/rooms/${id}/join-public`);
+    return data;
+  },
   async get(id: string): Promise<RoomDetails> {
     const { data } = await api.get<RoomDetails>(`/rooms/${id}`);
     return data;

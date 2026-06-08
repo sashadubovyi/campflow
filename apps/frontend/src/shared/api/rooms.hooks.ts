@@ -35,6 +35,16 @@ export function useJoinRoom() {
   });
 }
 
+export function useJoinPublicRoom() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (roomId: string) => roomsApi.joinPublic(roomId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['rooms'] });
+    },
+  });
+}
+
 export function useRoom(id: string) {
   return useQuery({
     queryKey: ['room', id],

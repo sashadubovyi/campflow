@@ -244,6 +244,23 @@ export class RoomsService {
     };
   }
 
+  async joinPublic(userId: string, roomId: string) {
+    const room = await this.prisma.room.findUnique({ where: { id: roomId } });
+    if (!room || room.archivedAt) throw new NotFoundException('Room not found');
+    if (!room.isPublic) throw new ForbiddenException('Room is not public');
+
+    const existing = await this.prisma.roomMember.findUnique({
+      where: { roomId_userId: { roomId: room.id, userId } },
+    });
+    if (existing) throw new ConflictException('You are already a member of this room');
+
+    await this.prisma.roomMember.create({
+      data: { roomId: room.id, userId, role: 'member' },
+    });
+    await this.touchActivity(room.id);
+    return this.getRoom(userId, room.id);
+  }
+
   async joinByCode(userId: string, inviteCode: string) {
     const room = await this.prisma.room.findUnique({
       where: { inviteCode },

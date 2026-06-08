@@ -93,6 +93,15 @@ export class RoomsController {
     return this.roomsService.joinByCode(user.id, dto.inviteCode);
   }
 
+  @Post(':id/join-public')
+  @HttpCode(HttpStatus.OK)
+  joinPublic(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ) {
+    return this.roomsService.joinPublic(user.id, id);
+  }
+
   @Get(':id')
   getRoom(@CurrentUser() user: AuthenticatedUser, @Param('id', new ParseUUIDPipe()) id: string) {
     return this.roomsService.getRoom(user.id, id);

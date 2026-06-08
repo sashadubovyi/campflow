@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Home, MessageCircle, Heart, User } from 'lucide-react';
+import { MessageCircle, Heart, User, Ampersand } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../shared/store/useAuth';
 import { cn } from '../shared/ui';
@@ -17,8 +17,8 @@ export function MobileTabBar() {
   return (
     <nav className="flex md:hidden fixed bottom-0 inset-x-0 z-40 h-16 bg-white border-t border-neutral-100 pb-[env(safe-area-inset-bottom)]">
       <NavLink to="/rooms" className={itemCls}>
-        <Home size={22} />
-        <span>{t('nav.home')}</span>
+        <Ampersand size={22} />
+        <span>{t('nav.feed', '&u')}</span>
       </NavLink>
       <NavLink to="/chat" className={itemCls}>
         <MessageCircle size={22} />
