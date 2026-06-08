@@ -12,6 +12,18 @@ export interface UserLookupResult {
   avatarUrl: string | null;
 }
 
+export type UserSearchBy = 'auto' | 'username' | 'email' | 'phone' | 'name';
+
+export interface UserSearchResult {
+  id: string;
+  username: string;
+  fullName: string;
+  avatarUrl: string | null;
+  city: string | null;
+  lastSeenAt: string;
+  isOnline: boolean;
+}
+
 export interface PublicProfile {
   id: string;
   username: string;
@@ -78,6 +90,11 @@ export type UpdateProfilePayload = Partial<
 export const profileApi = {
   async lookup(username: string): Promise<UserLookupResult> {
     const { data } = await api.get<UserLookupResult>('/users/lookup', { params: { username } });
+    return data;
+  },
+
+  async search(q: string, by: UserSearchBy = 'auto'): Promise<UserSearchResult[]> {
+    const { data } = await api.get<UserSearchResult[]>('/users/search', { params: { q, by } });
     return data;
   },
 

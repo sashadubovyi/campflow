@@ -95,6 +95,96 @@ export class UsersService {
     return { coverUrl };
   }
 
+  // === Пошук юзерів за username / email / phone / fullName ===
+  // by='auto' — пробуємо визначити поле за формою q.
+  // Email і phone шукаються тільки серед юзерів з visibility='public' для
+  // відповідного поля, щоб уникнути enumeration-атак.
+  async searchUsers(
+    rawQuery: string,
+    by: 'auto' | 'username' | 'email' | 'phone' | 'name',
+    viewerId: string,
+  ) {
+    const q = rawQuery.trim();
+    if (q.length < 2) return [];
+
+    const mode = by === 'auto' ? this.detectSearchMode(q) : by;
+
+    let where: import('@prisma/client').Prisma.UserWhereInput;
+    switch (mode) {
+      case 'username': {
+        const stripped = q.replace(/^@/, '').toLowerCase();
+        where = { username: { contains: stripped, mode: 'insensitive' } };
+        break;
+      }
+      case 'email': {
+        where = {
+          email: { contains: q.toLowerCase(), mode: 'insensitive' },
+          emailVisibility: 'public',
+        };
+        break;
+      }
+      case 'phone': {
+        const digits = q.replace(/\D+/g, '');
+        if (digits.length < 4) return [];
+        where = {
+          phone: { contains: digits },
+          phoneVisibility: 'public',
+        };
+        break;
+      }
+      case 'name':
+      default: {
+        where = { fullName: { contains: q, mode: 'insensitive' } };
+        break;
+      }
+    }
+
+    const users = await this.prisma.user.findMany({
+      where: { ...where, NOT: { id: viewerId } },
+      select: {
+        id: true,
+        username: true,
+        fullName: true,
+        avatarUrl: true,
+        city: true,
+        lastSeenAt: true,
+      },
+      orderBy: { fullName: 'asc' },
+      take: 20,
+    });
+
+    if (users.length === 0) return [];
+
+    // Прибираємо тих, кого viewer заблокував або хто заблокував viewer'а.
+    const userIds = users.map((u) => u.id);
+    const blocks = await this.prisma.userBlock.findMany({
+      where: {
+        OR: [
+          { blockerId: viewerId, blockedId: { in: userIds } },
+          { blockedId: viewerId, blockerId: { in: userIds } },
+        ],
+      },
+      select: { blockerId: true, blockedId: true },
+    });
+    const blockedSet = new Set<string>(
+      blocks.map((b) => (b.blockerId === viewerId ? b.blockedId : b.blockerId)),
+    );
+
+    return users
+      .filter((u) => !blockedSet.has(u.id))
+      .map((u) => ({
+        ...u,
+        isOnline: this.presence.isOnline(u.id),
+      }));
+  }
+
+  private detectSearchMode(q: string): 'username' | 'email' | 'phone' | 'name' {
+    if (q.startsWith('@')) return 'username';
+    if (q.includes('@') && q.includes('.')) return 'email';
+    if (/^\+?[\d\s\-()]+$/.test(q) && q.replace(/\D+/g, '').length >= 4) return 'phone';
+    return 'name';
+  }
+
   // === Пошук юзера за username (для майбутніх запрошень) ===
   async lookupByUsername(username: string, viewerId: string) {
     if (!username || username.length < 2) {

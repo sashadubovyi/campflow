@@ -16,6 +16,7 @@ import { ChatPage } from '../pages/ChatPage';
 import { DirectChatPage } from '../pages/DirectChatPage';
 import { MapPage } from '../pages/MapPage';
 import { EventsPage } from '../pages/EventsPage';
+import { SearchPage } from '../pages/SearchPage';
 
 export const router: ReturnType<typeof createBrowserRouter> = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -40,6 +41,7 @@ export const router: ReturnType<typeof createBrowserRouter> = createBrowserRoute
       { path: '/dm/:username', element: <DirectChatPage /> },
       { path: '/map', element: <MapPage /> },
       { path: '/events', element: <EventsPage /> },
+      { path: '/search', element: <SearchPage /> },
     ],
   },
   { path: '/', element: <Navigate to="/rooms" replace /> },

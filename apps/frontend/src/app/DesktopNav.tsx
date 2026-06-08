@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Plus, Users, Heart, Settings, LogOut, Bell, Ampersand, KeyRound } from 'lucide-react';
+import { Plus, Users, Heart, Settings, LogOut, Bell, Ampersand, KeyRound, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../shared/store/useAuth';
 import { useUnreadCount } from '../shared/api/notifications.hooks';
@@ -136,6 +136,9 @@ export function DesktopNav({ onCreateRoom }: Props) {
         <div className="flex flex-col items-center gap-1">
           <NavLink to="/rooms" className={itemClass} title="& Spaces">
             <Ampersand size={20} />
+          </NavLink>
+          <NavLink to="/search" className={itemClass} title={t('search.title', 'Пошук') as string}>
+            <Search size={20} />
           </NavLink>
           <NavLink to="/contacts" className={itemClass} title={t('contacts.link') as string}>
             <Users size={20} />

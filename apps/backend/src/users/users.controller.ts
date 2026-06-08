@@ -98,6 +98,15 @@ export class UsersController {
     return this.usersService.lookupByUsername(username, viewer.id);
   }
 
+  @Get('search')
+  search(
+    @Query('q') q: string,
+    @Query('by') by: 'auto' | 'username' | 'email' | 'phone' | 'name' = 'auto',
+    @CurrentUser() viewer: AuthenticatedUser,
+  ) {
+    return this.usersService.searchUsers(q ?? '', by, viewer.id);
+  }
+
   @Get(':username')
   getPublicProfile(@Param('username') username: string, @CurrentUser() viewer: AuthenticatedUser) {
     return this.usersService.getPublicProfile(username, viewer.id);

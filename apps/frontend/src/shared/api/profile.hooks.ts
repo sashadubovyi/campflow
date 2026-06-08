@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { profileApi, type UpdateProfilePayload } from './profile.api';
+import { profileApi, type UpdateProfilePayload, type UserSearchBy } from './profile.api';
 import { useAuthStore } from '../store/auth.store';
 
 export function useProfile(username: string) {
@@ -51,5 +51,14 @@ export function useUploadProfileCover() {
       qc.invalidateQueries({ queryKey: ['myProfile'] });
       qc.invalidateQueries({ queryKey: ['profile'] });
     },
+  });
+}
+
+export function useSearchUsers(q: string, by: UserSearchBy = 'auto') {
+  return useQuery({
+    queryKey: ['users', 'search', by, q],
+    queryFn: () => profileApi.search(q, by),
+    enabled: q.trim().length >= 2,
+    staleTime: 30_000,
   });
 }

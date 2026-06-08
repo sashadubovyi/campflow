@@ -112,6 +112,22 @@
     "emptyTitle": "The feed is empty",
     "emptyHint": "Create the first event and make it public — or join with an invite code."
   },
+  "search": {
+    "title": "Search",
+    "placeholder": "Search friends — name, username, email or phone",
+    "hint": "Type at least 2 characters to start searching",
+    "empty": "Nobody found for «{{query}}»",
+    "add": "Add",
+    "added": "Added",
+    "alreadyAdded": "Already in contacts",
+    "by": {
+      "auto": "Auto",
+      "name": "Name",
+      "username": "Username",
+      "email": "Email",
+      "phone": "Phone"
+    }
+  },
   "dm": {
     "emptyTitle": "No direct chats yet",
     "goContacts": "Go to contacts",

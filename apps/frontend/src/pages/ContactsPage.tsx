@@ -5,7 +5,7 @@ import { useContacts, useRemoveContact } from '../shared/api/contacts.hooks';
 import { Avatar } from '../shared/ui/Avatar';
 import { relativeTime } from '../shared/lib/relativeTime';
 import { BackButton, PageHeader, cn } from '../shared/ui';
-import { Users, UserCheck, Clock, MessageCircle, Trash2 } from 'lucide-react';
+import { Users, UserCheck, Clock, MessageCircle, Trash2, Search } from 'lucide-react';
 
 type Tab = 'mutual' | 'pending';
 
@@ -28,7 +28,20 @@ export function ContactsPage() {
 
   return (
     <div className="h-full flex flex-col bg-neutral-50 font-body">
-      <PageHeader title={<span className="font-display">&amp; Friends</span>} left={<BackButton />} />
+      <PageHeader
+        title={<span className="font-display">&amp; Friends</span>}
+        left={<BackButton />}
+        right={
+          <button
+            onClick={() => navigate('/search')}
+            className="flex items-center justify-center w-9 h-9 rounded-xl text-neutral-500 hover:bg-neutral-100 hover:text-accent-600 transition"
+            title={t('search.title', 'Пошук') as string}
+            aria-label={t('search.title', 'Пошук') as string}
+          >
+            <Search size={18} />
+          </button>
+        }
+      />
 
       <main className="flex-1 overflow-y-auto max-w-2xl mx-auto w-full px-4 md:px-6 py-6">
         {/* Tabs */}
