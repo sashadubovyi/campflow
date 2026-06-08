@@ -24,19 +24,24 @@ export function MembersPanel({ roomId, members, currentUserId, isAdmin }: Props)
   const leave = useLeaveRoom();
   const remove = useRemoveMember();
 
+  // Захист: при першому рендері (поки room ще завантажується) або при
+  // помилках API members може прийти undefined — інакше .filter() кидає.
+  const safeMembers: RoomMember[] = members ?? [];
+
   const sortMembers = (arr: RoomMember[]) =>
     [...arr].sort((a, b) => {
       if (a.user.isOnline !== b.user.isOnline) return a.user.isOnline ? -1 : 1;
       return a.user.fullName.localeCompare(b.user.fullName);
     });
 
-  const admins = sortMembers(members.filter((m) => m.role === 'admin'));
-  const regular = sortMembers(members.filter((m) => m.role === 'member'));
-  const onlineCount = members.filter((m) => m.user.isOnline).length;
+  const admins = sortMembers(safeMembers.filter((m) => m.role === 'admin'));
+  const regular = sortMembers(safeMembers.filter((m) => m.role === 'member'));
+  const onlineCount = safeMembers.filter((m) => m.user.isOnline).length;
 
-  const adminCount = members.filter((m) => m.role === 'admin').length;
-  const myMembership = members.find((m) => m.user.id === currentUserId);
-  const iAmLastAdmin = myMembership?.role === 'admin' && adminCount === 1 && members.length > 1;
+  const adminCount = admins.length;
+  const myMembership = safeMembers.find((m) => m.user.id === currentUserId);
+  const iAmLastAdmin =
+    myMembership?.role === 'admin' && adminCount === 1 && safeMembers.length > 1;
 
   function openProfile(username: string) {
     navigate(`/u/${username}`);
@@ -68,7 +73,7 @@ export function MembersPanel({ roomId, members, currentUserId, isAdmin }: Props)
             {t('rooms.members')}
           </h2>
           <p className="text-xs text-neutral-600 mt-0.5">
-            {t('rooms.membersCount', { count: members.length })}
+            {t('rooms.membersCount', { count: safeMembers.length })}
             {onlineCount > 0 && (
               <span className="text-neutral-400">
                 {' · '}
