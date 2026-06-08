@@ -6,6 +6,7 @@ import { useAuth } from '../shared/store/useAuth';
 import { useUnreadCount } from '../shared/api/notifications.hooks';
 import { useLang } from '../shared/lib/useLang';
 import { cn } from '../shared/ui';
+import { getMediaUrl } from '../shared/lib/getMediaUrl';
 import { JoinRoomModal } from '../pages/rooms/JoinRoomModal';
 
 interface Props {
@@ -103,7 +104,7 @@ export function DesktopNav({ onCreateRoom }: Props) {
             <span className="absolute inset-0 rounded-full bg-[conic-gradient(from_0deg,#2d6ff8,#8eb5ff,#22c55e,#2d6ff8)] animate-[spin_4s_linear_infinite]" />
             <span className="absolute inset-[2px] rounded-full overflow-hidden bg-neutral-100 flex items-center justify-center text-sm font-semibold text-neutral-600">
               {user.avatarUrl ? (
-                <img src={user.avatarUrl} alt="" className="w-full h-full object-cover" />
+                <img src={getMediaUrl(user.avatarUrl)} alt="" className="w-full h-full object-cover" />
               ) : (
                 initials(user.fullName)
               )}

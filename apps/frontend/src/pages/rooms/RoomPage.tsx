@@ -15,6 +15,7 @@ import { EditRoomModal } from './EditRoomModal';
 import { usePresence } from '../../shared/api/usePresence';
 import { useArchiveRoom } from '../../shared/api/rooms.hooks';
 import { BackButton, Modal } from '../../shared/ui';
+import { getMediaUrl } from '../../shared/lib/getMediaUrl';
 
 export function RoomPage() {
   const { t } = useTranslation();
@@ -126,7 +127,7 @@ export function RoomPage() {
           <div className="flex-1 flex items-center justify-center gap-2 px-2 min-w-0">
             {room.coverUrl && (
               <img
-                src={room.coverUrl}
+                src={getMediaUrl(room.coverUrl)}
                 alt=""
                 className="w-8 h-8 rounded-lg object-cover shrink-0"
               />

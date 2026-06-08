@@ -7,25 +7,35 @@ export class MapService {
 
   async getUserLocationPoints(userId: string) {
     // 1. Approved final plan items (category = 'location')
+    //    Тільки з активних, не-архівованих кімнат.
     const finalItems = await this.prisma.finalPlanItem.findMany({
       where: {
         category: 'location',
         latitude: { not: null },
         longitude: { not: null },
-        room: { members: { some: { userId } } },
+        room: {
+          status: 'active',
+          archivedAt: null,
+          members: { some: { userId } },
+        },
       },
       include: { room: { select: { id: true, name: true, coverUrl: true } } },
       orderBy: { approvedAt: 'desc' },
     });
 
     // 2. PollOption candidates from location-type polls in user's rooms
+    //    Тільки з активних, не-архівованих кімнат.
     const pollOptions = await this.prisma.pollOption.findMany({
       where: {
         latitude: { not: null },
         longitude: { not: null },
         poll: {
           type: 'location',
-          room: { members: { some: { userId } } },
+          room: {
+            status: 'active',
+            archivedAt: null,
+            members: { some: { userId } },
+          },
         },
       },
       include: {

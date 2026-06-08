@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMyProfile, useUpdateMyProfile, useUploadAvatar } from '../shared/api/profile.hooks';
+import { getMediaUrl } from '../shared/lib/getMediaUrl';
 import type { Visibility, Gender, MyProfile } from '../shared/api/profile.api';
 import { Mail, Phone, Send, MessageCircle, Camera, Users, type LucideIcon } from 'lucide-react';
 import { BackButton } from '../shared/ui';
@@ -26,7 +27,7 @@ function AvatarUpload({ avatarUrl, fullName }: { avatarUrl: string | null; fullN
     });
   }
 
-  const src = preview ?? avatarUrl;
+  const src = preview ?? (avatarUrl ? getMediaUrl(avatarUrl) : null);
 
   return (
     <div className="flex flex-col items-center gap-3 py-2">

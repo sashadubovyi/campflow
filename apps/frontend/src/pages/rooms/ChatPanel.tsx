@@ -160,7 +160,9 @@ function MessageBubble({
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [openDown, setOpenDown] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   // Close menu on outside click
   useEffect(() => {
@@ -174,6 +176,15 @@ function MessageBubble({
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [menuOpen]);
+
+  function handleToggleMenu() {
+    if (!menuOpen && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      setOpenDown(rect.top < 120);
+    }
+    setMenuOpen((v) => !v);
+    setDeleteConfirm(false);
+  }
 
   if (message.type === 'system') {
     return (
@@ -266,10 +277,8 @@ function MessageBubble({
         }`}
       >
         <button
-          onClick={() => {
-            setMenuOpen((v) => !v);
-            setDeleteConfirm(false);
-          }}
+          ref={triggerRef}
+          onClick={handleToggleMenu}
           className="w-7 h-7 flex items-center justify-center rounded-lg text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 transition-colors"
           aria-label="Message options"
         >
@@ -278,7 +287,7 @@ function MessageBubble({
 
         {menuOpen && (
           <div
-            className={`absolute bottom-8 ${isOwn ? 'right-0' : 'left-0'} bg-white rounded-xl shadow-card border border-neutral-100 py-1 z-20 min-w-[160px]`}
+            className={`absolute ${openDown ? 'top-8' : 'bottom-8'} ${isOwn ? 'right-0' : 'left-0'} bg-white rounded-xl shadow-card border border-neutral-100 py-1 z-20 min-w-[160px]`}
           >
             {/* Mark important */}
             <button

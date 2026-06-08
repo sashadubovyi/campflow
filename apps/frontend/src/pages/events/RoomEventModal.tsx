@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Calendar, MapPin, CheckCircle2, ArrowRight } from 'lucide-react';
 import { Modal } from '../../shared/ui/Modal';
 import { useFinalPlan } from '../../shared/api/final-plan.hooks';
+import { getMediaUrl } from '../../shared/lib/getMediaUrl';
 import type { RoomListItem } from '../../shared/api/rooms.api';
 
 interface Props {
@@ -35,7 +36,7 @@ export function RoomEventModal({ open, onClose, room }: Props) {
       <div className="space-y-4">
         {room.coverUrl && (
           <div className="-mx-6 -mt-6 aspect-[16/7] overflow-hidden bg-neutral-100">
-            <img src={room.coverUrl} alt="" className="w-full h-full object-cover" />
+            <img src={getMediaUrl(room.coverUrl)} alt="" className="w-full h-full object-cover" />
           </div>
         )}
 

@@ -1,3 +1,5 @@
+import { getMediaUrl } from '../lib/getMediaUrl';
+
 interface AvatarProps {
   fullName: string;
   avatarUrl?: string | null;
@@ -50,7 +52,7 @@ export function Avatar({
   if (avatarUrl) {
     return (
       <img
-        src={avatarUrl}
+        src={getMediaUrl(avatarUrl)}
         alt={fullName}
         className={`rounded-full object-cover shrink-0 transition ${ringClass} ${opacityClass}`}
         style={wrapperStyle}

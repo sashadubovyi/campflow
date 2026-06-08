@@ -25,6 +25,7 @@ import { cn, PageHeader, BackButton } from '../shared/ui';
 import { Modal } from '../shared/ui/Modal';
 import { useAddContact, useRemoveContact } from '../shared/api/contacts.hooks';
 import { useBlockUser } from '../shared/api/blocks.hooks';
+import { getMediaUrl } from '../shared/lib/getMediaUrl';
 
 function initials(name: string): string {
   const p = name.trim().split(/\s+/);
@@ -73,7 +74,7 @@ function RingAvatar({
         style={{ fontSize: size * 0.32 }}
       >
         {avatarUrl ? (
-          <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+          <img src={getMediaUrl(avatarUrl)} alt="" className="w-full h-full object-cover" />
         ) : (
           initials(fullName)
         )}

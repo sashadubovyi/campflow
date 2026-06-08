@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { LayoutList, Map as MapIcon, Calendar, Heart, Plus, Ampersand, ChevronDown } from 'lucide-react';
+import { LayoutList, Map as MapIcon, Calendar, Heart, Plus, KeyRound, ChevronDown } from 'lucide-react';
 import L from 'leaflet';
 import { MapContainer, TileLayer, CircleMarker, Marker, useMap } from 'react-leaflet';
 import { Calendar as BigCalendar, dateFnsLocalizer, type Event as RBCEvent } from 'react-big-calendar';
@@ -17,6 +17,7 @@ import { RoomCard } from './rooms/RoomCard';
 import { CreateRoomModal } from './rooms/CreateRoomModal';
 import { JoinRoomModal } from './rooms/JoinRoomModal';
 import { RoomEventModal } from './events/RoomEventModal';
+import { getMediaUrl } from '../shared/lib/getMediaUrl';
 
 const ROOM_COLORS = ['#2d6ff8', '#7c3aed', '#059669', '#d97706', '#dc2626', '#0891b2', '#9333ea', '#16a34a'];
 function roomColor(roomId: string): string {
@@ -38,7 +39,7 @@ function photoMarkerIcon(coverUrl: string, color: string, approved: boolean): L.
       border:2px solid ${color};
       opacity:${approved ? 1 : 0.85};
     ">
-      <img src="${escapeHtml(coverUrl)}" alt=""
+      <img src="${escapeHtml(getMediaUrl(coverUrl))}" alt=""
         style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;" />
     </div>`;
   return L.divIcon({
@@ -335,7 +336,7 @@ export function EventsPage() {
         className="w-8 h-8 flex items-center justify-center rounded-xl text-neutral-400 hover:bg-neutral-100 transition"
         title={t('rooms.joinByCode')}
       >
-        <Ampersand size={16} />
+        <KeyRound size={16} />
       </button>
     </div>
   ) : undefined;

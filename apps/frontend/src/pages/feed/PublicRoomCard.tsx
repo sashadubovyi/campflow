@@ -4,6 +4,7 @@ import { Users, Calendar, Check, Loader2 } from 'lucide-react';
 import type { PublicRoomItem } from '../../shared/api/rooms.api';
 import { useJoinPublicRoom } from '../../shared/api/rooms.hooks';
 import { Avatar } from '../../shared/ui';
+import { getMediaUrl } from '../../shared/lib/getMediaUrl';
 
 interface Props {
   room: PublicRoomItem;
@@ -65,7 +66,7 @@ export function PublicRoomCard({ room }: Props) {
       <div className="relative w-full aspect-[16/7] overflow-hidden bg-neutral-100">
         {room.coverUrl ? (
           <img
-            src={room.coverUrl}
+            src={getMediaUrl(room.coverUrl)}
             alt=""
             className="w-full h-full object-cover"
           />

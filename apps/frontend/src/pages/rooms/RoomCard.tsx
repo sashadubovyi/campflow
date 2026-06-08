@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Users, Calendar } from 'lucide-react';
 import type { RoomListItem } from '../../shared/api/rooms.api';
 import { Avatar } from '../../shared/ui';
+import { getMediaUrl } from '../../shared/lib/getMediaUrl';
 import { relativeTime } from '../../shared/lib/relativeTime';
 
 interface RoomCardProps {
@@ -44,7 +45,7 @@ export function RoomCard({ room, onOpen, compact = false }: RoomCardProps) {
       {/* Обкладинка */}
       <div className={`relative w-full overflow-hidden ${compact ? 'aspect-[32/9]' : 'aspect-[16/7]'}`}>
         <img
-          src={room.coverUrl ?? '/room-cover-placeholder.jpeg'}
+          src={room.coverUrl ? getMediaUrl(room.coverUrl) : '/room-cover-placeholder.jpeg'}
           alt={room.name}
           className={`w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300 ${room.status === 'closed' ? 'grayscale' : ''}`}
         />

@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Camera, ImagePlus, Loader2 } from 'lucide-react';
+import { getMediaUrl } from '../../shared/lib/getMediaUrl';
 
 interface Props {
   initialUrl?: string | null;
@@ -20,7 +21,7 @@ export function CoverUploadField({ initialUrl, onFileSelected, isUploading }: Pr
     onFileSelected?.(file);
   }
 
-  const src = preview ?? initialUrl ?? null;
+  const src = preview ?? (initialUrl ? getMediaUrl(initialUrl) : null);
 
   return (
     <div>

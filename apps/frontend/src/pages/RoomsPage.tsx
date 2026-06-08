@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Plus, Ampersand } from 'lucide-react';
+import { Plus, KeyRound } from 'lucide-react';
 import { usePublicRooms } from '../shared/api/rooms.hooks';
 import { PublicRoomCard } from './feed/PublicRoomCard';
 import { PageHeader } from '../shared/ui';
@@ -25,7 +25,7 @@ export function RoomsPage() {
             title={t('rooms.joinByCode')}
             className="flex items-center justify-center w-9 h-9 rounded-xl bg-accent-50 text-accent-500 hover:bg-accent-100 transition"
           >
-            <Ampersand size={18} />
+            <KeyRound size={18} />
           </button>
         }
         right={
@@ -66,7 +66,7 @@ export function RoomsPage() {
                 className="inline-flex items-center gap-1.5 bg-brand-gradient hover:bg-brand-gradient-hover text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition"
               >
                 <Plus size={16} />
-                {t('rooms.createNew', '+ Створити кімнату')}
+                {t('rooms.newRoom', 'Створити кімнату')}
               </button>
             </div>
           )}
