@@ -153,11 +153,27 @@ export class RoomsService {
   }
 
   async listPublicRooms(viewerId: string) {
+    // Стрічка фільтрується: own + контакти + ті, чий власник у тому самому місті.
+    // Якщо у viewer не задано city — третя умова просто не спрацьовує.
+    const viewer = await this.prisma.user.findUnique({
+      where: { id: viewerId },
+      select: { city: true },
+    });
+    const sameCity =
+      viewer?.city && viewer.city.trim().length > 0
+        ? [{ owner: { city: viewer.city } }]
+        : [];
+
     const rooms = await this.prisma.room.findMany({
       where: {
         archivedAt: null,
         isPublic: true,
         status: 'active',
+        OR: [
+          { ownerId: viewerId },
+          { owner: { contactsOf: { some: { ownerId: viewerId } } } },
+          ...sameCity,
+        ],
       },
       select: {
         id: true, name: true, description: true, coverUrl: true,
