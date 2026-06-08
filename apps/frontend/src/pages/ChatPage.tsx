@@ -1,104 +1,87 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { MessageCircle, ChevronDown, ArrowUpRight } from 'lucide-react';
-import { useRooms } from '../shared/api/rooms.hooks';
-import { ChatPanel } from './rooms/ChatPanel';
-import { cn, PageHeader } from '../shared/ui';
+import { MessageCircle } from 'lucide-react';
+import { useDmChats } from '../shared/api/dm.hooks';
+import { Avatar } from '../shared/ui/Avatar';
+import { PageHeader } from '../shared/ui';
+import { relativeTime } from '../shared/lib/relativeTime';
 
 export function ChatPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { data: rooms, isLoading } = useRooms();
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [pickerOpen, setPickerOpen] = useState(false);
-
-  if (isLoading) {
-    return (
-      <div className="h-full flex items-center justify-center text-neutral-400 animate-pulse">
-        {t('common.loading')}
-      </div>
-    );
-  }
-
-  const room = rooms?.find((r) => r.id === selectedId) ?? rooms?.[0];
-  if (!room) {
-    return (
-      <div className="h-full flex flex-col items-center justify-center gap-3 text-neutral-400 px-6 text-center">
-        <MessageCircle size={48} strokeWidth={1.5} />
-        <p className="text-neutral-600">{t('chat.noRoom')}</p>
-        <button onClick={() => navigate('/rooms')} className="text-accent-600 font-medium text-sm">
-          {t('nav.home')}
-        </button>
-      </div>
-    );
-  }
-
-  const hasMany = (rooms?.length ?? 0) > 1;
+  const { data: chats, isLoading } = useDmChats();
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Хедер лише на мобайлі (на десктопі назву показує ChatPanel) */}
-      <div className="md:hidden relative">
-        <PageHeader
-          title={
-            <button
-              onClick={() => hasMany && setPickerOpen((v) => !v)}
-              className="inline-flex items-center gap-1.5 max-w-full"
-            >
-              <span className="truncate">{room.name}</span>
-              {hasMany && (
-                <ChevronDown
-                  size={18}
-                  className={cn(
-                    'text-neutral-400 transition-transform shrink-0',
-                    pickerOpen && 'rotate-180',
-                  )}
-                />
-              )}
-            </button>
-          }
-          right={
-            <button
-              onClick={() => navigate(`/rooms/${room.id}`)}
-              className="p-2 text-neutral-500 hover:text-accent-600 rounded-lg"
-              title={t('chat.openRoom')}
-            >
-              <ArrowUpRight size={20} />
-            </button>
-          }
-        />
+    <div className="h-full flex flex-col bg-neutral-50 font-body">
+      <PageHeader title={<span className="font-display">&amp; chats</span>} />
 
-        {pickerOpen && hasMany && (
-          <>
-            <div className="fixed inset-0 z-30" onClick={() => setPickerOpen(false)} />
-            <ul className="absolute left-3 top-full mt-1 z-40 bg-white border border-neutral-200 rounded-xl shadow-card-lg overflow-hidden min-w-[200px] max-h-[60vh] overflow-y-auto">
-              {rooms!.map((r) => (
-                <li key={r.id}>
-                  <button
-                    onClick={() => {
-                      setSelectedId(r.id);
-                      setPickerOpen(false);
-                    }}
-                    className={cn(
-                      'w-full text-left px-4 py-2.5 text-sm hover:bg-neutral-50 transition truncate',
-                      r.id === room.id
-                        ? 'bg-neutral-50 text-neutral-900 font-semibold'
-                        : 'text-neutral-700',
-                    )}
-                  >
-                    {r.name}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </>
+      <main className="flex-1 overflow-y-auto max-w-2xl mx-auto w-full px-4 md:px-6 py-4">
+        {isLoading && (
+          <p className="text-neutral-400 text-center animate-pulse py-12">
+            {t('common.loading')}
+          </p>
         )}
-      </div>
 
-      <div className="flex-1 min-h-0">
-        <ChatPanel roomId={room.id} roomName={room.name} />
-      </div>
+        {!isLoading && (!chats || chats.length === 0) && (
+          <div className="flex flex-col items-center justify-center gap-3 text-neutral-400 text-center py-16">
+            <MessageCircle size={42} strokeWidth={1.5} />
+            <p className="text-sm">
+              {t('dm.emptyTitle', 'Поки немає особистих чатів')}
+            </p>
+            <button
+              onClick={() => navigate('/contacts')}
+              className="text-accent-600 text-sm font-medium hover:underline"
+            >
+              {t('dm.goContacts', 'Перейти до контактів')}
+            </button>
+          </div>
+        )}
+
+        {chats && chats.length > 0 && (
+          <ul className="bg-white rounded-2xl border border-neutral-100 shadow-sm divide-y divide-neutral-100 overflow-hidden">
+            {chats.map((c) => (
+              <li key={c.id}>
+                <button
+                  onClick={() => navigate(`/dm/${c.peer.username}`)}
+                  className="w-full flex items-center gap-3 p-4 hover:bg-neutral-50 transition text-left"
+                >
+                  <Avatar
+                    fullName={c.peer.fullName}
+                    avatarUrl={c.peer.avatarUrl}
+                    size={44}
+                    isOnline={c.peer.isOnline}
+                    showStatus
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="font-medium text-neutral-900 truncate">
+                        {c.peer.fullName}
+                      </p>
+                      <span className="text-[10px] text-neutral-400 shrink-0">
+                        {relativeTime(c.lastMessageAt)}
+                      </span>
+                    </div>
+                    <p className="text-xs text-neutral-500 truncate mt-0.5">
+                      {c.lastMessage ? (
+                        <>
+                          {c.lastMessage.isOwn && (
+                            <span className="text-neutral-400">{t('dm.you', 'Ви')}: </span>
+                          )}
+                          {c.lastMessage.content}
+                        </>
+                      ) : (
+                        <span className="text-neutral-400 italic">
+                          {t('dm.noMessages', 'Ще немає повідомлень')}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </main>
     </div>
   );
 }

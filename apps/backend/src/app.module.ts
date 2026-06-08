@@ -20,6 +20,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { InvitesModule } from './invites/invites.module';
 import { BlocksModule } from './blocks/blocks.module';
 import { MapModule } from './map/map.module';
+import { DmModule } from './dm/dm.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { MapModule } from './map/map.module';
     InvitesModule,
     BlocksModule,
     MapModule,
+    DmModule,
   ],
   controllers: [AppController],
   providers: [

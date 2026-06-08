@@ -112,6 +112,13 @@
     "emptyTitle": "The feed is empty",
     "emptyHint": "Create the first event and make it public — or join with an invite code."
   },
+  "dm": {
+    "emptyTitle": "No direct chats yet",
+    "goContacts": "Go to contacts",
+    "noMessages": "No messages yet",
+    "notFound": "Couldn't open this chat",
+    "you": "You"
+  },
   "chat": {
     "placeholder": "Type a message",
     "typing": "{{name}} is typing…",

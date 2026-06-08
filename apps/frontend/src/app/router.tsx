@@ -13,6 +13,7 @@ import { NotificationsPage } from '../pages/NotificationsPage';
 import { BlockedUsersPage } from '../pages/BlockedUsersPage';
 import { CalendarPage } from '../pages/CalendarPage';
 import { ChatPage } from '../pages/ChatPage';
+import { DirectChatPage } from '../pages/DirectChatPage';
 import { MapPage } from '../pages/MapPage';
 import { EventsPage } from '../pages/EventsPage';
 
@@ -36,6 +37,7 @@ export const router: ReturnType<typeof createBrowserRouter> = createBrowserRoute
       { path: '/calendar', element: <CalendarPage /> },
       { path: '/notifications', element: <NotificationsPage /> },
       { path: '/chat', element: <ChatPage /> },
+      { path: '/dm/:username', element: <DirectChatPage /> },
       { path: '/map', element: <MapPage /> },
       { path: '/events', element: <EventsPage /> },
     ],

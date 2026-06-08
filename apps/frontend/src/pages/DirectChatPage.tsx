@@ -1,0 +1,143 @@
+import { useEffect, useRef, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { Send } from 'lucide-react';
+import { useDmGetOrCreate, useDmMessages, useSendDm } from '../shared/api/dm.hooks';
+import { Avatar } from '../shared/ui/Avatar';
+import { BackButton, PageHeader } from '../shared/ui';
+
+function formatTime(iso: string, locale: string): string {
+  const map: Record<string, string> = { uk: 'uk-UA', en: 'en-US', ru: 'ru-RU' };
+  return new Date(iso).toLocaleTimeString(map[locale] ?? 'uk-UA', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+export function DirectChatPage() {
+  const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
+  const { username } = useParams<{ username: string }>();
+  const { data: chat, isLoading, isError } = useDmGetOrCreate(username ?? '');
+  const { data: messages = [] } = useDmMessages(chat?.id ?? '');
+  const send = useSendDm(chat?.id ?? '');
+  const [text, setText] = useState('');
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages.length]);
+
+  function handleSend() {
+    const trimmed = text.trim();
+    if (!trimmed || !chat) return;
+    setText('');
+    send.mutate(trimmed);
+  }
+
+  function handleKey(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  }
+
+  if (!username || isLoading) {
+    return (
+      <div className="h-full flex items-center justify-center text-neutral-400 animate-pulse">
+        {t('common.loading')}
+      </div>
+    );
+  }
+
+  if (isError || !chat) {
+    return (
+      <div className="h-full flex flex-col items-center justify-center gap-3 px-6 text-center text-neutral-500">
+        <p className="text-sm">{t('dm.notFound', 'Не вдалося відкрити чат')}</p>
+        <button
+          onClick={() => navigate('/chat')}
+          className="text-accent-600 text-sm font-medium hover:underline"
+        >
+          {t('common.back')}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-full flex flex-col bg-neutral-50 font-body">
+      <PageHeader
+        left={<BackButton />}
+        title={
+          <button
+            onClick={() => navigate(`/u/${chat.peer.username}`)}
+            className="flex items-center gap-2 max-w-full"
+          >
+            <Avatar
+              fullName={chat.peer.fullName}
+              avatarUrl={chat.peer.avatarUrl}
+              size={28}
+              isOnline={chat.peer.isOnline}
+              showStatus
+            />
+            <span className="font-display text-base font-bold text-neutral-900 truncate">
+              @{chat.peer.username}
+            </span>
+          </button>
+        }
+      />
+
+      <div className="flex-1 overflow-y-auto px-4 md:px-6 py-4 space-y-2">
+        {messages.length === 0 && (
+          <p className="text-center text-neutral-400 text-sm pt-12">
+            {t('dm.noMessages', 'Ще немає повідомлень')}
+          </p>
+        )}
+        {messages.map((m) => (
+          <div
+            key={m.id}
+            className={`flex ${m.isOwn ? 'justify-end' : 'justify-start'}`}
+          >
+            <div
+              className={`max-w-[75%] px-3.5 py-2 text-sm rounded-2xl shadow-sm ${
+                m.isOwn
+                  ? 'bg-gradient-to-br from-accent-400 to-accent-600 text-white rounded-tr-md'
+                  : 'bg-white text-neutral-900 rounded-tl-md'
+              }`}
+            >
+              <p className="leading-relaxed whitespace-pre-wrap">{m.content}</p>
+              <p
+                className={`text-[10px] mt-0.5 text-right ${
+                  m.isOwn ? 'text-white/70' : 'text-neutral-400'
+                }`}
+              >
+                {formatTime(m.createdAt, i18n.language)}
+              </p>
+            </div>
+          </div>
+        ))}
+        <div ref={bottomRef} />
+      </div>
+
+      <div className="px-4 md:px-6 py-3 border-t border-neutral-100 bg-white shrink-0">
+        <div className="flex items-center gap-2">
+          <input
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={handleKey}
+            placeholder={t('chat.placeholder')}
+            className="flex-1 h-11 px-4 rounded-xl bg-neutral-50 border border-neutral-200 text-neutral-900 placeholder:text-neutral-400 focus:bg-white focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 outline-none transition"
+          />
+          <button
+            onClick={handleSend}
+            disabled={!text.trim() || send.isPending}
+            className="w-11 h-11 shrink-0 flex items-center justify-center rounded-xl bg-brand-gradient hover:bg-brand-gradient-hover text-white disabled:opacity-40 transition"
+            aria-label={t('chat.send') ?? 'Send'}
+          >
+            <Send size={18} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

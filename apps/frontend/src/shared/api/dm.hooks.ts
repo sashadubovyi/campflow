@@ -1,0 +1,41 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { dmApi, type DmMessage } from './dm.api';
+
+export function useDmChats() {
+  return useQuery({
+    queryKey: ['dm', 'chats'],
+    queryFn: () => dmApi.list(),
+    refetchInterval: 15000,
+  });
+}
+
+export function useDmGetOrCreate(username: string) {
+  return useQuery({
+    queryKey: ['dm', 'with', username],
+    queryFn: () => dmApi.getOrCreate(username),
+    enabled: !!username && username.length >= 2,
+    retry: false,
+  });
+}
+
+export function useDmMessages(chatId: string) {
+  return useQuery({
+    queryKey: ['dm', 'messages', chatId],
+    queryFn: () => dmApi.messages(chatId),
+    enabled: !!chatId,
+    refetchInterval: 5000,
+  });
+}
+
+export function useSendDm(chatId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (content: string) => dmApi.send(chatId, content),
+    onSuccess: (msg) => {
+      qc.setQueryData<DmMessage[]>(['dm', 'messages', chatId], (prev) =>
+        prev ? [...prev, msg] : [msg],
+      );
+      qc.invalidateQueries({ queryKey: ['dm', 'chats'] });
+    },
+  });
+}
