@@ -81,6 +81,7 @@ function NavLanguage() {
 }
 
 export function DesktopNav({ onCreateRoom }: Props) {
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { data: unread } = useUnreadCount();
@@ -93,74 +94,77 @@ export function DesktopNav({ onCreateRoom }: Props) {
 
   return (
     <>
-      <nav className="hidden md:flex w-[10vw] min-w-[72px] max-w-[110px] shrink-0 flex-col items-center gap-1 py-4 bg-white border-r border-neutral-100">
-        {/* Avatar */}
-        {user?.username && (
-          <NavLink
-            to={`/u/${user.username}`}
-            title={user.fullName}
-            className="relative w-11 h-11 rounded-full mb-1 shrink-0"
-          >
-            <span className="absolute inset-0 rounded-full bg-[conic-gradient(from_0deg,#2d6ff8,#8eb5ff,#22c55e,#2d6ff8)] animate-[spin_4s_linear_infinite]" />
-            <span className="absolute inset-[2px] rounded-full overflow-hidden bg-neutral-100 flex items-center justify-center text-sm font-semibold text-neutral-600">
-              {user.avatarUrl ? (
-                <img src={getMediaUrl(user.avatarUrl)} alt="" className="w-full h-full object-cover" />
-              ) : (
-                initials(user.fullName)
-              )}
-            </span>
-          </NavLink>
-        )}
-
-        {/* Створити */}
-        <button
-          onClick={onCreateRoom}
-          title="Створити кімнату"
-          className="w-11 h-11 rounded-xl bg-brand-gradient hover:bg-brand-gradient-hover text-white flex items-center justify-center transition-colors shadow-fab my-1"
-        >
-          <Plus size={22} />
-        </button>
-
-        {/* Приєднатись за кодом */}
-        <button
-          onClick={() => setShowJoin(true)}
-          title="Приєднатись за кодом"
-          className="flex items-center justify-center w-11 h-11 rounded-xl text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 transition-colors"
-        >
-          <KeyRound size={18} />
-        </button>
-
-        <NavLink to="/rooms" className={itemClass} title="&u — стрічка">
-          <Ampersand size={20} />
-        </NavLink>
-        <NavLink to="/contacts" className={itemClass} title="Друзі">
-          <Users size={20} />
-        </NavLink>
-        <NavLink to="/events" className={itemClass} title="Мої події">
-          <Heart size={20} />
-        </NavLink>
-
-        {/* Сповіщення — після Heart */}
-        <NavLink to="/notifications" className={itemClass} title="Сповіщення">
-          <div className="relative">
-            <Bell size={20} />
-            {unread !== undefined && unread > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 bg-brand-gradient hover:bg-brand-gradient-hover text-white text-[9px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center">
-                {unread > 99 ? '99+' : unread}
+      <nav className="hidden md:flex w-[10vw] min-w-[72px] max-w-[110px] shrink-0 flex-col items-center py-4 bg-white border-r border-neutral-100">
+        {/* ── ВГОРУ: профіль + дії ───────────────────── */}
+        <div className="flex flex-col items-center gap-1">
+          {user?.username && (
+            <NavLink
+              to={`/u/${user.username}`}
+              title={user.fullName}
+              className="relative w-11 h-11 rounded-full mb-1 shrink-0"
+            >
+              <span className="absolute inset-0 rounded-full bg-[conic-gradient(from_0deg,#2d6ff8,#8eb5ff,#22c55e,#2d6ff8)] animate-[spin_4s_linear_infinite]" />
+              <span className="absolute inset-[2px] rounded-full overflow-hidden bg-neutral-100 flex items-center justify-center text-sm font-semibold text-neutral-600">
+                {user.avatarUrl ? (
+                  <img src={getMediaUrl(user.avatarUrl)} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  initials(user.fullName)
+                )}
               </span>
-            )}
-          </div>
-        </NavLink>
+            </NavLink>
+          )}
+          <button
+            onClick={onCreateRoom}
+            title={t('rooms.newRoom') as string}
+            className="w-11 h-11 rounded-xl bg-brand-gradient hover:bg-brand-gradient-hover text-white flex items-center justify-center transition-colors shadow-fab"
+          >
+            <Plus size={22} />
+          </button>
+          <button
+            onClick={() => setShowJoin(true)}
+            title={t('rooms.joinByCode') as string}
+            className="flex items-center justify-center w-11 h-11 rounded-xl text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 transition-colors"
+          >
+            <KeyRound size={18} />
+          </button>
+        </div>
 
-        {/* Низ: Налаштування → Мова → Вийти */}
+        {/* divider */}
+        <div className="w-8 h-px bg-neutral-100 my-3" />
+
+        {/* ── ПОСЕРЕДИНІ: основні розділи ────────────── */}
+        <div className="flex flex-col items-center gap-1">
+          <NavLink to="/rooms" className={itemClass} title="& Spaces">
+            <Ampersand size={20} />
+          </NavLink>
+          <NavLink to="/contacts" className={itemClass} title={t('contacts.link') as string}>
+            <Users size={20} />
+          </NavLink>
+          <NavLink to="/events" className={itemClass} title={t('nav.events') as string}>
+            <Heart size={20} />
+          </NavLink>
+          <NavLink to="/notifications" className={itemClass} title={t('notifications.title') as string}>
+            <div className="relative">
+              <Bell size={20} />
+              {unread !== undefined && unread > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 bg-brand-gradient text-white text-[9px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center">
+                  {unread > 99 ? '99+' : unread}
+                </span>
+              )}
+            </div>
+          </NavLink>
+        </div>
+
+        {/* ── ВНИЗУ: налаштування / мова / вихід ─────── */}
         <div className="mt-auto flex flex-col items-center gap-1">
-          <NavLink to="/settings/profile" className={itemClass} title="Налаштування">
+          <div className="w-8 h-px bg-neutral-100 mb-3" />
+          <NavLink to="/settings/profile" className={itemClass} title={t('profile.settings') as string}>
             <Settings size={20} />
           </NavLink>
           <NavLanguage />
           <button
             onClick={handleLogout}
-            title="Вийти"
+            title={t('common.logout') as string}
             className="flex items-center justify-center w-11 h-11 rounded-xl text-neutral-400 hover:bg-red-50 hover:text-red-600 transition-colors"
           >
             <LogOut size={20} />

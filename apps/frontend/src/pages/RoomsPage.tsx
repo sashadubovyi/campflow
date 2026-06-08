@@ -18,7 +18,7 @@ export function RoomsPage() {
   return (
     <div className="h-full flex flex-col bg-neutral-50 overflow-hidden">
       <PageHeader
-        title={<span className="font-display">&amp;u</span>}
+        title={<span className="font-display">&amp; Spaces</span>}
         left={
           <button
             onClick={() => setShowJoin(true)}

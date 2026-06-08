@@ -14,7 +14,7 @@ export function MobileTabBar() {
 
   return (
     <nav className="flex md:hidden fixed bottom-0 inset-x-0 z-40 h-16 bg-white border-t border-neutral-100 pb-[env(safe-area-inset-bottom)]">
-      <NavLink to="/rooms" className={itemCls} aria-label="&u">
+      <NavLink to="/rooms" className={itemCls} aria-label="Spaces">
         <Ampersand size={24} />
       </NavLink>
       <NavLink to="/chat" className={itemCls} aria-label="Chat">

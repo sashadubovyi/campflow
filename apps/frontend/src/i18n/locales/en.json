@@ -98,7 +98,7 @@
   },
   "nav": {
     "home": "Rooms",
-    "feed": "&u",
+    "feed": "& Spaces",
     "chat": "Chat",
     "map": "Map",
     "events": "My events",
@@ -292,10 +292,15 @@
     "title": "My contacts",
     "link": "Contacts",
     "empty": "No contacts yet",
+    "emptyPending": "Awaiting confirmation",
     "emptyHint": "Add people from their profiles — the «+ Add to contacts» button.",
     "count": "{{count}} contacts",
     "mutual": "— mutually added",
-    "message": "Message"
+    "message": "Message",
+    "tabs": {
+      "mutual": "Mutual",
+      "pending": "Pending"
+    }
   },
   "invites": {
     "byUsername": "By username",

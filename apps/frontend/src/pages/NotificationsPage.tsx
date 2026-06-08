@@ -7,7 +7,7 @@ import { Avatar } from '../shared/ui/Avatar';
 import { relativeTime } from '../shared/lib/relativeTime';
 import type { NotificationItem } from '../shared/api/notifications.api';
 import { BackButton, PageHeader } from '../shared/ui';
-import { Mail, CheckCircle, XCircle, UserX, Crown, Clock, Bell, CheckCheck, UserPlus } from 'lucide-react';
+import { Mail, Check, XCircle, UserX, Crown, Clock, Bell, CheckCheck, UserPlus } from 'lucide-react';
 
 export function NotificationsPage() {
   const { t } = useTranslation();
@@ -329,10 +329,18 @@ function SystemCard({
 function iconForKind(kind: NotificationItem['kind']) {
   const map: Partial<Record<NotificationItem['kind'], React.ReactNode>> = {
     room_invite: <Mail size={18} className="text-neutral-500" />,
-    room_invite_accepted: <CheckCircle size={18} className="text-green-500" />,
+    room_invite_accepted: (
+      <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-neutral-100">
+        <Check size={12} strokeWidth={3} className="text-neutral-500" />
+      </span>
+    ),
     room_invite_declined: <XCircle size={18} className="text-red-400" />,
     join_request: <UserPlus size={18} className="text-accent-600" />,
-    join_request_accepted: <CheckCircle size={18} className="text-green-500" />,
+    join_request_accepted: (
+      <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-neutral-100">
+        <Check size={12} strokeWidth={3} className="text-neutral-500" />
+      </span>
+    ),
     join_request_rejected: <XCircle size={18} className="text-red-400" />,
     member_removed: <UserX size={18} className="text-neutral-500" />,
     room_admin_transferred: <Crown size={18} className="text-amber-500" />,
