@@ -23,14 +23,13 @@ body {
 
 /* Тонкий скролбар для панелей */
 /* Leaflet tiles під модалками */
+/* НЕ override-ити .leaflet-marker-icon / .leaflet-marker-pane / .leaflet-marker-shadow —
+   це ламає DOM-маркери (divIcon) після Leaflet-анімації, маркери зникають через ~1 с */
 .leaflet-pane,
 .leaflet-tile,
-.leaflet-marker-icon,
-.leaflet-marker-shadow,
 .leaflet-tile-pane,
 .leaflet-overlay-pane,
 .leaflet-shadow-pane,
-.leaflet-marker-pane,
 .leaflet-tooltip-pane,
 .leaflet-popup-pane {
   z-index: auto !important;
