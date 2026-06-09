@@ -53,7 +53,7 @@ export function ContactsPage() {
   return (
     <div className="h-full flex flex-col bg-neutral-50 font-body">
       <PageHeader
-        title={<span className="font-display">&amp; Friends</span>}
+        title={<span className="font-display">{t('nav.titles.friends')}</span>}
         left={<BackButton />}
         right={
           <button

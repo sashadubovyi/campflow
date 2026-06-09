@@ -37,7 +37,11 @@
     "noAccount": "Немає акаунту?",
     "haveAccount": "Вже є акаунт?",
     "invalidCredentials": "Невірний email або пароль",
-    "emailInUse": "Email вже використовується"
+    "emailInUse": "Email вже використовується",
+    "signinWithApple": "Увійти через Apple",
+    "signupWithApple": "Зареєструватись через Apple",
+    "signinWithFacebook": "Увійти через Facebook",
+    "signupWithFacebook": "Зареєструватись через Facebook"
   },
   "rooms": {
     "title": "Майбутні події",
@@ -98,11 +102,24 @@
   },
   "nav": {
     "home": "Кімнати",
-    "feed": "& Spaces",
+    "feed": "Spaces",
     "chat": "Чат",
     "map": "Карта",
     "events": "Мої події",
-    "profile": "Профіль"
+    "profile": "Профіль",
+    "titles": {
+      "spaces": "Простори",
+      "chats": "Чати",
+      "events": "Події",
+      "calendar": "Календар",
+      "map": "Карта",
+      "friends": "Друзі",
+      "notifications": "Сповіщення",
+      "blocked": "Заблоковані",
+      "settings": "Налаштування",
+      "search": "Пошук",
+      "language": "Мова"
+    }
   },
   "feed": {
     "join": "Приєднатись",
@@ -149,7 +166,9 @@
     "retry": "Повторити",
     "send": "Надіслати",
     "importantFilter": "Тільки важливі",
-    "noImportantMessages": "Немає важливих повідомлень"
+    "noImportantMessages": "Немає важливих повідомлень",
+    "reply": "Відповісти",
+    "replyingTo": "Відповідь:"
   },
   "qr": {
     "title": "QR код профілю",

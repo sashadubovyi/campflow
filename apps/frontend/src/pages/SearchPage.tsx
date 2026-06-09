@@ -47,7 +47,7 @@ export function SearchPage() {
   return (
     <div className="h-full flex flex-col bg-neutral-50 font-body">
       <PageHeader
-        title={<span className="font-display">&amp; Search</span>}
+        title={<span className="font-display">{t('nav.titles.search')}</span>}
         left={<BackButton />}
       />
 

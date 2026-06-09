@@ -3,15 +3,16 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { OAuthService } from './oauth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
-    JwtModule.register({}), // секреты передаём явно в signAsync
+    JwtModule.register({}),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, OAuthService, JwtStrategy],
   exports: [AuthService],
 })
 export class AuthModule {}

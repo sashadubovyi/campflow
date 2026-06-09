@@ -12,7 +12,7 @@ export function BlockedUsersPage() {
 
   return (
     <div className="h-full flex flex-col bg-neutral-50 font-body">
-      <PageHeader title={<span className="font-display">&amp; Blocked</span>} left={<BackButton />} />
+      <PageHeader title={<span className="font-display">{t('nav.titles.blocked')}</span>} left={<BackButton />} />
 
       <main className="flex-1 overflow-y-auto max-w-2xl mx-auto w-full px-4 md:px-6 py-6">
         {isLoading && (

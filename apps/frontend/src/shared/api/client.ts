@@ -37,7 +37,8 @@ api.interceptors.response.use(
     const isAuthRoute =
       url.includes('/auth/refresh') ||
       url.includes('/auth/login') ||
-      url.includes('/auth/register');
+      url.includes('/auth/register') ||
+      url.includes('/auth/oauth');
 
     if (error.response?.status === 401 && !original._retry && !isAuthRoute) {
       if (isRefreshing) {

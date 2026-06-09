@@ -37,7 +37,11 @@
     "noAccount": "Don't have an account?",
     "haveAccount": "Already have an account?",
     "invalidCredentials": "Invalid email or password",
-    "emailInUse": "Email already in use"
+    "emailInUse": "Email already in use",
+    "signinWithApple": "Sign in with Apple",
+    "signupWithApple": "Sign up with Apple",
+    "signinWithFacebook": "Sign in with Facebook",
+    "signupWithFacebook": "Sign up with Facebook"
   },
   "rooms": {
     "title": "Upcoming events",
@@ -98,11 +102,24 @@
   },
   "nav": {
     "home": "Rooms",
-    "feed": "& Spaces",
+    "feed": "Spaces",
     "chat": "Chat",
     "map": "Map",
     "events": "My events",
-    "profile": "Profile"
+    "profile": "Profile",
+    "titles": {
+      "spaces": "Spaces",
+      "chats": "Chats",
+      "events": "Events",
+      "calendar": "Calendar",
+      "map": "Map",
+      "friends": "Friends",
+      "notifications": "Notifications",
+      "blocked": "Blocked",
+      "settings": "Settings",
+      "search": "Search",
+      "language": "Language"
+    }
   },
   "feed": {
     "join": "Join",
@@ -149,7 +166,9 @@
     "retry": "Retry",
     "send": "Send",
     "importantFilter": "Important only",
-    "noImportantMessages": "No important messages"
+    "noImportantMessages": "No important messages",
+    "reply": "Reply",
+    "replyingTo": "Reply to:"
   },
   "qr": {
     "title": "Profile QR code",

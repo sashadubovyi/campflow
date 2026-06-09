@@ -129,6 +129,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       client.data.userId,
       dto.roomId,
       dto.content,
+      dto.replyToId,
     );
 
     this.server.to(this.roomChannel(dto.roomId)).emit('message:new', message);

@@ -1,5 +1,12 @@
 import { api } from './client';
 
+export interface ReplyPreview {
+  id: string;
+  content: string;
+  authorId: string | null;
+  author: { id: string; fullName: string } | null;
+}
+
 export interface Message {
   id: string;
   roomId: string;
@@ -13,6 +20,8 @@ export interface Message {
     fullName: string;
     avatarUrl: string | null;
   } | null;
+  replyToId?: string | null;
+  replyTo?: ReplyPreview | null;
   /** Local-only optimistic send status */
   _status?: 'sending' | 'failed';
 }

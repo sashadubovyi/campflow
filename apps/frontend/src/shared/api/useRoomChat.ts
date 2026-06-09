@@ -83,7 +83,7 @@ export function useRoomChat(roomId: string) {
   }, [roomId]);
 
   const sendMessage = useCallback(
-    (content: string, retryId?: string): string => {
+    (content: string, retryId?: string, replyTo?: { id: string; content: string; authorId: string | null; author: { id: string; fullName: string } | null } | null): string => {
       const socket = getSocket();
       const tempId = retryId ?? `pending-${Date.now()}-${Math.random()}`;
 
@@ -99,6 +99,8 @@ export function useRoomChat(roomId: string) {
           author: user
             ? { id: user.id, fullName: user.fullName, avatarUrl: user.avatarUrl }
             : null,
+          replyToId: replyTo?.id ?? null,
+          replyTo: replyTo ?? null,
           _status: 'sending',
         };
         setMessages((prev) => [...prev, optimistic]);
@@ -110,7 +112,7 @@ export function useRoomChat(roomId: string) {
 
       socket.timeout(6000).emit(
         'message:send',
-        { roomId, content },
+        { roomId, content, replyToId: replyTo?.id },
         (err: Error | null, ack: { ok: boolean; id: string } | undefined) => {
           if (err || !ack?.ok) {
             setMessages((prev) =>

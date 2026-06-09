@@ -69,6 +69,15 @@ export default {
         card: '20px',
         'card-lg': '24px',
       },
+      keyframes: {
+        'brand-pulse': {
+          '0%, 100%': { opacity: '0.25', transform: 'scale(0.98)' },
+          '50%': { opacity: '1', transform: 'scale(1.02)' },
+        },
+      },
+      animation: {
+        'brand-pulse': 'brand-pulse 1.8s ease-in-out infinite',
+      },
     },
   },
   plugins: [],

@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../shared/store/useAuth';
 import { LanguageSwitcher } from '../../shared/ui/LanguageSwitcher';
+import { OAuthButtons } from './OAuthButtons';
 import type { AxiosError } from 'axios';
 import type { ApiError } from '../../shared/api/types';
 
@@ -51,8 +52,8 @@ export function RegisterPage() {
       </div>
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="font-display text-lg font-bold text-neutral-900">
-            Camp<span className="text-accent-600">Flow</span>
+          <h1 className="font-display text-3xl font-bold text-neutral-900">
+            &amp;<span className="text-accent-600">u</span>
           </h1>
           <p className="font-body text-neutral-700 mt-2">{t('auth.registerTitle')}</p>
         </div>
@@ -132,6 +133,10 @@ export function RegisterPage() {
               {isSubmitting ? t('common.loading') : t('auth.register')}
             </button>
           </form>
+
+          <div className="mt-6">
+            <OAuthButtons context="signup" />
+          </div>
         </div>
 
         <p className="text-center text-neutral-700 text-sm mt-6 font-body">

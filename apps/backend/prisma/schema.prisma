@@ -19,7 +19,7 @@ model User {
   id              String   @id @default(uuid()) @db.Uuid
   email           String   @unique @db.Citext
   username        String   @unique @db.VarChar(32)
-  passwordHash    String   @map("password_hash")
+  passwordHash    String?  @map("password_hash")
   fullName        String   @map("full_name")
   phone           String?
   avatarUrl       String?  @map("avatar_url")
@@ -78,8 +78,30 @@ model User {
   dmChatsA        DirectChat[]    @relation("DmChatsA")
   dmChatsB        DirectChat[]    @relation("DmChatsB")
   dmMessages      DirectMessage[]
+  oauthIdentities OAuthIdentity[]
 
   @@map("users")
+}
+
+enum OAuthProvider {
+  google
+  apple
+  facebook
+}
+
+model OAuthIdentity {
+  id             String        @id @default(uuid()) @db.Uuid
+  userId         String        @map("user_id") @db.Uuid
+  provider       OAuthProvider
+  providerUserId String        @map("provider_user_id") @db.VarChar(255)
+  email          String?       @db.Citext
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz()
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerUserId])
+  @@index([userId])
+  @@map("oauth_identities")
 }
 
 enum Gender {
@@ -191,12 +213,16 @@ model Message {
   content     String      @db.Text
   isImportant Boolean     @default(false) @map("is_important")
   editedAt    DateTime?   @map("edited_at") @db.Timestamptz()
+  replyToId String?     @map("reply_to_id") @db.Uuid
   createdAt DateTime    @default(now()) @map("created_at") @db.Timestamptz()
 
-  room   Room  @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  author User? @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  room    Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  author  User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  replyTo Message?  @relation("MessageReplies", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies Message[] @relation("MessageReplies")
 
   @@index([roomId, createdAt(sort: Desc)])
+  @@index([replyToId])
   @@map("messages")
 }
 

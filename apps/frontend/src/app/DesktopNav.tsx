@@ -100,7 +100,7 @@ export function DesktopNav({ onCreateRoom }: Props) {
 
         {/* ── ПОСЕРЕДИНІ: основні розділи ────────────── */}
         <div className="flex flex-col items-center gap-1">
-          <NavLink to="/rooms" className={itemClass} title="& Spaces">
+          <NavLink to="/rooms" className={itemClass} title={t('nav.titles.spaces') as string}>
             <Ampersand size={20} />
           </NavLink>
           <NavLink to="/search" className={itemClass} title={t('search.title', 'Пошук') as string}>

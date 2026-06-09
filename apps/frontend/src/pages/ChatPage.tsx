@@ -14,7 +14,7 @@ export function ChatPage() {
   return (
     <div className="h-full flex flex-col bg-neutral-50 font-body">
       <PageHeader
-        title={<span className="font-display">&amp; Chats</span>}
+        title={<span className="font-display">{t('nav.titles.chats')}</span>}
         right={
           <button
             onClick={() => navigate('/search')}

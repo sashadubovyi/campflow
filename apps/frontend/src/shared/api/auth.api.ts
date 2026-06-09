@@ -37,4 +37,20 @@ export const authApi = {
     const { data } = await api.post<{ accessToken: string }>('/auth/refresh');
     return data;
   },
+
+  async oauthGoogle(idToken: string): Promise<AuthResponse> {
+    const { data } = await api.post<AuthResponse>('/auth/oauth/google', { idToken });
+    return data;
+  },
+
+  async oauthApple(idToken: string, fullName?: string): Promise<AuthResponse> {
+    const { data } = await api.post<AuthResponse>('/auth/oauth/apple', { idToken, fullName });
+    return data;
+  },
+
+  async oauthFacebook(accessToken: string): Promise<AuthResponse> {
+    // На бекенді поле DTO називається idToken — переюзаємо.
+    const { data } = await api.post<AuthResponse>('/auth/oauth/facebook', { idToken: accessToken });
+    return data;
+  },
 };

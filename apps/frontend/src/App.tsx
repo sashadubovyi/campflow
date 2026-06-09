@@ -4,6 +4,7 @@ import { RouterProvider } from 'react-router-dom';
 import { router } from './app/router';
 import { useAuth } from './shared/store/useAuth';
 import { useNotificationsSubscription } from './shared/api/notifications.hooks';
+import { BrandLoader } from './shared/ui/BrandLoader';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,13 +26,7 @@ function AppContent() {
   }, []);
 
   if (!isInitialized) {
-    return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
-        <div className="font-display text-2xl text-neutral-900 animate-pulse">
-          Camp<span className="text-accent-600">Flow</span>
-        </div>
-      </div>
-    );
+    return <BrandLoader fullscreen />;
   }
 
   return <RouterProvider router={router} />;

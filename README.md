@@ -142,6 +142,30 @@ apps/backend/Procfile
 6. Persistent storage for `apps/backend/uploads/` — mount a volume; the relative
    `/uploads/...` URLs are served by Nest's `useStaticAssets`.
 
+### OAuth (Google / Apple Sign-In)
+
+Sign-In кнопки на сторінках Login та Register активуються лише коли
+налаштовані `VITE_GOOGLE_CLIENT_ID` / `VITE_APPLE_CLIENT_ID` на фронті
+**та** `GOOGLE_OAUTH_CLIENT_ID` / `APPLE_OAUTH_CLIENT_ID` на бекенді.
+Без них кнопки просто не рендеряться — звичайний email-логін працює як раніше.
+
+**Google** (console.cloud.google.com → APIs & Services → Credentials):
+- Створити OAuth 2.0 Client ID типу **Web application**.
+- Authorized JavaScript origins: `https://<frontend-domain>` (+ `http://localhost:5173` для dev).
+- Той самий Client ID кладеш у backend `GOOGLE_OAUTH_CLIENT_ID` і frontend `VITE_GOOGLE_CLIENT_ID`.
+
+**Apple** (developer.apple.com → Certificates, Identifiers & Profiles):
+- Створити **Services ID** з увімкненим Sign In with Apple.
+- Додати домен фронта і Return URL (наприклад `https://<frontend-domain>/login`).
+- Service ID іде у `APPLE_OAUTH_CLIENT_ID` (backend) і `VITE_APPLE_CLIENT_ID` (frontend);
+  `VITE_APPLE_REDIRECT_URI` — той самий Return URL.
+
+Backend перевіряє id_token самостійно через JWKS обох провайдерів — додаткові
+пакети не потрібні. OAuth-юзери створюються з `password_hash = NULL` і
+прив'язуються через таблицю `oauth_identities`. Якщо email вже зайнятий
+існуючим email-логіном — нова OAuth-айдентичність додається до того ж юзера
+(тільки якщо email верифікований провайдером).
+
 ### Frontend (Vercel)
 
 `apps/frontend/vercel.json` proxies `/api/*`, `/uploads/*` and `/socket.io/*`

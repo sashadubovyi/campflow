@@ -16,7 +16,7 @@ export function LanguagePage() {
   return (
     <div className="h-full flex flex-col bg-neutral-50 font-body">
       <PageHeader
-        title={<span className="font-display">&amp; Language</span>}
+        title={<span className="font-display">{t('nav.titles.language')}</span>}
         left={<BackButton />}
       />
 

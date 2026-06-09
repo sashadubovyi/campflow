@@ -1,4 +1,4 @@
-import { IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
+import { IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 
 export class SendMessageDto {
   @IsUUID()
@@ -8,4 +8,9 @@ export class SendMessageDto {
   @MinLength(1)
   @MaxLength(4000)
   content!: string;
+
+  /** UUID повідомлення, на яке відповідаємо (опціонально). */
+  @IsOptional()
+  @IsUUID()
+  replyToId?: string;
 }

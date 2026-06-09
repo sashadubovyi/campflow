@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Send, MessageCircle, MoreHorizontal, Trash2, Star, RefreshCw } from 'lucide-react';
+import { Send, MessageCircle, MoreHorizontal, Trash2, Star, RefreshCw, CornerUpLeft, X } from 'lucide-react';
 import { useRoomChat } from '../../shared/api/useRoomChat';
 import { useAuth } from '../../shared/store/useAuth';
 import { Avatar } from '../../shared/ui/Avatar';
@@ -27,8 +27,17 @@ export function ChatPanel({ roomId, roomName: _roomName, importantOnly = false, 
   const { messages, isLoading, typingUsers, sendMessage, deleteMessage, toggleImportant, emitTyping } =
     useRoomChat(roomId);
   const [text, setText] = useState('');
+  const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  function startReplyTo(m: Message) {
+    setReplyingTo(m);
+    // Невелика затримка — щоб мобільний клавіатурний focus спрацював після
+    // закриття меню/тача.
+    setTimeout(() => inputRef.current?.focus(), 50);
+  }
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -51,8 +60,19 @@ export function ChatPanel({ roomId, roomName: _roomName, importantOnly = false, 
   function handleSend() {
     const trimmed = text.trim();
     if (!trimmed) return;
-    sendMessage(trimmed);
+    const replyPayload = replyingTo
+      ? {
+          id: replyingTo.id,
+          content: replyingTo.content,
+          authorId: replyingTo.authorId,
+          author: replyingTo.author
+            ? { id: replyingTo.author.id, fullName: replyingTo.author.fullName }
+            : null,
+        }
+      : null;
+    sendMessage(trimmed, undefined, replyPayload);
     setText('');
+    setReplyingTo(null);
     emitTyping(false);
   }
 
@@ -99,6 +119,7 @@ export function ChatPanel({ roomId, roomName: _roomName, importantOnly = false, 
               isOwn={isOwn}
               showAvatar={showAvatar}
               locale={i18n.language}
+              onReply={() => startReplyTo(m)}
               onDelete={() => deleteMessage(m.id)}
               onToggleImportant={() => toggleImportant(m.id)}
               onRetry={() => sendMessage(m.content, m.id)}
@@ -117,9 +138,33 @@ export function ChatPanel({ roomId, roomName: _roomName, importantOnly = false, 
         )}
       </div>
 
-      <div className="px-4 md:px-6 py-3 border-t border-neutral-100 bg-white shrink-0">
-        <div className="flex items-center gap-2">
+      <div className="border-t border-neutral-100 bg-white shrink-0">
+        {/* Reply preview bar — mobile-first, тонкий і клікабельний дозакриття */}
+        {replyingTo && (
+          <div className="flex items-center gap-2 px-3 md:px-6 py-2 bg-accent-50 border-b border-accent-100">
+            <CornerUpLeft size={14} className="text-accent-600 shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] font-semibold text-accent-700 leading-tight">
+                {t('chat.replyingTo', 'Відповідь:')}{' '}
+                {replyingTo.author?.fullName ?? t('common.you', 'Ви')}
+              </p>
+              <p className="text-xs text-neutral-700 truncate leading-tight">
+                {replyingTo.content}
+              </p>
+            </div>
+            <button
+              onClick={() => setReplyingTo(null)}
+              className="shrink-0 p-1 rounded-md text-neutral-500 hover:text-neutral-900 hover:bg-white transition"
+              aria-label={t('common.cancel')}
+            >
+              <X size={14} />
+            </button>
+          </div>
+        )}
+
+        <div className="flex items-center gap-2 px-4 md:px-6 py-3">
           <input
+            ref={inputRef}
             value={text}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
@@ -145,6 +190,7 @@ function MessageBubble({
   isOwn,
   showAvatar,
   locale,
+  onReply,
   onDelete,
   onToggleImportant,
   onRetry,
@@ -153,6 +199,7 @@ function MessageBubble({
   isOwn: boolean;
   showAvatar: boolean;
   locale: string;
+  onReply: () => void;
   onDelete: () => void;
   onToggleImportant: () => void;
   onRetry: () => void;
@@ -163,6 +210,44 @@ function MessageBubble({
   const [openDown, setOpenDown] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressTriggered = useRef(false);
+
+  // Long-press (550мс) на бабл — відкриває те саме меню, що й три точки.
+  // Якщо touchmove > ~10px вважаємо це скролом і скасовуємо.
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
+
+  function handleTouchStart(e: React.TouchEvent) {
+    if (message.type === 'system') return;
+    const t = e.touches[0];
+    if (!t) return;
+    touchStart.current = { x: t.clientX, y: t.clientY };
+    longPressTriggered.current = false;
+    longPressTimer.current = setTimeout(() => {
+      longPressTriggered.current = true;
+      setOpenDown(false);
+      setMenuOpen(true);
+      // легка віброреакція якщо доступна
+      if ('vibrate' in navigator) {
+        try { navigator.vibrate?.(15); } catch { /* ignore */ }
+      }
+    }, 550);
+  }
+
+  function handleTouchMove(e: React.TouchEvent) {
+    const t = e.touches[0];
+    if (!t || !touchStart.current) return;
+    const dx = Math.abs(t.clientX - touchStart.current.x);
+    const dy = Math.abs(t.clientY - touchStart.current.y);
+    if (dx > 10 || dy > 10) cancelLongPress();
+  }
+
+  function cancelLongPress() {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  }
 
   // Close menu on outside click
   useEffect(() => {
@@ -201,12 +286,35 @@ function MessageBubble({
 
   const bubbleContent = (
     <div
-      className={`px-3.5 py-2 text-sm leading-relaxed transition-opacity ${isSending || isFailed ? 'opacity-50' : 'opacity-100'} ${
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={cancelLongPress}
+      onTouchCancel={cancelLongPress}
+      onContextMenu={(e) => {
+        // На mobile довгий тач інколи викликає системне меню — блокуємо.
+        if (longPressTriggered.current) e.preventDefault();
+      }}
+      className={`px-3.5 py-2 text-sm leading-relaxed transition-opacity select-none ${isSending || isFailed ? 'opacity-50' : 'opacity-100'} ${
         isOwn
           ? 'bg-gradient-to-br from-accent-400 to-accent-600 text-white rounded-2xl rounded-tr-md shadow-sm'
           : 'bg-gradient-to-br from-white to-neutral-100 text-neutral-900 shadow-card rounded-2xl rounded-tl-md'
       }`}
     >
+      {/* Reply preview inside bubble — клікабельний, ілюзія цитати */}
+      {message.replyTo && (
+        <div
+          className={`mb-1.5 px-2 py-1 rounded-md border-l-2 text-[11px] leading-tight ${
+            isOwn
+              ? 'bg-white/10 border-white/60 text-white/90'
+              : 'bg-neutral-100 border-accent-400 text-neutral-600'
+          }`}
+        >
+          <p className={`font-semibold truncate ${isOwn ? 'text-white' : 'text-accent-700'}`}>
+            {message.replyTo.author?.fullName ?? t('common.you', 'Ви')}
+          </p>
+          <p className="truncate opacity-80">{message.replyTo.content}</p>
+        </div>
+      )}
       {message.content}
     </div>
   );
@@ -289,6 +397,18 @@ function MessageBubble({
           <div
             className={`absolute ${openDown ? 'top-8' : 'bottom-8'} ${isOwn ? 'right-0' : 'left-0'} bg-white rounded-xl shadow-card border border-neutral-100 py-1 z-20 min-w-[160px]`}
           >
+            {/* Reply */}
+            <button
+              onClick={() => {
+                onReply();
+                setMenuOpen(false);
+              }}
+              className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors"
+            >
+              <CornerUpLeft size={14} className="text-neutral-400" />
+              {t('chat.reply', 'Відповісти')}
+            </button>
+
             {/* Mark important */}
             <button
               onClick={() => {

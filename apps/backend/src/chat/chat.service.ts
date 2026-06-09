@@ -17,11 +17,23 @@ export class ChatService {
     return member;
   }
 
-  async createMessage(userId: string, roomId: string, content: string) {
+  async createMessage(userId: string, roomId: string, content: string, replyToId?: string) {
     await this.assertMembership(userId, roomId);
 
     const room = await this.prisma.room.findUnique({ where: { id: roomId } });
     if (!room || room.archivedAt) throw new NotFoundException('Room not found');
+
+    // Захист: replyToId має посилатись на повідомлення в цій же кімнаті.
+    let validReplyToId: string | null = null;
+    if (replyToId) {
+      const parent = await this.prisma.message.findUnique({
+        where: { id: replyToId },
+        select: { roomId: true },
+      });
+      if (parent && parent.roomId === roomId) {
+        validReplyToId = replyToId;
+      }
+    }
 
     const message = await this.prisma.message.create({
       data: {
@@ -29,10 +41,17 @@ export class ChatService {
         authorId: userId,
         content,
         type: 'text',
+        replyToId: validReplyToId,
       },
       include: {
-        author: {
-          select: { id: true, fullName: true, avatarUrl: true },
+        author: { select: { id: true, fullName: true, avatarUrl: true } },
+        replyTo: {
+          select: {
+            id: true,
+            content: true,
+            authorId: true,
+            author: { select: { id: true, fullName: true } },
+          },
         },
       },
     });
@@ -52,8 +71,14 @@ export class ChatService {
         ...(options.cursor && { createdAt: { lt: new Date(options.cursor) } }),
       },
       include: {
-        author: {
-          select: { id: true, fullName: true, avatarUrl: true },
+        author: { select: { id: true, fullName: true, avatarUrl: true } },
+        replyTo: {
+          select: {
+            id: true,
+            content: true,
+            authorId: true,
+            author: { select: { id: true, fullName: true } },
+          },
         },
       },
       orderBy: { createdAt: 'desc' },

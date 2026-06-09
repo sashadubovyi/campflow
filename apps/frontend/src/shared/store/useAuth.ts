@@ -17,6 +17,24 @@ export function useAuth() {
     return res.user;
   }
 
+  async function loginWithGoogle(idToken: string) {
+    const res = await authApi.oauthGoogle(idToken);
+    setAuth(res.user, res.accessToken);
+    return res.user;
+  }
+
+  async function loginWithApple(idToken: string, fullName?: string) {
+    const res = await authApi.oauthApple(idToken, fullName);
+    setAuth(res.user, res.accessToken);
+    return res.user;
+  }
+
+  async function loginWithFacebook(accessToken: string) {
+    const res = await authApi.oauthFacebook(accessToken);
+    setAuth(res.user, res.accessToken);
+    return res.user;
+  }
+
   async function logout() {
     try {
       await authApi.logout();
@@ -47,6 +65,9 @@ export function useAuth() {
     isAuthenticated: !!user,
     login,
     register,
+    loginWithGoogle,
+    loginWithApple,
+    loginWithFacebook,
     logout,
     bootstrap,
   };

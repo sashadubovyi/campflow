@@ -181,7 +181,7 @@ export function ProfileSettingsPage() {
         <div className="w-full px-4 md:px-6 py-3 flex items-center justify-between gap-3">
           <BackButton />
           <span className="font-display text-lg font-bold text-neutral-900 truncate">
-            &amp; Settings
+            {t('nav.titles.settings')}
           </span>
           {saved ? (
             <span className="flex items-center gap-1.5 text-sm font-semibold text-green-600 px-4 py-1.5 rounded-xl bg-green-50 animate-fade-in">

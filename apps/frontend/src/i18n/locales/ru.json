@@ -37,7 +37,11 @@
     "noAccount": "Нет аккаунта?",
     "haveAccount": "Уже есть аккаунт?",
     "invalidCredentials": "Неверный email или пароль",
-    "emailInUse": "Email уже используется"
+    "emailInUse": "Email уже используется",
+    "signinWithApple": "Войти через Apple",
+    "signupWithApple": "Регистрация через Apple",
+    "signinWithFacebook": "Войти через Facebook",
+    "signupWithFacebook": "Регистрация через Facebook"
   },
   "rooms": {
     "title": "Будущие события",
@@ -98,11 +102,24 @@
   },
   "nav": {
     "home": "Комнаты",
-    "feed": "& Spaces",
+    "feed": "Spaces",
     "chat": "Чат",
     "map": "Карта",
     "events": "Мои события",
-    "profile": "Профиль"
+    "profile": "Профиль",
+    "titles": {
+      "spaces": "Комнаты",
+      "chats": "Чаты",
+      "events": "События",
+      "calendar": "Календарь",
+      "map": "Карта",
+      "friends": "Друзья",
+      "notifications": "Уведомления",
+      "blocked": "Заблокированные",
+      "settings": "Настройки",
+      "search": "Поиск",
+      "language": "Язык"
+    }
   },
   "feed": {
     "join": "Присоединиться",
@@ -149,7 +166,9 @@
     "retry": "Повторить",
     "send": "Отправить",
     "importantFilter": "Только важные",
-    "noImportantMessages": "Нет важных сообщений"
+    "noImportantMessages": "Нет важных сообщений",
+    "reply": "Ответить",
+    "replyingTo": "Ответ:"
   },
   "qr": {
     "title": "QR код профиля",

@@ -4,6 +4,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../shared/store/useAuth';
 import { LanguageSwitcher } from '../../shared/ui/LanguageSwitcher';
+import { OAuthButtons } from './OAuthButtons';
 
 interface LoginForm {
   email: string;
@@ -40,8 +41,8 @@ export function LoginPage() {
       </div>
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="font-display text-lg font-bold text-neutral-900">
-            Camp<span className="text-accent-600">Flow</span>
+          <h1 className="font-display text-3xl font-bold text-neutral-900">
+            &amp;<span className="text-accent-600">u</span>
           </h1>
           <p className="font-body text-neutral-700 mt-2">{t('auth.loginTitle')}</p>
         </div>
@@ -88,6 +89,10 @@ export function LoginPage() {
               {isSubmitting ? t('common.loading') : t('auth.login')}
             </button>
           </form>
+
+          <div className="mt-6">
+            <OAuthButtons context="signin" />
+          </div>
         </div>
         <p className="text-center text-neutral-700 text-sm mt-6 font-body">
           {t('auth.noAccount')}{' '}

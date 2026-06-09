@@ -71,6 +71,12 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    // OAuth-only юзери не мають password_hash — пропонуємо їм увійти
+    // через провайдера, але повертаємо ту саму помилку, щоб не виявляти
+    // факт існування акаунта.
+    if (!user.passwordHash) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
     const valid = await bcrypt.compare(dto.password, user.passwordHash);
     if (!valid) {
       throw new UnauthorizedException('Invalid credentials');
@@ -151,6 +157,25 @@ export class AuthService {
       where: { tokenHash, revokedAt: null },
       data: { revokedAt: new Date() },
     });
+  }
+
+  /** Залогінити вже-існуючого юзера (наприклад, після OAuth find-or-create). */
+  async loginUserById(userId: string, meta: { userAgent?: string; ip?: string }) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        fullName: true,
+        avatarUrl: true,
+        locale: true,
+      },
+    });
+    if (!user) throw new UnauthorizedException('User not found');
+
+    const tokens = await this.issueTokens(user.id, user.email, meta);
+    return { user, ...tokens };
   }
 
   private async issueTokens(

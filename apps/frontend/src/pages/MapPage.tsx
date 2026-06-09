@@ -42,7 +42,7 @@ export function MapPage() {
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
-      <PageHeader title={<span className="font-display">&amp; Map</span>} left={<BackButton />} />
+      <PageHeader title={<span className="font-display">{t('nav.titles.map')}</span>} left={<BackButton />} />
 
       {isLoading && (
         <div className="flex-1 flex items-center justify-center text-neutral-400 animate-pulse">
