@@ -325,7 +325,11 @@
     "tabs": {
       "mutual": "Mutual",
       "pending": "Pending"
-    }
+    },
+    "removeTitle": "Remove from contacts?",
+    "removeText": "{{name}} will no longer be in your contacts.",
+    "removeOnly": "Remove only",
+    "removeAndBlock": "Remove and block"
   },
   "invites": {
     "byUsername": "By username",

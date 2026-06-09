@@ -325,7 +325,11 @@
     "tabs": {
       "mutual": "Взаимные",
       "pending": "Не принятые"
-    }
+    },
+    "removeTitle": "Удалить из контактов?",
+    "removeText": "{{name}} больше не будет в ваших контактах.",
+    "removeOnly": "Только удалить",
+    "removeAndBlock": "Удалить и заблокировать"
   },
   "invites": {
     "byUsername": "По username",

@@ -2,19 +2,43 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useContacts, useRemoveContact } from '../shared/api/contacts.hooks';
+import { useBlockUser } from '../shared/api/blocks.hooks';
 import { Avatar } from '../shared/ui/Avatar';
 import { relativeTime } from '../shared/lib/relativeTime';
 import { BackButton, PageHeader, cn } from '../shared/ui';
-import { Users, UserCheck, Clock, MessageCircle, Trash2, Search } from 'lucide-react';
+import { Modal } from '../shared/ui/Modal';
+import { Users, UserCheck, Clock, MessageCircle, Trash2, Search, ShieldX } from 'lucide-react';
 
 type Tab = 'mutual' | 'pending';
+
+interface RemoveTarget {
+  userId: string;
+  fullName: string;
+}
 
 export function ContactsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: contacts, isLoading } = useContacts();
   const remove = useRemoveContact();
+  const block = useBlockUser();
   const [tab, setTab] = useState<Tab>('mutual');
+  const [removeTarget, setRemoveTarget] = useState<RemoveTarget | null>(null);
+
+  async function handleRemoveOnly() {
+    if (!removeTarget) return;
+    await remove.mutateAsync(removeTarget.userId);
+    setRemoveTarget(null);
+  }
+
+  async function handleRemoveAndBlock() {
+    if (!removeTarget) return;
+    await block.mutateAsync({ userId: removeTarget.userId });
+    // remove invalidates contacts автоматично через useBlockUser onSuccess,
+    // але деякі бекенди не видаляють контакт при блоці — підстрахуємось.
+    await remove.mutateAsync(removeTarget.userId).catch(() => undefined);
+    setRemoveTarget(null);
+  }
 
   const { mutual, pending } = useMemo(() => {
     const list = contacts ?? [];
@@ -43,7 +67,7 @@ export function ContactsPage() {
         }
       />
 
-      <main className="flex-1 overflow-y-auto max-w-2xl mx-auto w-full px-4 md:px-6 py-6">
+      <main className="flex-1 overflow-y-auto w-full px-4 md:px-6 py-6">
         {/* Tabs */}
         <div className="flex gap-1 bg-neutral-100 p-1 rounded-xl mb-4">
           <TabButton
@@ -124,9 +148,8 @@ export function ContactsPage() {
                   </button>
                 )}
                 <button
-                  onClick={() => remove.mutate(c.user.id)}
-                  disabled={remove.isPending}
-                  className="flex items-center justify-center w-9 h-9 rounded-lg text-neutral-400 hover:text-red-600 hover:bg-red-50 transition disabled:opacity-50"
+                  onClick={() => setRemoveTarget({ userId: c.user.id, fullName: c.user.fullName })}
+                  className="flex items-center justify-center w-9 h-9 rounded-lg text-neutral-400 hover:text-red-600 hover:bg-red-50 transition"
                   title={t('common.remove')}
                   aria-label={t('common.remove')}
                 >
@@ -137,6 +160,52 @@ export function ContactsPage() {
           </ul>
         )}
       </main>
+
+      <Modal
+        open={removeTarget !== null}
+        onClose={() => setRemoveTarget(null)}
+        size="sm"
+      >
+        <div className="text-center space-y-4">
+          <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mx-auto">
+            <Trash2 size={22} className="text-red-500" />
+          </div>
+          <div>
+            <h3 className="font-display text-lg font-bold text-neutral-900 mb-1">
+              {t('contacts.removeTitle', 'Видалити з контактів?')}
+            </h3>
+            <p className="text-sm text-neutral-500">
+              {t('contacts.removeText', '{{name}} більше не буде у твоїх контактах.', {
+                name: removeTarget?.fullName ?? '',
+              })}
+            </p>
+          </div>
+          <div className="grid grid-cols-1 gap-2">
+            <button
+              onClick={handleRemoveOnly}
+              disabled={remove.isPending || block.isPending}
+              className="w-full flex items-center justify-center gap-1.5 bg-red-500 hover:bg-red-600 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition text-sm"
+            >
+              <Trash2 size={15} />
+              {t('contacts.removeOnly', 'Тільки видалити')}
+            </button>
+            <button
+              onClick={handleRemoveAndBlock}
+              disabled={remove.isPending || block.isPending}
+              className="w-full flex items-center justify-center gap-1.5 border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-60 font-semibold py-2.5 rounded-xl transition text-sm"
+            >
+              <ShieldX size={15} />
+              {t('contacts.removeAndBlock', 'Видалити і заблокувати')}
+            </button>
+            <button
+              onClick={() => setRemoveTarget(null)}
+              className="w-full border border-neutral-100 text-neutral-700 font-semibold py-2.5 rounded-xl hover:bg-neutral-50 transition text-sm"
+            >
+              {t('common.cancel')}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
