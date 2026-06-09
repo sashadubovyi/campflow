@@ -17,6 +17,7 @@ import { DirectChatPage } from '../pages/DirectChatPage';
 import { MapPage } from '../pages/MapPage';
 import { EventsPage } from '../pages/EventsPage';
 import { SearchPage } from '../pages/SearchPage';
+import { LanguagePage } from '../pages/LanguagePage';
 
 export const router: ReturnType<typeof createBrowserRouter> = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -42,6 +43,7 @@ export const router: ReturnType<typeof createBrowserRouter> = createBrowserRoute
       { path: '/map', element: <MapPage /> },
       { path: '/events', element: <EventsPage /> },
       { path: '/search', element: <SearchPage /> },
+      { path: '/settings/language', element: <LanguagePage /> },
     ],
   },
   { path: '/', element: <Navigate to="/rooms" replace /> },

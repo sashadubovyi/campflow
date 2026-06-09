@@ -1,10 +1,18 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Plus, Users, Heart, Settings, LogOut, Bell, Ampersand, KeyRound, Search } from 'lucide-react';
+import {
+  Plus,
+  Users,
+  Heart,
+  LogOut,
+  Ampersand,
+  KeyRound,
+  Search,
+  MessageCircle,
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../shared/store/useAuth';
 import { useUnreadCount } from '../shared/api/notifications.hooks';
-import { useLang } from '../shared/lib/useLang';
 import { cn } from '../shared/ui';
 import { getMediaUrl } from '../shared/lib/getMediaUrl';
 import { JoinRoomModal } from '../pages/rooms/JoinRoomModal';
@@ -31,55 +39,6 @@ function initials(name?: string) {
     .join('');
 }
 
-const LANG_LABEL: Record<string, string> = { uk: 'Ukr', ru: 'Ru', en: 'En' };
-
-function NavLanguage() {
-  const { current, change, supported } = useLang();
-  const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    function onClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    }
-    if (open) document.addEventListener('mousedown', onClick);
-    return () => document.removeEventListener('mousedown', onClick);
-  }, [open]);
-  return (
-    <div className="relative" ref={ref}>
-      <button
-        onClick={() => setOpen((v) => !v)}
-        title={t(`language.${current}`)}
-        className="flex items-center justify-center w-11 h-11 rounded-xl text-xs font-semibold uppercase text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 transition-colors"
-      >
-        {LANG_LABEL[current] ?? current}
-      </button>
-      {open && (
-        <ul className="absolute left-full bottom-0 ml-2 bg-white border border-neutral-200 rounded-xl shadow-card-lg overflow-hidden z-50 min-w-[130px]">
-          {supported.map((lang) => (
-            <li key={lang}>
-              <button
-                onClick={() => {
-                  change(lang);
-                  setOpen(false);
-                }}
-                className={cn(
-                  'w-full text-left px-3 py-2 text-sm hover:bg-neutral-50 transition',
-                  current === lang
-                    ? 'bg-neutral-50 text-neutral-900 font-semibold'
-                    : 'text-neutral-700',
-                )}
-              >
-                {t(`language.${lang}`)}
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-
 export function DesktopNav({ onCreateRoom }: Props) {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
@@ -91,6 +50,8 @@ export function DesktopNav({ onCreateRoom }: Props) {
     await logout();
     navigate('/login');
   }
+
+  const hasUnread = unread !== undefined && unread > 0;
 
   return (
     <>
@@ -111,6 +72,11 @@ export function DesktopNav({ onCreateRoom }: Props) {
                   initials(user.fullName)
                 )}
               </span>
+              {hasUnread && (
+                <span className="absolute -top-1 -right-1 bg-brand-gradient text-white text-[9px] font-bold rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center ring-2 ring-white">
+                  {unread > 99 ? '99+' : unread}
+                </span>
+              )}
             </NavLink>
           )}
           <button
@@ -140,31 +106,19 @@ export function DesktopNav({ onCreateRoom }: Props) {
           <NavLink to="/search" className={itemClass} title={t('search.title', 'Пошук') as string}>
             <Search size={20} />
           </NavLink>
+          <NavLink to="/chat" className={itemClass} title={t('nav.chat') as string}>
+            <MessageCircle size={20} />
+          </NavLink>
           <NavLink to="/contacts" className={itemClass} title={t('contacts.link') as string}>
             <Users size={20} />
           </NavLink>
           <NavLink to="/events" className={itemClass} title={t('nav.events') as string}>
             <Heart size={20} />
           </NavLink>
-          <NavLink to="/notifications" className={itemClass} title={t('notifications.title') as string}>
-            <div className="relative">
-              <Bell size={20} />
-              {unread !== undefined && unread > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 bg-brand-gradient text-white text-[9px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center">
-                  {unread > 99 ? '99+' : unread}
-                </span>
-              )}
-            </div>
-          </NavLink>
         </div>
 
-        {/* ── ВНИЗУ: налаштування / мова / вихід ─────── */}
+        {/* ── ВНИЗУ: тільки вихід ───────────────────── */}
         <div className="mt-auto flex flex-col items-center gap-1">
-          <div className="w-8 h-px bg-neutral-100 mb-3" />
-          <NavLink to="/settings/profile" className={itemClass} title={t('profile.settings') as string}>
-            <Settings size={20} />
-          </NavLink>
-          <NavLanguage />
           <button
             onClick={handleLogout}
             title={t('common.logout') as string}

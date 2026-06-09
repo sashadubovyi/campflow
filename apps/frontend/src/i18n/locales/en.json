@@ -246,6 +246,8 @@
       "viewPublic": "My profile",
       "qr": "Profile QR code",
       "personal": "Personal info",
+      "notifications": "Notifications",
+      "language": "Language",
       "contacts": "Contacts",
       "calendar": "Calendar",
       "privacy": "Privacy & security",

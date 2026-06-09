@@ -16,9 +16,12 @@ import {
   ChevronRight,
   Eye,
   QrCode,
+  Bell,
+  Globe,
   type LucideIcon,
 } from 'lucide-react';
 import { ProfileQRModal } from './profile/ProfileQRModal';
+import { useUnreadCount } from '../shared/api/notifications.hooks';
 import { useProfile, useMyProfile } from '../shared/api/profile.hooks';
 import type { PublicProfile, MyProfile, Visibility } from '../shared/api/profile.api';
 import { useAuth } from '../shared/store/useAuth';
@@ -94,6 +97,7 @@ export function ProfilePage() {
   const { data: myProfile } = useMyProfile();
   const [showPreview, setShowPreview] = useState(false);
   const [showQr, setShowQr] = useState(false);
+  const { data: unread } = useUnreadCount();
 
   async function handleLogout() {
     await logout();
@@ -188,6 +192,18 @@ export function ProfilePage() {
                 icon={<Users size={19} />}
                 label={t('profile.menu.contacts')}
                 onClick={() => navigate('/contacts')}
+              />
+              <MenuRow
+                icon={<Bell size={19} />}
+                label={t('profile.menu.notifications', 'Сповіщення')}
+                onClick={() => navigate('/notifications')}
+                badge={unread}
+              />
+              <MenuRow
+                icon={<Globe size={19} />}
+                label={t('profile.menu.language', 'Мова')}
+                onClick={() => navigate('/settings/language')}
+                hint={t(`language.${myProfile?.locale ?? 'uk'}`) as string}
               />
               <MenuRow
                 icon={<ShieldCheck size={19} />}
@@ -285,11 +301,15 @@ function MenuRow({
   label,
   onClick,
   danger,
+  badge,
+  hint,
 }: {
   icon: React.ReactNode;
   label: string;
   onClick: () => void;
   danger?: boolean;
+  badge?: number;
+  hint?: string;
 }) {
   return (
     <button
@@ -302,6 +322,12 @@ function MenuRow({
       >
         {label}
       </span>
+      {hint && <span className="text-xs text-neutral-400 mr-1">{hint}</span>}
+      {badge !== undefined && badge > 0 && (
+        <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-brand-gradient text-white text-[10px] font-bold mr-1">
+          {badge > 99 ? '99+' : badge}
+        </span>
+      )}
       {!danger && <ChevronRight size={18} className="text-neutral-300 shrink-0" />}
     </button>
   );
