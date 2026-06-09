@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Send } from 'lucide-react';
 import { useDmGetOrCreate, useDmMessages, useSendDm } from '../shared/api/dm.hooks';
 import { Avatar } from '../shared/ui/Avatar';
-import { BackButton, PageHeader } from '../shared/ui';
+import { BackButton } from '../shared/ui';
 
 function formatTime(iso: string, locale: string): string {
   const map: Record<string, string> = { uk: 'uk-UA', en: 'en-US', ru: 'ru-RU' };
@@ -66,26 +66,31 @@ export function DirectChatPage() {
 
   return (
     <div className="h-full flex flex-col bg-neutral-50 font-body">
-      <PageHeader
-        left={<BackButton />}
-        title={
-          <button
-            onClick={() => navigate(`/u/${chat.peer.username}`)}
-            className="flex items-center gap-2 max-w-full"
-          >
-            <Avatar
-              fullName={chat.peer.fullName}
-              avatarUrl={chat.peer.avatarUrl}
-              size={28}
-              isOnline={chat.peer.isOnline}
-              showStatus
-            />
-            <span className="font-display text-base font-bold text-neutral-900 truncate">
-              @{chat.peer.username}
+      {/* Власний хедер: клікабельний avatar+name → профіль (PageHeader
+          ставить pointer-events-none на title-h1, тому не використовуємо) */}
+      <header className="bg-white border-b border-neutral-100 shrink-0 px-2 md:px-4 h-14 flex items-center gap-2">
+        <BackButton />
+        <button
+          onClick={() => navigate(`/u/${chat.peer.username}`)}
+          className="flex items-center gap-2.5 flex-1 min-w-0 hover:bg-neutral-50 rounded-xl px-2 py-1 transition"
+        >
+          <Avatar
+            fullName={chat.peer.fullName}
+            avatarUrl={chat.peer.avatarUrl}
+            size={36}
+            isOnline={chat.peer.isOnline}
+            showStatus
+          />
+          <div className="flex flex-col items-start min-w-0">
+            <span className="font-display text-base font-bold text-neutral-900 truncate leading-tight">
+              {chat.peer.fullName}
             </span>
-          </button>
-        }
-      />
+            <span className="text-[10px] text-neutral-400 truncate leading-tight">
+              {chat.peer.isOnline ? t('profile.online', 'онлайн') : `@${chat.peer.username}`}
+            </span>
+          </div>
+        </button>
+      </header>
 
       <div className="flex-1 overflow-y-auto px-4 md:px-6 py-4 space-y-2">
         {messages.length === 0 && (
