@@ -4,6 +4,7 @@ import { Send, MessageCircle, MoreHorizontal, Trash2, Star, RefreshCw, CornerUpL
 import { useRoomChat } from '../../shared/api/useRoomChat';
 import { useAuth } from '../../shared/store/useAuth';
 import { Avatar } from '../../shared/ui/Avatar';
+import { Skeleton } from '../../shared/ui/Skeleton';
 import type { Message } from '../../shared/api/chat.api';
 
 interface Props {
@@ -89,9 +90,14 @@ export function ChatPanel({ roomId, roomName: _roomName, importantOnly = false, 
     <section className="h-full flex flex-col bg-neutral-50 min-h-0">
       <div className="flex-1 overflow-y-auto scrollbar-thin px-4 md:px-6 py-4 space-y-1">
         {isLoading && (
-          <p className="text-center text-neutral-400 text-sm animate-pulse">
-            {t('common.loading')}
-          </p>
+          <div className="space-y-3 pt-2">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className={`flex gap-2.5 items-end ${i % 3 === 2 ? 'flex-row-reverse' : ''}`}>
+                {i % 3 !== 2 && <Skeleton className="w-8 h-8 rounded-full shrink-0" />}
+                <Skeleton className={`h-10 rounded-2xl ${i % 3 === 2 ? 'w-[55%]' : 'w-[65%]'}`} />
+              </div>
+            ))}
+          </div>
         )}
 
         {!isLoading && visibleMessages.length === 0 && (
@@ -377,11 +383,13 @@ function MessageBubble({
         )}
       </div>
 
-      {/* Three-dot hover menu — desktop only */}
+      {/* Three-dot menu: на desktop — hover, на mobile — показується після long-press */}
       <div
         ref={menuRef}
-        className={`hidden md:flex self-end mb-1 relative opacity-0 group-hover:opacity-100 transition-opacity ${
-          menuOpen ? 'opacity-100' : ''
+        className={`self-end mb-1 relative transition-opacity ${
+          menuOpen
+            ? 'flex opacity-100'
+            : 'md:flex md:opacity-0 md:group-hover:opacity-100 hidden'
         }`}
       >
         <button
