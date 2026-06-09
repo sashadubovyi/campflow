@@ -26,8 +26,10 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto, meta: { userAgent?: string; ip?: string }) {
+    const normalizedEmail = dto.email.toLowerCase().trim();
+
     const existing = await this.prisma.user.findUnique({
-      where: { email: dto.email },
+      where: { email: normalizedEmail },
       select: { id: true },
     });
 
@@ -35,26 +37,36 @@ export class AuthService {
       throw new ConflictException('Email already in use');
     }
 
-    const username = await this.generateUniqueUsername(dto.email, dto.fullName);
+    const username = await this.generateUniqueUsername(normalizedEmail, dto.fullName);
     const passwordHash = await bcrypt.hash(dto.password, this.BCRYPT_ROUNDS);
 
-    const user = await this.prisma.user.create({
-      data: {
-        fullName: dto.fullName,
-        email: dto.email,
-        username,
-        passwordHash,
-        phone: dto.phone,
-      },
-      select: {
-        id: true,
-        email: true,
-        username: true,
-        fullName: true,
-        avatarUrl: true,
-        locale: true,
-      },
-    });
+    let user;
+    try {
+      user = await this.prisma.user.create({
+        data: {
+          fullName: dto.fullName.trim(),
+          email: normalizedEmail,
+          username,
+          passwordHash,
+          phone: dto.phone,
+        },
+        select: {
+          id: true,
+          email: true,
+          username: true,
+          fullName: true,
+          avatarUrl: true,
+          locale: true,
+        },
+      });
+    } catch (err: unknown) {
+      // Prisma P2002 = unique constraint violation (race condition on username)
+      const code = (err as { code?: string })?.code;
+      if (code === 'P2002') {
+        throw new ConflictException('User with this data already exists');
+      }
+      throw err;
+    }
 
     const tokens = await this.issueTokens(user.id, user.email, meta);
 
@@ -227,8 +239,9 @@ export class AuthService {
   private async generateUniqueUsername(email: string, fullName?: string): Promise<string> {
     // Спершу пробуємо локальну частину email; для кириличних — транслітеруємо.
     // Якщо нічого корисного — пробуємо ПІБ. Якщо й там нема — 'user'.
-    const fromEmail = toLatinSlug(email.split('@')[0] ?? '').slice(0, 24);
-    const fromName = fullName ? toLatinSlug(fullName).slice(0, 24) : '';
+    // toLatinSlug вже повертає lowercase; .toLowerCase() — додатковий захист.
+    const fromEmail = toLatinSlug(email.split('@')[0] ?? '').toLowerCase().slice(0, 24);
+    const fromName = fullName ? toLatinSlug(fullName).toLowerCase().slice(0, 24) : '';
     const base = fromEmail.length >= 2 ? fromEmail : fromName.length >= 2 ? fromName : 'user';
 
     let candidate = base;
