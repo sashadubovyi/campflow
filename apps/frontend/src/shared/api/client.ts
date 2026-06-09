@@ -1,8 +1,11 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import { useAuthStore } from '../store/auth.store';
 
+const baseUrl = import.meta.env.VITE_API_URL || '';
+const cleanUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+
 export const api = axios.create({
-  baseURL: '/api',
+  baseURL: `${cleanUrl}/api`,
   withCredentials: true, // щоб refresh-cookie ходила
 });
 
