@@ -118,14 +118,24 @@ export class AuthController {
   async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const token = req.cookies?.[REFRESH_COOKIE];
     await this.authService.logout(token);
-    res.clearCookie(REFRESH_COOKIE);
+    const isProd = process.env.NODE_ENV === 'production';
+    res.clearCookie(REFRESH_COOKIE, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax',
+      path: '/api/auth',
+    });
   }
 
   private setRefreshCookie(res: Response, token: string) {
+    const isProd = process.env.NODE_ENV === 'production';
     res.cookie(REFRESH_COOKIE, token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      // У prod фронт (Vercel) і бек (Railway) на різних доменах — це cross-site.
+      // SameSite=None дозволяє cookie у cross-site XHR (потрібен Secure=true).
+      // У dev обидва на localhost → достатньо Lax.
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax',
       maxAge: REFRESH_COOKIE_MAX_AGE,
       path: '/api/auth',
     });

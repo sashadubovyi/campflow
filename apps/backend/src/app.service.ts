@@ -22,6 +22,15 @@ export class AppService {
       checks: {
         database: dbStatus,
       },
+      // Видно тільки факт наявності — без значень. Корисно при дебагу 502/OAuth.
+      configured: {
+        google: !!process.env.GOOGLE_OAUTH_CLIENT_ID,
+        apple: !!process.env.APPLE_OAUTH_CLIENT_ID,
+        facebook:
+          !!process.env.FACEBOOK_OAUTH_CLIENT_ID && !!process.env.FACEBOOK_OAUTH_CLIENT_SECRET,
+        gemini: !!process.env.GEMINI_API_KEY,
+        cors: !!process.env.FRONTEND_URL,
+      },
       timestamp: new Date().toISOString(),
     };
   }

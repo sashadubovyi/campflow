@@ -6,15 +6,27 @@ import cookieParser from 'cookie-parser';
 import { join } from 'path';
 import { AppModule } from './app.module';
 
+function parseAllowedOrigins(input: string | undefined): string[] {
+  if (!input) return [];
+  return input
+    .split(',')
+    .map((s) => s.trim().replace(/\/+$/, ''))
+    .filter(Boolean);
+}
+
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bufferLogs: false,
+  });
   const config = app.get(ConfigService);
   const logger = new Logger('Bootstrap');
 
+  // Trust proxy потрібен щоб req.protocol/req.secure коректно працювали
+  // за Railway/Vercel/Nginx (інакше secure-cookie не виставиться).
+  app.set('trust proxy', 1);
+
   app.setGlobalPrefix('api');
-
   app.useStaticAssets(join(__dirname, '..', 'uploads'), { prefix: '/uploads' });
-
   app.use(cookieParser());
 
   app.useGlobalPipes(
@@ -25,15 +37,35 @@ async function bootstrap() {
     }),
   );
 
+  // CORS: FRONTEND_URL може бути кома-розділений список (prod + preview-домени).
+  // Завжди дозволяємо localhost:5173 для dev. Хвостові слеші ігноруємо.
+  const allowedOrigins = [
+    ...parseAllowedOrigins(config.get<string>('FRONTEND_URL')),
+    'http://localhost:5173',
+  ];
   app.enableCors({
-    origin: config.get<string>('FRONTEND_URL', 'http://localhost:5173'),
+    origin: (origin, cb) => {
+      // Запит без Origin (curl, same-origin, server-to-server) — дозволяємо.
+      if (!origin) return cb(null, true);
+      const normalized = origin.replace(/\/+$/, '');
+      if (allowedOrigins.includes(normalized)) return cb(null, true);
+      logger.warn(`CORS blocked origin: ${origin}`);
+      return cb(new Error(`Origin not allowed: ${origin}`), false);
+    },
     credentials: true,
   });
 
-  const port = config.get<number>('PORT', 3001);
+  // Healthcheck-friendly: HTTP listening має статись ASAP, інакше Railway/Vercel
+  // дають 502 поки app не відповідає.
+  const port = Number(config.get<number>('PORT', 3001));
   await app.listen(port, '0.0.0.0');
 
-  logger.log(`🚀 &u backend running on http://localhost:${port}/api`);
+  logger.log(`🚀 &u backend listening on :${port} (NODE_ENV=${process.env.NODE_ENV ?? 'dev'})`);
+  logger.log(`   CORS allowlist: ${allowedOrigins.join(', ')}`);
 }
 
-bootstrap();
+bootstrap().catch((err) => {
+  // eslint-disable-next-line no-console
+  console.error('FATAL bootstrap error:', err);
+  process.exit(1);
+});
