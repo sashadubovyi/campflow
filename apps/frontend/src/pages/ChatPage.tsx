@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { MessageCircle } from 'lucide-react';
+import { MessageCircle, Search } from 'lucide-react';
 import { useDmChats } from '../shared/api/dm.hooks';
 import { Avatar } from '../shared/ui/Avatar';
 import { PageHeader } from '../shared/ui';
@@ -13,9 +13,21 @@ export function ChatPage() {
 
   return (
     <div className="h-full flex flex-col bg-neutral-50 font-body">
-      <PageHeader title={<span className="font-display">&amp; Chats</span>} />
+      <PageHeader
+        title={<span className="font-display">&amp; Chats</span>}
+        right={
+          <button
+            onClick={() => navigate('/search')}
+            className="flex items-center justify-center w-9 h-9 rounded-xl text-neutral-500 hover:bg-neutral-100 hover:text-accent-600 transition"
+            title={t('search.title', 'Пошук') as string}
+            aria-label={t('search.title', 'Пошук') as string}
+          >
+            <Search size={18} />
+          </button>
+        }
+      />
 
-      <main className="flex-1 overflow-y-auto max-w-2xl mx-auto w-full px-4 md:px-6 py-4">
+      <main className="flex-1 overflow-y-auto w-full px-4 md:px-6 py-4">
         {isLoading && (
           <p className="text-neutral-400 text-center animate-pulse py-12">
             {t('common.loading')}
