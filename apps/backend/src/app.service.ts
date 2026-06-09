@@ -18,7 +18,7 @@ export class AppService {
 
     return {
       status: dbStatus === 'ok' ? 'ok' : 'degraded',
-      service: 'campflow-backend',
+      service: 'andu-backend',
       checks: {
         database: dbStatus,
       },

@@ -32,7 +32,7 @@ export class GeoResolverService {
         `q=${encodeURIComponent(query)}&format=json&limit=${limit}&addressdetails=1`;
 
       const res = await fetch(url, {
-        headers: { 'User-Agent': 'campflow-app/1.0' },
+        headers: { 'User-Agent': 'andu-app/1.0 (https://andu.app)' },
       });
 
       if (!res.ok) return [];

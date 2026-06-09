@@ -33,7 +33,7 @@ async function bootstrap() {
   const port = config.get<number>('PORT', 3001);
   await app.listen(port, '0.0.0.0');
 
-  logger.log(`🚀 CampFlow backend running on http://localhost:${port}/api`);
+  logger.log(`🚀 &u backend running on http://localhost:${port}/api`);
 }
 
 bootstrap();

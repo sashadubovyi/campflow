@@ -10,7 +10,7 @@ export class AppController {
   @Get()
   getRoot() {
     return {
-      name: 'CampFlow API',
+      name: '&u API',
       version: '0.1.0',
       docs: '/api/health',
     };
