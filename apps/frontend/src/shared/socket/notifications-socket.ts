@@ -5,9 +5,13 @@ let socket: Socket | null = null;
 
 export function getNotificationsSocket(): Socket {
   if (socket) return socket;
-  const token = useAuthStore.getState().accessToken;
 
-  socket = io('/notifications', {
+  const token = useAuthStore.getState().accessToken;
+  const baseUrl = import.meta.env.VITE_API_URL || '';
+  const cleanUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+
+  // Передаем полный URL бэкенда + неймспейс (/notifications)
+  socket = io(`${cleanUrl}/notifications`, {
     path: '/socket.io',
     auth: { token },
     transports: ['websocket'],

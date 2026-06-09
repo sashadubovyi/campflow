@@ -7,8 +7,11 @@ export function getSocket(): Socket {
   if (socket) return socket;
 
   const token = useAuthStore.getState().accessToken;
+  const baseUrl = import.meta.env.VITE_API_URL || '';
+  const cleanUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
 
-  socket = io('/ws', {
+  // Передаем полный URL бэкенда + нужный неймспейс (/ws)
+  socket = io(`${cleanUrl}/ws`, {
     path: '/socket.io',
     auth: { token },
     transports: ['websocket'],
