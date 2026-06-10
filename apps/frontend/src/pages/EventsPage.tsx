@@ -91,7 +91,7 @@ const VIEW_ICONS: Record<EventView, typeof LayoutList> = {
 function DesktopViewToggle({ view, onChange }: { view: EventView; onChange: (v: EventView) => void }) {
   const buttons: EventView[] = ['list', 'map', 'calendar'];
   return (
-    <div className="flex items-center gap-0.5 bg-neutral-100 rounded-xl p-1">
+    <div className="flex items-center gap-0.5 bg-white/35 border border-white/50 backdrop-blur-md rounded-2xl p-1">
       {buttons.map((id) => {
         const Icon = VIEW_ICONS[id];
         return (
@@ -99,7 +99,7 @@ function DesktopViewToggle({ view, onChange }: { view: EventView; onChange: (v: 
             key={id}
             onClick={() => onChange(id)}
             className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${
-              view === id ? 'bg-white/85 border border-white/90 text-accent-600 shadow-sm' : 'text-neutral-400 hover:text-neutral-600'
+              view === id ? 'bg-white/85 border border-white/90 text-accent-600 shadow-sm' : 'text-neutral-500 hover:text-neutral-700 hover:bg-white/40'
             }`}
           >
             <Icon size={16} />
@@ -118,7 +118,7 @@ function MobileViewToggle({ view, onChange }: { view: EventView; onChange: (v: E
 
   if (expanded) {
     return (
-      <div className="flex items-center gap-0.5 bg-neutral-100 rounded-xl p-1">
+      <div className="flex items-center gap-0.5 bg-white/35 border border-white/50 backdrop-blur-md rounded-2xl p-1">
         {buttons.map((id) => {
           const Icon = VIEW_ICONS[id];
           return (
@@ -126,7 +126,7 @@ function MobileViewToggle({ view, onChange }: { view: EventView; onChange: (v: E
               key={id}
               onClick={() => { onChange(id); setExpanded(false); }}
               className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${
-                view === id ? 'bg-white/85 border border-white/90 text-accent-600 shadow-sm' : 'text-neutral-400 hover:text-neutral-600'
+                view === id ? 'bg-white/85 border border-white/90 text-accent-600 shadow-sm' : 'text-neutral-500 hover:text-neutral-700 hover:bg-white/40'
               }`}
             >
               <Icon size={16} />
@@ -140,7 +140,7 @@ function MobileViewToggle({ view, onChange }: { view: EventView; onChange: (v: E
   return (
     <button
       onClick={() => setExpanded(true)}
-      className="flex items-center gap-1 bg-neutral-100 rounded-xl px-2 h-9 text-neutral-500"
+      className="flex items-center gap-1 bg-white/35 border border-white/50 backdrop-blur-md rounded-2xl px-2.5 h-9 text-neutral-600"
     >
       <ActiveIcon size={16} />
       <ChevronDown size={13} />

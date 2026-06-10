@@ -21,6 +21,10 @@ import {
   Globe,
   MessageSquare,
   LockOpen,
+  UserCheck,
+  UserPlus,
+  UserMinus,
+  ShieldX,
   type LucideIcon,
 } from 'lucide-react';
 import { ProfileQRModal } from './profile/ProfileQRModal';
@@ -66,21 +70,29 @@ function calculateAge(birthDate: string | null): number | null {
   return age;
 }
 
+// Зміни: ring відображається тільки для онлайн-користувачів
 function RingAvatar({
   fullName,
   avatarUrl,
   size = 88,
+  isOnline = false,
 }: {
   fullName: string;
   avatarUrl: string | null;
   size?: number;
+  isOnline?: boolean;
 }) {
   return (
     <div className="relative rounded-full shrink-0" style={{ width: size, height: size }}>
-      <span className="absolute inset-0 rounded-full bg-[conic-gradient(from_0deg,#2d6ff8,#8eb5ff,#22c55e,#2d6ff8)] animate-[spin_4s_linear_infinite]" />
+      {isOnline && (
+        <span className="absolute inset-0 rounded-full bg-[conic-gradient(from_0deg,#2d6ff8,#8eb5ff,#22c55e,#2d6ff8)] animate-[spin_4s_linear_infinite]" />
+      )}
       <span
-        className="absolute inset-[3px] rounded-full overflow-hidden bg-neutral-100 flex items-center justify-center font-semibold text-neutral-600"
-        style={{ fontSize: size * 0.32 }}
+        className="absolute rounded-full overflow-hidden bg-neutral-100 flex items-center justify-center font-semibold text-neutral-600"
+        style={{
+          inset: isOnline ? 3 : 0,
+          fontSize: size * 0.32,
+        }}
       >
         {avatarUrl ? (
           <img src={getMediaUrl(avatarUrl)} alt="" className="w-full h-full object-cover" />
@@ -189,7 +201,7 @@ export function ProfilePage() {
       <div ref={scrollRef} className="flex-1 overflow-y-auto">
         {/* Hero — avatar scrolls naturally away, triggering header animation */}
         <div className="flex flex-col items-center px-6 pt-8 pb-4">
-          <RingAvatar fullName={profile.fullName} avatarUrl={profile.avatarUrl} size={96} />
+          <RingAvatar fullName={profile.fullName} avatarUrl={profile.avatarUrl} size={96} isOnline={profile.isOnline} />
           <h1 className="mt-4 font-display text-2xl font-bold text-neutral-900 text-center">
             {profile.fullName}
           </h1>
@@ -292,7 +304,7 @@ export function ProfilePage() {
       >
         <div className="space-y-4">
           <div className="flex items-center gap-5">
-            <RingAvatar fullName={profile.fullName} avatarUrl={profile.avatarUrl} size={80} />
+            <RingAvatar fullName={profile.fullName} avatarUrl={profile.avatarUrl} size={80} isOnline={profile.isOnline} />
             <div className="flex-1 min-w-0">
               <h2 className="text-xl font-bold text-neutral-900 truncate">{profile.fullName}</h2>
               <p className="text-neutral-400 text-sm">@{profile.username}</p>
@@ -573,7 +585,7 @@ function ContactButton({
       <button
         onClick={() => unblock.mutate(profileId)}
         disabled={unblock.isPending}
-        className="w-full flex items-center justify-center gap-2 border border-yellow-300 text-yellow-600 hover:bg-yellow-50 font-semibold py-2.5 rounded-xl text-sm transition disabled:opacity-50"
+        className="w-full flex items-center justify-center gap-2 border border-yellow-300/60 bg-yellow-50/50 backdrop-blur-sm text-yellow-600 hover:bg-yellow-50 font-semibold py-2.5 rounded-2xl text-sm transition disabled:opacity-50"
       >
         <LockOpen size={16} />
         {unblock.isPending ? '…' : t('profile.unblock', 'Розблокувати')}
@@ -581,45 +593,60 @@ function ContactButton({
     );
   }
 
+  // Зміни: мобільна версія — тільки іконки в один рядок
   return (
-    <div className="space-y-2">
-      <div className="flex gap-2">
-        {isContact ? (
-          <>
-            <div className="flex-1 bg-neutral-100 text-neutral-600 font-semibold py-2.5 rounded-xl text-sm text-center">
-              {isMutual ? t('profile.mutualContacts') : t('profile.inContacts')}
-            </div>
-            <button
-              onClick={() => remove.mutate(profileId)}
-              disabled={loading}
-              className="border border-neutral-200 text-red-500 hover:bg-red-50 font-semibold py-2.5 px-4 rounded-xl text-sm transition disabled:opacity-50"
-            >
-              {remove.isPending ? '…' : t('common.remove')}
-            </button>
-          </>
-        ) : (
-          <button
-            onClick={() => add.mutate(profileId)}
-            disabled={loading}
-            className="flex-1 btn-glass-blue py-2.5 rounded-xl text-sm disabled:opacity-50"
-          >
-            {add.isPending ? t('profile.adding') : t('profile.addToContacts')}
-          </button>
-        )}
+    <div className="flex gap-2">
+      {/* Add / status button */}
+      {isContact ? (
+        <div className="flex-1 flex items-center justify-center gap-1.5 bg-white/40 border border-white/60 backdrop-blur-sm text-neutral-600 font-semibold py-2.5 rounded-2xl text-sm">
+          {/* Desktop: show text; mobile: show icon */}
+          <UserCheck size={16} className="shrink-0" />
+          <span className="hidden sm:inline text-sm">
+            {isMutual ? t('profile.mutualContacts') : t('profile.inContacts')}
+          </span>
+        </div>
+      ) : (
         <button
-          onClick={() => navigate(`/dm/${profileUsername}`)}
-          title={t('profile.sendMessage', 'Написати повідомлення')}
-          className="flex items-center justify-center w-11 rounded-xl border border-neutral-200 text-accent-600 hover:bg-accent-50 transition shrink-0"
+          onClick={() => add.mutate(profileId)}
+          disabled={loading}
+          className="flex-1 flex items-center justify-center gap-1.5 btn-glass-blue py-2.5 rounded-2xl text-sm disabled:opacity-50"
         >
-          <MessageSquare size={18} />
+          <UserPlus size={16} className="shrink-0" />
+          <span className="hidden sm:inline">
+            {add.isPending ? t('profile.adding') : t('profile.addToContacts')}
+          </span>
         </button>
-      </div>
+      )}
+
+      {/* Remove (only when in contacts) */}
+      {isContact && (
+        <button
+          onClick={() => remove.mutate(profileId)}
+          disabled={loading}
+          title={t('common.remove')}
+          className="flex items-center justify-center w-11 h-11 rounded-2xl bg-danger-500/10 border border-danger-500/25 text-danger-600 hover:bg-danger-500/18 transition disabled:opacity-50 shrink-0"
+        >
+          <UserMinus size={16} />
+        </button>
+      )}
+
+      {/* Chat */}
+      <button
+        onClick={() => navigate(`/dm/${profileUsername}`)}
+        title={t('profile.sendMessage', 'Написати повідомлення')}
+        className="flex items-center justify-center w-11 h-11 rounded-2xl bg-accent-500/10 border border-accent-500/25 text-accent-600 hover:bg-accent-500/18 transition shrink-0"
+      >
+        <MessageSquare size={16} />
+      </button>
+
+      {/* Block */}
       <button
         onClick={handleBlock}
         disabled={loading}
-        className="w-full text-xs text-red-500 hover:bg-red-50 font-semibold py-2 rounded-lg transition disabled:opacity-50"
+        title={t('profile.block')}
+        className="flex items-center justify-center w-11 h-11 rounded-2xl bg-white/40 border border-white/60 backdrop-blur-sm text-neutral-500 hover:bg-danger-500/10 hover:text-danger-600 hover:border-danger-500/25 transition disabled:opacity-50 shrink-0"
       >
-        {t('profile.block')}
+        <ShieldX size={16} />
       </button>
     </div>
   );
