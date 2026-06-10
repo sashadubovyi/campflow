@@ -153,6 +153,10 @@ export function RegisterPage() {
           <Link to="/privacy" className="hover:underline hover:text-neutral-600 transition-colors">
             Політикою конфіденційності
           </Link>
+          {' та '}
+          <Link to="/offer" className="hover:underline hover:text-neutral-600 transition-colors">
+            Публічною офертою
+          </Link>
         </p>
       </m.div>
     </div>
