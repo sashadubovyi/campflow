@@ -106,7 +106,7 @@ function DmMessageBubble({
         className={`max-w-[75%] px-3.5 py-2 text-sm rounded-2xl shadow-sm ${
           message.isOwn
             ? 'bg-gradient-to-br from-accent-400 to-accent-600 text-white rounded-tr-md'
-            : 'bg-white text-neutral-900 rounded-tl-md'
+            : 'bg-white/75 backdrop-blur-sm text-neutral-900 rounded-tl-md'
         }`}
       >
         <p className="leading-relaxed whitespace-pre-wrap">{message.content}</p>
@@ -181,12 +181,12 @@ export function DirectChatPage() {
   }
 
   return (
-    <div className="h-full flex flex-col bg-neutral-50 font-body">
+    <div className="h-full flex flex-col font-body">
       <header className="glass-header shadow-[0_0.5px_0_rgba(0,0,0,0.06)] shrink-0 px-2 md:px-4 h-12 flex items-center gap-2">
         <BackButton />
         <button
           onClick={() => navigate(`/u/${chat.peer.username}`)}
-          className="flex items-center gap-2.5 flex-1 min-w-0 hover:bg-neutral-50 rounded-xl px-2 py-1 transition"
+          className="flex items-center gap-2.5 flex-1 min-w-0 hover:bg-white/50 rounded-xl px-2 py-1 transition"
         >
           <Avatar
             fullName={chat.peer.fullName}
@@ -223,7 +223,7 @@ export function DirectChatPage() {
         <div ref={bottomRef} />
       </div>
 
-      <div className="px-4 md:px-6 py-3 border-t border-neutral-100 bg-white shrink-0">
+      <div className="px-4 md:px-6 py-3 border-t border-white/30 bg-white/55 backdrop-blur-xl shrink-0">
         {replyingTo && (
           <div className="flex items-center gap-2 mb-2 px-3 py-1.5 bg-accent-50 rounded-xl border-l-2 border-accent-400">
             <Reply size={14} className="text-accent-500 shrink-0" />
@@ -243,7 +243,7 @@ export function DirectChatPage() {
             onChange={(e) => setText(e.target.value)}
             onKeyDown={handleKey}
             placeholder={t('chat.placeholder')}
-            className="flex-1 h-11 px-4 rounded-xl bg-neutral-50 border border-neutral-200 text-neutral-900 placeholder:text-neutral-400 focus:bg-white focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 outline-none transition"
+            className="flex-1 h-11 px-4 rounded-2xl glass-input text-neutral-900 placeholder:text-neutral-400 focus:ring-0 outline-none transition"
           />
           <button
             onClick={handleSend}

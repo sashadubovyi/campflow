@@ -135,7 +135,7 @@ export function EditRoomModal({ room, onClose }: Props) {
             <button
               type="submit"
               disabled={updateRoom.isPending || !name.trim()}
-              className="flex-1 btn-glass-blue disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition text-sm"
+              className="flex-1 btn-glass-blue disabled:opacity-60 font-semibold py-2.5 rounded-xl transition text-sm"
             >
               {updateRoom.isPending ? t('common.saving') : t('common.save')}
             </button>

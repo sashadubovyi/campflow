@@ -220,9 +220,9 @@ export function OAuthButtons({ context = 'signin' }: Props) {
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-3 text-xs text-neutral-400 uppercase tracking-wider">
-        <span className="flex-1 h-px bg-neutral-100" />
+        <span className="flex-1 h-px bg-white/60" />
         {t('common.or')}
-        <span className="flex-1 h-px bg-neutral-100" />
+        <span className="flex-1 h-px bg-white/60" />
       </div>
 
       <div className="flex flex-col items-center gap-2.5">
@@ -235,7 +235,7 @@ export function OAuthButtons({ context = 'signin' }: Props) {
             type="button"
             onClick={handleApple}
             disabled={busyProvider !== null}
-            className="w-full max-w-[320px] flex items-center justify-center gap-2 bg-black hover:bg-neutral-900 disabled:opacity-60 text-white font-semibold py-2.5 rounded-full transition text-sm"
+            className="w-full max-w-[320px] flex items-center justify-center gap-2 bg-neutral-900/85 border border-neutral-800/60 backdrop-blur-sm hover:bg-neutral-900/92 disabled:opacity-60 text-white font-semibold py-2.5 rounded-2xl transition text-sm"
           >
             {busyProvider === 'apple' ? (
               <Loader2 size={16} className="animate-spin" />
@@ -253,7 +253,7 @@ export function OAuthButtons({ context = 'signin' }: Props) {
             type="button"
             onClick={handleFacebook}
             disabled={busyProvider !== null}
-            className="w-full max-w-[320px] flex items-center justify-center gap-2 bg-[#1877F2] hover:bg-[#166fe5] disabled:opacity-60 text-white font-semibold py-2.5 rounded-full transition text-sm"
+            className="w-full max-w-[320px] flex items-center justify-center gap-2 bg-[#1877F2]/85 border border-[#1877F2]/50 backdrop-blur-sm hover:bg-[#1877F2]/92 disabled:opacity-60 text-white font-semibold py-2.5 rounded-2xl transition text-sm"
           >
             {busyProvider === 'facebook' ? (
               <Loader2 size={16} className="animate-spin" />

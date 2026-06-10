@@ -17,7 +17,7 @@ export function RoomsPage() {
   const [showJoin, setShowJoin] = useState(false);
 
   return (
-    <div className="h-full flex flex-col bg-neutral-50 overflow-hidden">
+    <div className="h-full flex flex-col overflow-hidden">
       <PageHeader
         title={<span className="font-display">{t('nav.titles.spaces')}</span>}
         left={
@@ -33,7 +33,7 @@ export function RoomsPage() {
           <button
             onClick={() => { setShowJoin(false); setShowCreate(true); }}
             title={t('common.create')}
-            className="flex items-center gap-1.5 btn-glass-blue text-white rounded-xl px-3 h-9 text-sm font-semibold transition"
+            className="flex items-center gap-1.5 btn-glass-blue rounded-xl px-3 h-9 text-sm font-semibold transition"
           >
             <Plus size={16} />
             <span className="hidden md:inline">{t('common.create')}</span>
@@ -46,7 +46,7 @@ export function RoomsPage() {
           {isLoading && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="bg-white rounded-card shadow-card p-5 space-y-3">
+                <div key={i} className="glass-card p-5 space-y-3">
                   <Skeleton className="h-5 w-3/4" />
                   <Skeleton className="h-4 w-full" />
                   <Skeleton className="h-4 w-1/2" />
@@ -76,7 +76,7 @@ export function RoomsPage() {
               </p>
               <button
                 onClick={() => setShowCreate(true)}
-                className="inline-flex items-center gap-1.5 btn-glass-blue text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition"
+                className="inline-flex items-center gap-1.5 btn-glass-blue font-semibold px-4 py-2.5 rounded-xl text-sm transition"
               >
                 <Plus size={16} />
                 {t('rooms.newRoom', 'Створити кімнату')}

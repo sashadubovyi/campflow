@@ -1,7 +1,7 @@
 import { useEffect, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { cn } from './cn';
 
 interface Props {
@@ -40,21 +40,21 @@ export function Modal({
   return createPortal(
     <AnimatePresence>
       {open && (
-        <motion.div
+        <m.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.18 }}
-          className="fixed inset-0 z-50 flex items-start md:items-center justify-center overflow-y-auto px-4 py-6 bg-neutral-900/40 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-start md:items-center justify-center overflow-y-auto px-4 py-6 bg-neutral-900/35 backdrop-blur-sm"
           onClick={closeOnBackdrop ? onClose : undefined}
         >
-          <motion.div
+          <m.div
             initial={{ opacity: 0, scale: 0.92, y: 28, filter: 'blur(8px)' }}
             animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
             exit={{ opacity: 0, scale: 0.95, y: 16, filter: 'blur(6px)' }}
             transition={spring}
             className={cn(
-              'w-full glass-surface rounded-card-lg shadow-card-lg my-auto',
+              'w-full glass-surface rounded-card-lg shadow-glass-panel my-auto',
               sizes[size],
             )}
             onClick={(e) => e.stopPropagation()}
@@ -64,15 +64,15 @@ export function Modal({
                 <h2 className="text-lg font-semibold text-neutral-900">{title}</h2>
                 <button
                   onClick={onClose}
-                  className="p-1.5 glass-icon rounded-lg"
+                  className="p-1.5 glass-icon rounded-xl"
                 >
                   <X size={18} />
                 </button>
               </div>
             )}
             <div className={cn('px-6 pb-6', !title && 'pt-6')}>{children}</div>
-          </motion.div>
-        </motion.div>
+          </m.div>
+        </m.div>
       )}
     </AnimatePresence>,
     document.body,

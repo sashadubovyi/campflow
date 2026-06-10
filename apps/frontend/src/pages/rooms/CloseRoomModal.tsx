@@ -39,7 +39,7 @@ export function CloseRoomModal({ roomId, roomName, onClose, onClosed }: Props) {
         </p>
 
         {closeRoom.isPending && (
-          <p className="text-sm text-neutral-700 bg-neutral-50 rounded-lg px-3 py-2 mb-4 animate-pulse">
+          <p className="text-sm text-neutral-700 bg-white/40 backdrop-blur-sm rounded-2xl px-3 py-2 mb-4 animate-pulse">
             {t('polls.ai.summarizing')}
           </p>
         )}

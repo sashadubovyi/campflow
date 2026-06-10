@@ -75,7 +75,7 @@ export function ProfileQRModal({ open, onClose, username }: Props) {
   return (
     <Modal open={open} onClose={onClose} title={t('qr.title', 'QR код профілю')} size="sm">
       <div className="flex flex-col items-center gap-4">
-        <div className="p-4 rounded-2xl bg-white border border-neutral-100 shadow-card">
+        <div className="p-4 glass-card">
           <QRCodeSVG
             value={url}
             size={220}
@@ -98,7 +98,7 @@ export function ProfileQRModal({ open, onClose, username }: Props) {
         <div className="grid grid-cols-2 gap-2 w-full">
           <button
             onClick={handleShare}
-            className="flex items-center justify-center gap-1.5 btn-glass-blue text-white font-semibold py-2.5 rounded-xl transition text-sm"
+            className="flex items-center justify-center gap-1.5 btn-glass-blue font-semibold py-2.5 rounded-xl transition text-sm"
           >
             <Share2 size={15} />
             {t('qr.share', 'Поділитись')}

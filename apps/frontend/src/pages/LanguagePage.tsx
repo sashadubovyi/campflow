@@ -14,14 +14,14 @@ export function LanguagePage() {
   const { current, change, supported } = useLang();
 
   return (
-    <div className="h-full flex flex-col bg-neutral-50 font-body">
+    <div className="h-full flex flex-col font-body">
       <PageHeader
         title={<span className="font-display">{t('nav.titles.language')}</span>}
         left={<BackButton />}
       />
 
       <main className="flex-1 overflow-y-auto w-full px-4 md:px-6 py-6">
-        <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm divide-y divide-neutral-100 overflow-hidden">
+        <div className="glass-card shadow-sm divide-y divide-neutral-100 overflow-hidden">
           {supported.map((lang) => {
             const isActive = current === lang;
             const meta = LANG_LABEL[lang];
@@ -31,7 +31,7 @@ export function LanguagePage() {
                 onClick={() => change(lang)}
                 className={cn(
                   'w-full flex items-center gap-3 p-4 text-left transition',
-                  isActive ? 'bg-accent-50/50' : 'hover:bg-neutral-50',
+                  isActive ? 'bg-accent-500/10 border-accent-500/30' : 'hover:bg-white/50',
                 )}
               >
                 <span className="text-xl">{meta?.flag}</span>

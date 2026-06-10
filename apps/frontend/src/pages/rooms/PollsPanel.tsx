@@ -40,7 +40,7 @@ export function PollsPanel({ roomId, isAdmin, members, currentUserId }: Props) {
   return (
     <aside className="h-full bg-white flex flex-col min-h-0">
       <div className="px-2 pt-2 shrink-0 border-b border-neutral-100">
-        <div className="flex gap-1 bg-neutral-100 p-1 rounded-xl mb-2">
+        <div className="flex gap-1 bg-white/35 border border-white/50 backdrop-blur-md p-1 rounded-2xl mb-2">
           <button onClick={() => setTab('polls')} className={tabCls(tab === 'polls')}>
             <BarChart2 size={14} />
             {t('polls.finalPlan.tabPolls')}
@@ -58,7 +58,7 @@ export function PollsPanel({ roomId, isAdmin, members, currentUserId }: Props) {
             </h2>
             <button
               onClick={() => setShowCreate(true)}
-              className="w-16 h-7 flex items-center justify-center btn-glass-blue text-white rounded-lg transition shrink-0"
+              className="w-16 h-7 flex items-center justify-center btn-glass-blue rounded-lg transition shrink-0"
               title={t('polls.createNew')}
             >
               <Plus size={16} />

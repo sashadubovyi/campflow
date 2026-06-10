@@ -95,7 +95,7 @@ export function ChatPanel({ roomId, roomName: _roomName, importantOnly = false, 
   const othersTyping = [...typingUsers].filter((id) => id !== user?.id);
 
   return (
-    <section className="h-full flex flex-col bg-neutral-50 min-h-0">
+    <section className="h-full flex flex-col min-h-0">
       <div className="flex-1 overflow-y-auto scrollbar-thin px-4 md:px-6 py-4 space-y-1">
         {isLoading && (
           <div className="space-y-3 pt-2">
@@ -152,10 +152,10 @@ export function ChatPanel({ roomId, roomName: _roomName, importantOnly = false, 
         )}
       </div>
 
-      <div className="border-t border-neutral-100 bg-white shrink-0">
+      <div className="border-t border-white/30 bg-white/55 backdrop-blur-xl shrink-0">
         {/* Reply preview bar — mobile-first, тонкий і клікабельний дозакриття */}
         {replyingTo && (
-          <div className="flex items-center gap-2 px-3 md:px-6 py-2 bg-accent-50 border-b border-accent-100">
+          <div className="flex items-center gap-2 px-3 md:px-6 py-2 bg-accent-500/8 border-b border-accent-500/20">
             <CornerUpLeft size={14} className="text-accent-600 shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="text-[11px] font-semibold text-accent-700 leading-tight">
@@ -168,7 +168,7 @@ export function ChatPanel({ roomId, roomName: _roomName, importantOnly = false, 
             </div>
             <button
               onClick={() => setReplyingTo(null)}
-              className="shrink-0 p-1 rounded-md text-neutral-500 hover:text-neutral-900 hover:bg-white transition"
+              className="shrink-0 p-1 rounded-md text-neutral-500 hover:text-neutral-900 hover:bg-white/70 transition"
               aria-label={t('common.cancel')}
             >
               <X size={14} />
@@ -183,7 +183,7 @@ export function ChatPanel({ roomId, roomName: _roomName, importantOnly = false, 
             onChange={handleChange}
             onKeyDown={handleKeyDown}
             placeholder={t('chat.placeholder')}
-            className="flex-1 h-11 px-4 rounded-xl bg-neutral-50 border border-neutral-200 text-neutral-900 placeholder:text-neutral-400 focus:bg-white focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 outline-none transition"
+            className="flex-1 h-11 px-4 rounded-2xl glass-input text-neutral-900 placeholder:text-neutral-400 focus:ring-0 outline-none transition"
           />
           <button
             onClick={handleSend}
@@ -314,7 +314,7 @@ function MessageBubble({
   if (message.type === 'system') {
     return (
       <div className="flex justify-center py-1">
-        <p className="text-xs text-neutral-500 bg-neutral-100 rounded-full px-3 py-1">
+        <p className="text-xs text-neutral-500 bg-white/40 backdrop-blur-sm rounded-full px-3 py-1">
           {message.content}
         </p>
       </div>
@@ -330,12 +330,12 @@ function MessageBubble({
       className={`px-3.5 py-2 text-sm leading-relaxed select-none ${isSending || isFailed ? 'opacity-50' : ''} ${
         isOwn
           ? 'bg-gradient-to-br from-accent-400 to-accent-600 text-white rounded-2xl rounded-tr-md shadow-sm'
-          : 'bg-gradient-to-br from-white to-neutral-100 text-neutral-900 shadow-card rounded-2xl rounded-tl-md'
+          : 'glass-card !rounded-2xl !rounded-tl-md text-neutral-900'
       }`}
     >
       {message.replyTo && (
         <div className={`mb-1.5 px-2 py-1 rounded-md border-l-2 text-[11px] leading-tight ${
-          isOwn ? 'bg-white/10 border-white/60 text-white/90' : 'bg-neutral-100 border-accent-400 text-neutral-600'
+          isOwn ? 'bg-white/10 border-white/60 text-white/90' : 'bg-white/20 border-accent-400 text-neutral-600'
         }`}>
           <p className={`font-semibold truncate ${isOwn ? 'text-white' : 'text-accent-700'}`}>
             {message.replyTo.author?.fullName ?? t('common.you', 'Ви')}
@@ -434,11 +434,11 @@ function MessageBubble({
         </button>
 
         {menuOpen && (
-          <div className={`absolute ${openDown ? 'top-8' : 'bottom-8'} ${isOwn ? 'right-0' : 'left-0'} bg-white rounded-xl shadow-card border border-neutral-100 py-1 z-20 min-w-[160px]`}>
+          <div className={`absolute ${openDown ? 'top-8' : 'bottom-8'} ${isOwn ? 'right-0' : 'left-0'} glass-surface rounded-2xl py-1 z-20 min-w-[160px]`}>
             {/* Reply — desktop only, mobile uses swipe */}
             <button
               onClick={() => { onReply(); setMenuOpen(false); }}
-              className="hidden md:flex w-full items-center gap-2.5 px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors"
+              className="hidden md:flex w-full items-center gap-2.5 px-3 py-2 text-sm text-neutral-700 hover:bg-white/50 transition-colors"
             >
               <CornerUpLeft size={14} className="text-neutral-400" />
               {t('chat.reply', 'Відповісти')}
@@ -446,7 +446,7 @@ function MessageBubble({
 
             <button
               onClick={() => { onToggleImportant(); setMenuOpen(false); }}
-              className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors"
+              className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-neutral-700 hover:bg-white/50 transition-colors"
             >
               <Star size={14} className={message.isImportant ? 'text-amber-400 fill-amber-400' : 'text-neutral-400'} />
               {message.isImportant ? (t('chat.unmarkImportant') ?? 'Unmark important') : (t('chat.markImportant') ?? 'Mark important')}
@@ -471,7 +471,7 @@ function MessageBubble({
                         {t('common.yes') ?? 'Yes'}
                       </button>
                       <button onClick={() => setDeleteConfirm(false)}
-                        className="flex-1 text-xs bg-neutral-100 text-neutral-600 rounded-lg py-1 hover:bg-neutral-200 transition-colors">
+                        className="flex-1 text-xs bg-white/55 border border-white/70 text-neutral-600 rounded-lg py-1 hover:bg-white/72 transition-colors">
                         {t('common.no') ?? 'No'}
                       </button>
                     </div>

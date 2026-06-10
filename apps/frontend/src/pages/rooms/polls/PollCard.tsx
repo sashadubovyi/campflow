@@ -12,7 +12,7 @@ import type { PollDetails, PollOption } from '../../../shared/api/polls.api';
 import type { RoomMember } from '../../../shared/api/rooms.api';
 import { Avatar } from '../../../shared/ui/Avatar';
 import { LocationMap } from '../../../shared/ui/map/LocationMap';
-import { MapPin } from 'lucide-react';
+import { MapPin, Check } from 'lucide-react';
 
 interface Props {
   poll: PollDetails;
@@ -24,8 +24,8 @@ interface Props {
 function StatusBadge({ status }: { status: PollDetails['status'] }) {
   const { t } = useTranslation();
   const styles: Record<PollDetails['status'], string> = {
-    open: 'bg-neutral-50 text-neutral-700',
-    reopened: 'bg-neutral-50 text-neutral-700',
+    open: 'bg-white/40 text-neutral-700',
+    reopened: 'bg-white/40 text-neutral-700',
     closed: 'bg-neutral-100 text-neutral-400',
     approved: 'bg-accent-500/10 text-accent-600',
   };
@@ -38,7 +38,7 @@ function StatusBadge({ status }: { status: PollDetails['status'] }) {
 
 function ProgressBar({ percent, isWinning }: { percent: number; isWinning: boolean }) {
   return (
-    <div className="h-1.5 bg-neutral-50 rounded-full overflow-hidden mt-1">
+    <div className="h-1.5 bg-white/40 rounded-full overflow-hidden mt-1">
       <div
         className={`h-full ${isWinning ? 'bg-brand-gradient' : 'bg-neutral-300'} transition-all`}
         style={{ width: `${percent}%` }}
@@ -54,7 +54,7 @@ export function PollCard({ poll, isAdmin, members, currentUserId }: Props) {
   const maxVotes = Math.max(...poll.options.map((o) => o.votes), 0);
 
   return (
-    <article className="bg-white rounded-xl border border-neutral-100 p-3 shadow-sm">
+    <article className="glass-card rounded-xl p-3 shadow-sm">
       <header className="flex items-start justify-between gap-2 mb-2">
         <div className="min-w-0 flex-1">
           <h3 className="font-display text-sm font-semibold text-neutral-900 leading-tight">
@@ -171,7 +171,7 @@ function MultiView({
         const percent = totalVotes > 0 ? (opt.votes / totalVotes) * 100 : 0;
 
         return (
-          <li key={opt.id} className={`rounded-lg p-2 transition ${isChosen ? 'bg-accent-50 border border-accent-500/30' : 'bg-neutral-50'}`}>
+          <li key={opt.id} className={`rounded-lg p-2 transition ${isChosen ? 'bg-accent-500/10 border border-accent-500/30' : 'bg-white/40'}`}>
             <button
               type="button"
               disabled={isClosed || toggleVote.isPending}
@@ -181,10 +181,10 @@ function MultiView({
               <div className="flex items-center gap-2">
                 <span
                   className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 ${
-                    isChosen ? 'border-accent-500 bg-accent-500' : 'border-neutral-100 bg-white'
+                    isChosen ? 'border-accent-500 bg-accent-500' : 'border-white/70 bg-white/60'
                   }`}
                 >
-                  {isChosen && <span className="text-white text-[10px]">✓</span>}
+                  {isChosen && <Check size={8} className="text-white" />}
                 </span>
                 <span className="text-sm text-neutral-900 flex-1 truncate">{opt.label}</span>
                 <span className="text-xs text-neutral-700 font-semibold shrink-0">{opt.votes}</span>
@@ -222,13 +222,13 @@ function MultiView({
                 )}
 
                 {assigningId === opt.id && (
-                  <div className="mt-1.5 bg-white border border-neutral-100 rounded-lg p-1.5 space-y-0.5">
+                  <div className="mt-1.5 glass-surface rounded-2xl p-1.5 space-y-0.5">
                     {members.map((m) => (
                       <button
                         key={m.id}
                         type="button"
                         onClick={() => handleAssign(opt.id, m.user.id)}
-                        className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-neutral-50 transition text-left"
+                        className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-white/50 transition text-left"
                       >
                         <Avatar fullName={m.user.fullName} avatarUrl={m.user.avatarUrl} size={20} />
                         <span className="text-xs text-neutral-900">{m.user.fullName}</span>
@@ -296,7 +296,7 @@ function LocationView({
                 onClick={() => vote.mutate({ pollId: poll.id, optionId: opt.id })}
                 className={`w-full text-left px-3 py-2 rounded-lg border transition disabled:cursor-default ${
                   isChosen
-                    ? 'border-accent-500 bg-neutral-50'
+                    ? 'border-accent-500 bg-accent-500/10'
                     : 'border-neutral-100 hover:border-accent-500/50'
                 }`}
               >
@@ -354,7 +354,7 @@ function AdminActions({ poll }: { poll: PollDetails }) {
             type="button"
             onClick={() => closePoll.mutate(poll.id)}
             disabled={closePoll.isPending}
-            className="flex-1 text-xs bg-neutral-50 hover:bg-neutral-100 text-neutral-700 font-semibold py-1.5 rounded-lg transition"
+            className="flex-1 text-xs bg-white/55 border border-white/70 hover:bg-white/72 text-neutral-700 font-semibold py-1.5 rounded-xl transition"
           >
             {t('polls.close')}
           </button>
@@ -366,14 +366,14 @@ function AdminActions({ poll }: { poll: PollDetails }) {
               <button
                 type="button"
                 onClick={() => reopenPoll.mutate(poll.id)}
-                className="flex-1 text-xs bg-neutral-50 hover:bg-neutral-100 text-neutral-700 font-semibold py-1.5 rounded-lg transition"
+                className="flex-1 text-xs bg-white/55 border border-white/70 hover:bg-white/72 text-neutral-700 font-semibold py-1.5 rounded-xl transition"
               >
                 {t('polls.reopen')}
               </button>
               <button
                 type="button"
                 onClick={() => setPickingWinner(true)}
-                className="flex-1 text-xs btn-glass-blue text-white font-semibold py-1.5 rounded-lg transition"
+                className="flex-1 text-xs btn-glass-blue font-semibold py-1.5 rounded-lg transition"
               >
                 {t('polls.approve')}
               </button>
@@ -390,7 +390,7 @@ function AdminActions({ poll }: { poll: PollDetails }) {
                     className={`w-full text-left px-2 py-1 rounded text-xs transition ${
                       selectedIds.has(opt.id)
                         ? 'bg-accent-500/10 text-accent-600 font-semibold'
-                        : 'bg-neutral-50 text-neutral-700 hover:bg-neutral-100'
+                        : 'bg-white/40 text-neutral-700 hover:bg-white/60'
                     }`}
                   >
                     {selectedIds.has(opt.id) ? '✓ ' : ''}
@@ -413,7 +413,7 @@ function AdminActions({ poll }: { poll: PollDetails }) {
                   type="button"
                   onClick={handleApprove}
                   disabled={selectedIds.size === 0 || approve.isPending}
-                  className="flex-1 text-xs btn-glass-blue disabled:opacity-50 text-white font-semibold py-1.5 rounded-lg transition"
+                  className="flex-1 text-xs btn-glass-blue disabled:opacity-50 font-semibold py-1.5 rounded-xl transition"
                 >
                   {t('polls.approveAction')}
                 </button>

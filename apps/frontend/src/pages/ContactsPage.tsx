@@ -51,7 +51,7 @@ export function ContactsPage() {
   const visible = tab === 'mutual' ? mutual : pending;
 
   return (
-    <div className="h-full flex flex-col bg-neutral-50 font-body">
+    <div className="h-full flex flex-col font-body">
       <PageHeader
         title={<span className="font-display">{t('nav.titles.friends')}</span>}
         left={<BackButton />}
@@ -69,7 +69,7 @@ export function ContactsPage() {
 
       <main className="flex-1 overflow-y-auto w-full px-4 md:px-6 py-6">
         {/* Tabs */}
-        <div className="flex gap-1 bg-neutral-100 p-1 rounded-xl mb-4">
+        <div className="flex gap-1 bg-white/35 border border-white/50 backdrop-blur-md p-1 rounded-2xl mb-4">
           <TabButton
             active={tab === 'mutual'}
             onClick={() => setTab('mutual')}
@@ -91,7 +91,7 @@ export function ContactsPage() {
         )}
 
         {!isLoading && visible.length === 0 && (
-          <div className="bg-white rounded-2xl border border-neutral-100 border-dashed p-10 text-center flex flex-col items-center">
+          <div className="glass-card border-dashed p-10 text-center flex flex-col items-center">
             <Users size={40} className="text-neutral-300 mb-3" />
             <p className="font-display text-lg text-neutral-900 mb-1">
               {tab === 'mutual'
@@ -103,7 +103,7 @@ export function ContactsPage() {
         )}
 
         {visible.length > 0 && (
-          <ul className="bg-white rounded-2xl border border-neutral-100 shadow-sm divide-y divide-neutral-100 overflow-hidden">
+          <ul className="glass-card shadow-sm divide-y divide-neutral-100 overflow-hidden">
             {visible.map((c) => (
               <li key={c.id} className="flex items-center gap-3 p-4 hover:bg-neutral-50 transition">
                 <button
@@ -229,7 +229,7 @@ function TabButton({
       onClick={onClick}
       className={cn(
         'flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-semibold transition',
-        active ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500 hover:text-neutral-700',
+        active ? 'bg-white/85 border border-white/90 text-neutral-900 shadow-sm' : 'text-neutral-500 hover:text-neutral-700',
       )}
     >
       {icon}

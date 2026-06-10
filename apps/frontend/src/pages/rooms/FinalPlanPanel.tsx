@@ -89,7 +89,7 @@ function Section({
 function DecisionCard({ item }: { item: FinalPlanItem }) {
   const { t } = useTranslation();
   return (
-    <div className="bg-white rounded-xl border border-neutral-100 p-3">
+    <div className="glass-card rounded-xl p-3">
       <p className="text-sm font-medium text-neutral-900">{item.title}</p>
       <p className="text-[10px] text-neutral-400 mt-1">
         {t('polls.finalPlan.approvedAt', { time: relativeTime(item.approvedAt) })}
@@ -101,7 +101,7 @@ function DecisionCard({ item }: { item: FinalPlanItem }) {
 function LocationCard({ item }: { item: FinalPlanItem }) {
   const { t } = useTranslation();
   return (
-    <div className="bg-white rounded-xl border border-neutral-100 p-3">
+    <div className="glass-card rounded-xl p-3">
       <p className="text-sm font-medium text-neutral-900 flex items-center gap-1">
         <MapPin size={13} className="text-neutral-400 shrink-0" />
         {item.title}
@@ -129,7 +129,7 @@ function LocationCard({ item }: { item: FinalPlanItem }) {
 function ItemCard({ item }: { item: FinalPlanItem }) {
   const { t } = useTranslation();
   return (
-    <div className="bg-white rounded-xl border border-neutral-100 p-3">
+    <div className="glass-card rounded-xl p-3">
       <p className="text-sm font-medium text-neutral-900">{item.title}</p>
       <div className="flex items-center justify-between mt-1.5">
         {item.assignee ? (

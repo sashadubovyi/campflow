@@ -123,7 +123,7 @@ export function ProfileSettingsPage() {
 
   if (isLoading || !profile) {
     return (
-      <div className="h-full bg-neutral-50 flex items-center justify-center">
+      <div className="h-full flex items-center justify-center">
         <p className="font-display text-xl text-neutral-900 animate-pulse">{t('common.loading')}</p>
       </div>
     );
@@ -178,7 +178,7 @@ export function ProfileSettingsPage() {
   const birthDateInput = form.birthDate ? form.birthDate.slice(0, 10) : '';
 
   return (
-    <div className="h-full overflow-y-auto bg-neutral-50 font-body pb-20">
+    <div className="h-full overflow-y-auto font-body pb-20">
       <header className="glass-header shadow-[0_0.5px_0_rgba(0,0,0,0.06)] sticky top-0 z-10">
         <div className="w-full px-4 md:px-6 py-2 flex items-center justify-between gap-3">
           <BackButton />
@@ -195,8 +195,8 @@ export function ProfileSettingsPage() {
               disabled={!isDirty || update.isPending}
               className={`text-sm font-semibold px-4 py-1.5 rounded-xl transition ${
                 isDirty && !update.isPending
-                  ? 'bg-brand-gradient text-white'
-                  : 'bg-neutral-100 text-neutral-400 cursor-default'
+                  ? 'btn-glass-blue'
+                  : 'bg-white/30 text-neutral-400 border border-white/50 cursor-default'
               }`}
             >
               {update.isPending ? t('common.saving') : t('common.save')}
@@ -219,7 +219,7 @@ export function ProfileSettingsPage() {
             <input
               value={profile.username}
               disabled
-              className={`${inputCls} bg-neutral-50 text-neutral-400`}
+              className={`${inputCls} opacity-60`}
             />
           </Field>
           <Field label={t('profile.fields.city')}>
@@ -247,8 +247,8 @@ export function ProfileSettingsPage() {
                   onClick={() => set('gender', gender)}
                   className={`flex-1 px-3 py-2 rounded-xl border-2 text-sm transition ${
                     form.gender === gender
-                      ? 'border-accent-500 bg-neutral-50 text-neutral-900'
-                      : 'border-neutral-100 text-neutral-700 hover:border-accent-500/50'
+                      ? 'border-accent-500 bg-accent-500/10 text-neutral-900'
+                      : 'border-white/70 bg-white/50 text-neutral-700 hover:border-accent-500/50'
                   }`}
                 >
                   {t(`profile.gender.${gender}`)}
@@ -289,7 +289,7 @@ export function ProfileSettingsPage() {
                   className={`text-xs font-medium px-3 py-1.5 rounded-full transition ${
                     active
                       ? 'text-white shadow-sm'
-                      : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+                      : 'bg-white/50 border border-white/70 text-neutral-700 hover:bg-white/72'
                   }`}
                 >
                   {tag}
@@ -384,8 +384,8 @@ export function ProfileSettingsPage() {
                 onClick={() => set('inviteFrom', opt)}
                 className={`w-full text-left px-4 py-3 rounded-xl border-2 transition ${
                   form.inviteFrom === opt
-                    ? 'border-accent-500 bg-neutral-50'
-                    : 'border-neutral-100 hover:border-accent-500/50'
+                    ? 'border-accent-500 bg-accent-500/10'
+                    : 'border-white/70 bg-white/50 hover:border-accent-500/50'
                 }`}
               >
                 <p className="text-sm font-semibold text-neutral-900">
@@ -401,7 +401,7 @@ export function ProfileSettingsPage() {
           <button
             type="button"
             onClick={() => navigate('/settings/blocked')}
-            className="w-full text-left px-4 py-3 rounded-xl border-2 border-neutral-100 hover:border-accent-500/50 transition"
+            className="w-full text-left glass-card !p-0 px-4 py-3 hover:!border-accent-500/50 transition"
           >
             <p className="text-sm font-semibold text-neutral-900">
               {t('profile.security.blocked')}
@@ -415,11 +415,11 @@ export function ProfileSettingsPage() {
 }
 
 const inputCls =
-  'w-full px-4 py-2.5 rounded-xl border border-neutral-100 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 outline-none transition text-sm';
+  'w-full px-4 py-2.5 rounded-2xl glass-input focus:ring-0 outline-none transition text-sm text-neutral-900';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-5">
+    <section className="glass-card shadow-sm p-5">
       <h2 className="font-display text-sm uppercase tracking-widest text-neutral-400 mb-4">
         {title}
       </h2>
@@ -477,12 +477,12 @@ function ContactRow({
         onChange={(e) => onChange?.(e.target.value)}
         disabled={disabled}
         placeholder={placeholder ?? label}
-        className={`${inputCls} ${disabled ? 'bg-neutral-50 text-neutral-400' : ''} flex-1`}
+        className={`${inputCls} ${disabled ? 'opacity-60' : ''} flex-1`}
       />
       <select
         value={visibility ?? 'hidden'}
         onChange={(e) => onVisibilityChange(e.target.value as Visibility)}
-        className="px-2 py-2.5 rounded-xl border border-neutral-100 text-xs font-medium text-neutral-700 bg-white focus:border-accent-500 outline-none shrink-0"
+        className="px-2 py-2.5 rounded-xl glass-input text-xs font-medium text-neutral-700 focus:ring-0 outline-none shrink-0"
       >
         <option value="public">{t('profile.visibility.public')}</option>
         <option value="contacts">{t('profile.visibility.contacts')}</option>

@@ -68,8 +68,8 @@ export function MembersPanel({ roomId, members, currentUserId, isAdmin }: Props)
 
   return (
     <>
-      <aside className="h-full bg-white flex flex-col min-h-0">
-        <div className="px-4 py-4 border-b border-neutral-100 shrink-0">
+      <aside className="h-full bg-white/55 backdrop-blur-xl flex flex-col min-h-0">
+        <div className="px-4 py-4 border-b border-white/30 shrink-0">
           <h2 className="text-sm uppercase tracking-widest text-neutral-400">
             {t('rooms.members')}
           </h2>
@@ -168,7 +168,7 @@ function MemberGroup({
               <button
                 type="button"
                 onClick={() => onOpen(m.user.username)}
-                className="flex-1 flex items-center gap-3 px-2 py-1.5 rounded-lg hover:bg-neutral-50 transition text-left min-w-0"
+                className="flex-1 flex items-center gap-3 px-2 py-1.5 rounded-lg hover:bg-white/50 transition text-left min-w-0 rounded-xl"
               >
                 <Avatar
                   fullName={m.user.fullName}
@@ -301,7 +301,7 @@ function TransferAdminModal({
           <button
             onClick={handleConfirm}
             disabled={transfer.isPending}
-            className="flex-1 btn-glass-blue disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition"
+            className="flex-1 btn-glass-blue disabled:opacity-60 font-semibold py-2.5 rounded-2xl transition"
           >
             {transfer.isPending ? t('rooms.transferring') : t('rooms.transferAndLeave')}
           </button>

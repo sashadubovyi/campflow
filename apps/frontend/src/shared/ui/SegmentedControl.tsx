@@ -1,5 +1,5 @@
 import { useId } from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { cn } from './cn';
 
 interface Option<T extends string> {
@@ -23,21 +23,27 @@ export function SegmentedControl<T extends string>({
   const id = useId();
 
   return (
-    <div className={cn('inline-flex p-1 bg-neutral-100 rounded-xl', className)}>
+    <div
+      className={cn(
+        'inline-flex p-1 rounded-2xl',
+        'bg-white/35 border border-white/50 backdrop-blur-md',
+        className,
+      )}
+    >
       {options.map((opt) => (
         <button
           key={opt.value}
           onClick={() => onChange(opt.value)}
           className={cn(
-            'relative px-3 h-8 rounded-lg text-sm font-medium transition-colors',
+            'relative px-3.5 h-8 rounded-xl text-sm font-semibold transition-colors duration-200',
             value === opt.value ? 'text-neutral-900' : 'text-neutral-500 hover:text-neutral-700',
           )}
         >
           {value === opt.value && (
-            <motion.span
+            <m.span
               layoutId={`${id}-seg`}
-              className="absolute inset-0 rounded-lg bg-white shadow-sm"
-              style={{ borderRadius: 8 }}
+              className="absolute inset-0 rounded-xl bg-white/85 border border-white/90 shadow-glass"
+              style={{ borderRadius: 10 }}
               transition={{ type: 'spring', stiffness: 500, damping: 35 }}
             />
           )}
