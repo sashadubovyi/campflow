@@ -4,6 +4,25 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  /* Secondary button — transparent with thin border, Gemini tint on hover */
+  .glass-btn {
+    @apply bg-transparent border border-neutral-200/70 text-neutral-700 font-semibold rounded-xl
+           hover:bg-gemini-active-hover hover:border-accent-200/40 hover:text-accent-700
+           transition-all duration-200;
+  }
+  /* Icon / ghost button — same but no initial border */
+  .glass-icon {
+    @apply bg-transparent border border-transparent text-neutral-500 rounded-xl
+           hover:bg-gemini-active-hover hover:border-accent-200/30 hover:text-accent-600
+           transition-all duration-200;
+  }
+  /* Frosted glass surface (modals, headers, panels) */
+  .glass-surface {
+    @apply bg-white/70 backdrop-blur-2xl border border-white/50;
+  }
+}
+
 :root {
   color-scheme: light;
 }

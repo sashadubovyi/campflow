@@ -149,7 +149,7 @@ export function ChatPage() {
         right={
           <button
             onClick={() => navigate('/search')}
-            className="flex items-center justify-center w-9 h-9 rounded-xl text-neutral-500 hover:bg-neutral-100 hover:text-accent-600 transition"
+            className="flex items-center justify-center w-9 h-9 glass-icon"
             title={t('search.title', 'Пошук') as string}
             aria-label={t('search.title', 'Пошук') as string}
           >

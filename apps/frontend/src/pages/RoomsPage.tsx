@@ -24,7 +24,7 @@ export function RoomsPage() {
           <button
             onClick={() => { setShowCreate(false); setShowJoin(true); }}
             title={t('rooms.joinByCode')}
-            className="flex items-center justify-center w-9 h-9 rounded-xl bg-accent-50 text-accent-500 hover:bg-accent-100 transition"
+            className="flex items-center justify-center w-9 h-9 rounded-xl bg-gemini-active border border-accent-200/40 text-accent-600 hover:bg-gemini-active-hover transition-all duration-200"
           >
             <KeyRound size={18} />
           </button>

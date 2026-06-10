@@ -86,7 +86,7 @@ export function RoomPage() {
       className={`flex items-center justify-center w-9 h-9 rounded-xl transition ${
         importantOnly
           ? 'bg-amber-50 text-amber-500'
-          : 'text-neutral-400 hover:bg-neutral-100 hover:text-amber-500'
+          : 'glass-icon'
       }`}
     >
       <Star size={16} className={importantOnly ? 'fill-amber-400' : ''} />
@@ -119,7 +119,7 @@ export function RoomPage() {
     return (
       <div className="h-full flex flex-col bg-neutral-50 overflow-hidden">
         {/* Хедер — h1 абсолютно позиціонований щоб не зсувався від кнопок */}
-        <header className="relative bg-white/75 backdrop-blur-xl border-b border-neutral-100/50 shrink-0 px-4 h-12 flex items-center">
+        <header className="relative bg-white/65 backdrop-blur-2xl border-b border-white/40 shrink-0 px-4 h-12 flex items-center">
           <div className="flex items-center justify-start min-w-[2.5rem] shrink-0">
             <BackButton />
           </div>
@@ -142,7 +142,7 @@ export function RoomPage() {
               <button
                 onClick={() => setShowEditModal(true)}
                 title={t('rooms.editRoom')}
-                className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 transition text-xs font-semibold"
+                className="flex items-center justify-center gap-1.5 px-3 py-2 glass-icon text-xs font-semibold"
               >
                 <Pencil size={14} />
                 {t('rooms.editRoom')}
@@ -206,7 +206,7 @@ export function RoomPage() {
               {/* Toggle members кнопка */}
               <button
                 onClick={() => setShowMembers((v) => !v)}
-                className="shrink-0 border-t border-neutral-100 py-3.5 text-sm font-semibold text-neutral-500 hover:bg-neutral-50 hover:text-neutral-700 transition flex items-center justify-center gap-1.5"
+                className="shrink-0 border-t border-neutral-100 py-3.5 text-sm font-semibold text-neutral-500 hover:bg-gemini-active-hover hover:text-accent-600 transition flex items-center justify-center gap-1.5"
               >
                 <Users size={14} />
                 {t('rooms.members')}
@@ -240,7 +240,7 @@ export function RoomPage() {
             <div className="flex gap-3">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 border border-neutral-100 text-neutral-700 font-semibold py-2.5 rounded-xl hover:bg-neutral-50 transition text-sm"
+                className="flex-1 glass-btn py-2.5 text-sm"
               >
                 {t('common.cancel')}
               </button>
@@ -264,7 +264,7 @@ export function RoomPage() {
   /* ---------- MOBILE ---------- */
   return (
     <div className="h-full flex flex-col bg-neutral-50 overflow-hidden">
-      <header className="relative bg-white/75 backdrop-blur-xl border-b border-neutral-100/50 shrink-0 px-2 h-12 flex items-center gap-1">
+      <header className="relative bg-white/65 backdrop-blur-2xl border-b border-white/40 shrink-0 px-2 h-12 flex items-center gap-1">
         <button
           onClick={() => (mobileView !== 'chat' ? setMobileView('chat') : navigate('/rooms'))}
           className="p-2 text-neutral-500 hover:text-neutral-900 rounded-lg shrink-0"
@@ -378,7 +378,7 @@ export function RoomPage() {
                   <div className="flex gap-1">
                     <button
                       onClick={() => setShowDeleteConfirm(false)}
-                      className="flex-1 py-1.5 rounded-lg text-xs font-semibold text-neutral-500 hover:bg-neutral-100 transition"
+                      className="flex-1 py-1.5 rounded-lg text-xs font-semibold text-neutral-500 glass-icon"
                     >
                       {t('common.cancel')}
                     </button>

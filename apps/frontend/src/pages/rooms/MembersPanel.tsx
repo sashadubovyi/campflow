@@ -255,7 +255,7 @@ function TransferAdminModal({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-card-lg shadow-card-lg w-full max-w-md p-6"
+        className="glass-surface rounded-2xl shadow-2xl w-full max-w-md p-6"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-lg font-bold text-neutral-900 mb-1">{t('rooms.transferAdmin')}</h2>
@@ -294,7 +294,7 @@ function TransferAdminModal({
         <div className="flex gap-2">
           <button
             onClick={onClose}
-            className="flex-1 border border-neutral-200 text-neutral-700 font-semibold py-2.5 rounded-xl hover:bg-neutral-50 transition"
+            className="flex-1 glass-btn py-2.5"
           >
             {t('common.cancel')}
           </button>

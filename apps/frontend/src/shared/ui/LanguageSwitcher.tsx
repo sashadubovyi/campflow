@@ -22,7 +22,7 @@ export function LanguageSwitcher() {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center justify-center w-11 h-11 rounded-xl text-xs font-semibold uppercase bg-accent-50 text-accent-500 shadow-card hover:bg-accent-100 hover:shadow-card-lg transition"
+        className="flex items-center justify-center w-11 h-11 rounded-xl text-xs font-semibold uppercase bg-gemini-active border border-accent-200/40 text-accent-600 hover:bg-gemini-active-hover transition-all duration-200"
         title={t(`language.${current}`)}
       >
         {current}

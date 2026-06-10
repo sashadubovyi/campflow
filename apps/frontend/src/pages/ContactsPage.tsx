@@ -58,7 +58,7 @@ export function ContactsPage() {
         right={
           <button
             onClick={() => navigate('/search')}
-            className="flex items-center justify-center w-9 h-9 rounded-xl text-neutral-500 hover:bg-neutral-100 hover:text-accent-600 transition"
+            className="flex items-center justify-center w-9 h-9 glass-icon"
             title={t('search.title', 'Пошук') as string}
             aria-label={t('search.title', 'Пошук') as string}
           >
@@ -140,7 +140,7 @@ export function ContactsPage() {
                 {c.isMutual && (
                   <button
                     onClick={() => navigate(`/dm/${c.user.username}`)}
-                    className="flex items-center justify-center w-9 h-9 rounded-lg text-neutral-400 hover:text-accent-600 hover:bg-accent-50 transition"
+                    className="flex items-center justify-center w-9 h-9 rounded-lg bg-gemini-active border border-accent-200/40 text-accent-600 hover:bg-gemini-active-hover transition-all duration-200"
                     title={t('contacts.message', 'Написати')}
                     aria-label={t('contacts.message', 'Написати')}
                   >
@@ -199,7 +199,7 @@ export function ContactsPage() {
             </button>
             <button
               onClick={() => setRemoveTarget(null)}
-              className="w-full border border-neutral-100 text-neutral-700 font-semibold py-2.5 rounded-xl hover:bg-neutral-50 transition text-sm"
+              className="w-full glass-btn py-2.5 text-sm"
             >
               {t('common.cancel')}
             </button>

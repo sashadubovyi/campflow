@@ -54,7 +54,7 @@ export function Modal({
             exit={{ opacity: 0, scale: 0.96, y: 10 }}
             transition={spring}
             className={cn(
-              'w-full bg-white/95 backdrop-blur-sm rounded-card-lg shadow-card-lg my-auto',
+              'w-full glass-surface rounded-card-lg shadow-card-lg my-auto',
               sizes[size],
             )}
             onClick={(e) => e.stopPropagation()}
@@ -64,7 +64,7 @@ export function Modal({
                 <h2 className="text-lg font-semibold text-neutral-900">{title}</h2>
                 <button
                   onClick={onClose}
-                  className="p-1.5 rounded-lg text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 transition"
+                  className="p-1.5 glass-icon rounded-lg"
                 >
                   <X size={18} />
                 </button>
