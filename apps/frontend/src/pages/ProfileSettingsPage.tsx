@@ -180,7 +180,7 @@ export function ProfileSettingsPage() {
   return (
     <div className="h-full overflow-y-auto bg-neutral-50 font-body pb-20">
       <header className="bg-white border-b border-neutral-100 sticky top-0 z-10">
-        <div className="w-full px-4 md:px-6 py-3 flex items-center justify-between gap-3">
+        <div className="w-full px-4 md:px-6 py-2 flex items-center justify-between gap-3">
           <BackButton />
           <span className="font-display text-lg font-bold text-neutral-900 truncate">
             {t('nav.titles.settings')}

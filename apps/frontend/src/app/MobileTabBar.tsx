@@ -48,7 +48,7 @@ export function MobileTabBar() {
     location.pathname === profilePath || location.pathname === `/u/${user?.username}`;
 
   return (
-    <nav className="flex md:hidden fixed bottom-0 inset-x-0 z-40 h-16 bg-white border-t border-neutral-100 pb-[env(safe-area-inset-bottom)]">
+    <nav className="flex md:hidden fixed bottom-0 inset-x-0 z-40 h-14 bg-white border-t border-neutral-100 pb-[env(safe-area-inset-bottom)]">
       {NAV_TABS.map(({ to, Icon, label }) => {
         const isActive = location.pathname === to || location.pathname.startsWith(to + '/');
         return (
@@ -59,7 +59,7 @@ export function MobileTabBar() {
             className="flex items-center justify-center flex-1 h-full"
           >
             <TabIcon isActive={isActive}>
-              <Icon size={24} />
+              <Icon size={22} />
             </TabIcon>
           </NavLink>
         );
@@ -72,7 +72,7 @@ export function MobileTabBar() {
       >
         <TabIcon isActive={isProfileActive}>
           <div className="relative">
-            <User size={24} />
+            <User size={22} />
             {hasUnread && (
               <span className="absolute -top-1.5 -right-2 bg-brand-gradient text-white text-[9px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center">
                 {(unread ?? 0) > 99 ? '99+' : unread}

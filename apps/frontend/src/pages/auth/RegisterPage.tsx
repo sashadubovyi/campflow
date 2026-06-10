@@ -145,6 +145,12 @@ export function RegisterPage() {
             {t('auth.login')}
           </Link>
         </p>
+        <p className="text-center text-xs text-neutral-400 mt-4 font-body">
+          Реєструючись, ви погоджуєтеся з{' '}
+          <Link to="/privacy" className="hover:underline hover:text-neutral-600 transition">
+            Політикою конфіденційності
+          </Link>
+        </p>
       </div>
     </div>
   );

@@ -100,6 +100,11 @@ export function LoginPage() {
             {t('auth.register')}
           </Link>
         </p>
+        <p className="text-center text-xs text-neutral-400 mt-4 font-body">
+          <Link to="/privacy" className="hover:underline hover:text-neutral-600 transition">
+            Політика конфіденційності
+          </Link>
+        </p>
       </div>
     </div>
   );

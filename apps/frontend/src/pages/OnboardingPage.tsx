@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import {
   MapPin, Smile, Calendar, AlignLeft, Phone, ShieldCheck, ChevronRight,
   User, Camera, Check, X, Loader2, Upload, AtSign, Send, MessageCircle,
+  Mars, Venus, VenusAndMars,
 } from 'lucide-react';
 import { useAuth } from '../shared/store/useAuth';
 import { useAuthStore } from '../shared/store/auth.store';
@@ -25,10 +26,10 @@ const HOBBY_COLORS = [
   '#f59e0b', '#ea580c', '#16a34a', '#4f46e5',
 ];
 
-const GENDER_OPTIONS: { value: Gender; labelKey: string }[] = [
-  { value: 'male', labelKey: 'profile.gender.male' },
-  { value: 'female', labelKey: 'profile.gender.female' },
-  { value: 'unspecified', labelKey: 'profile.gender.unspecified' },
+const GENDER_OPTIONS: { value: Gender; labelKey: string; Icon: React.ElementType }[] = [
+  { value: 'male',        labelKey: 'profile.gender.male',        Icon: Mars },
+  { value: 'female',      labelKey: 'profile.gender.female',      Icon: Venus },
+  { value: 'unspecified', labelKey: 'profile.gender.unspecified', Icon: VenusAndMars },
 ];
 
 const TOTAL_STEPS = 9;
@@ -364,7 +365,7 @@ function StepBirthdate({
           {t('onboarding.birthdate.gender')}
         </label>
         <div className="flex gap-3">
-          {GENDER_OPTIONS.map(({ value, labelKey }) => (
+          {GENDER_OPTIONS.map(({ value, labelKey, Icon }) => (
             <motion.button
               key={value} type="button" whileTap={{ scale: 0.94 }}
               onClick={() => onGender(value)}
@@ -374,7 +375,7 @@ function StepBirthdate({
                   : 'border-neutral-200 text-neutral-600 hover:border-accent-300'
               }`}
             >
-              <User size={20} />
+              <Icon size={20} />
               <span>{t(labelKey)}</span>
             </motion.button>
           ))}

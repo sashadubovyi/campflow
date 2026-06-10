@@ -20,7 +20,7 @@ export function AppShell() {
   return (
     <div className="flex h-[100dvh] bg-neutral-50 overflow-hidden">
       <DesktopNav onCreateRoom={() => setShowCreate(true)} />
-      <main className="flex-1 min-w-0 overflow-hidden pb-16 md:pb-0 relative">
+      <main className="flex-1 min-w-0 overflow-hidden pb-14 md:pb-0 relative">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={location.pathname}
