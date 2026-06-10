@@ -182,7 +182,7 @@ export function DirectChatPage() {
 
   return (
     <div className="h-full flex flex-col bg-neutral-50 font-body">
-      <header className="bg-white border-b border-neutral-100 shrink-0 px-2 md:px-4 h-12 flex items-center gap-2">
+      <header className="bg-white/75 backdrop-blur-xl border-b border-neutral-100/50 shrink-0 px-2 md:px-4 h-12 flex items-center gap-2">
         <BackButton />
         <button
           onClick={() => navigate(`/u/${chat.peer.username}`)}

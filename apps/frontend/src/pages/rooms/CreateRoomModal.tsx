@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Sparkles, Pencil } from 'lucide-react';
 import type { RoomDraft } from '../../shared/api/ai-rooms.api';
@@ -20,6 +20,12 @@ export function CreateRoomModal({ onClose, onCreated }: Props) {
   const [mode, setMode] = useState<Mode>('manual');
   const [step, setStep] = useState<Step>('input');
   const [draft, setDraft] = useState<RoomDraft | null>(null);
+
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, []);
 
   function handleDraft(d: RoomDraft) {
     setDraft(d);

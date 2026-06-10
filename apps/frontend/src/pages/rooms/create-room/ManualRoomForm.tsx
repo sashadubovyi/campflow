@@ -77,22 +77,22 @@ export function ManualRoomForm({ onClose, onCreated }: Props) {
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-sm font-medium text-neutral-700 mb-1.5">
+          <label className="block text-xs font-medium text-neutral-600 mb-1">
             {t('rooms.startsAt')}
           </label>
           <input
             type="date"
-            className="w-full px-3 py-2.5 rounded-xl border border-neutral-100 focus:border-accent-500 outline-none transition text-neutral-700 [&::-webkit-calendar-picker-indicator]:opacity-40"
+            className="w-full px-2.5 py-1.5 text-sm rounded-xl border border-neutral-100 focus:border-accent-500 outline-none transition text-neutral-700 [&::-webkit-calendar-picker-indicator]:opacity-40"
             {...register('startsAt')}
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-neutral-700 mb-1.5">
+          <label className="block text-xs font-medium text-neutral-600 mb-1">
             {t('rooms.endsAt')}
           </label>
           <input
             type="date"
-            className="w-full px-3 py-2.5 rounded-xl border border-neutral-100 focus:border-accent-500 outline-none transition text-neutral-700 [&::-webkit-calendar-picker-indicator]:opacity-40"
+            className="w-full px-2.5 py-1.5 text-sm rounded-xl border border-neutral-100 focus:border-accent-500 outline-none transition text-neutral-700 [&::-webkit-calendar-picker-indicator]:opacity-40"
             {...register('endsAt')}
           />
         </div>

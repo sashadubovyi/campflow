@@ -64,6 +64,8 @@ export default {
         'rose-gradient-hover': 'linear-gradient(135deg, #ec4899 0%, #7c3aed 100%)',
         'danger-gradient': 'linear-gradient(135deg, #f87171 0%, #ef4444 50%, #dc2626 100%)',
         'danger-gradient-hover': 'linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%)',
+        'gemini-active': 'linear-gradient(135deg, rgba(72,140,251,0.12) 0%, rgba(41,219,188,0.08) 50%, rgba(101,90,220,0.10) 100%)',
+        'gemini-active-hover': 'linear-gradient(135deg, rgba(72,140,251,0.18) 0%, rgba(41,219,188,0.12) 50%, rgba(101,90,220,0.15) 100%)',
       },
       borderRadius: {
         card: '20px',

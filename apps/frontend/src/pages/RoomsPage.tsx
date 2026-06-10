@@ -22,7 +22,7 @@ export function RoomsPage() {
         title={<span className="font-display">{t('nav.titles.spaces')}</span>}
         left={
           <button
-            onClick={() => setShowJoin(true)}
+            onClick={() => { setShowCreate(false); setShowJoin(true); }}
             title={t('rooms.joinByCode')}
             className="flex items-center justify-center w-9 h-9 rounded-xl bg-accent-50 text-accent-500 hover:bg-accent-100 transition"
           >
@@ -31,7 +31,7 @@ export function RoomsPage() {
         }
         right={
           <button
-            onClick={() => setShowCreate(true)}
+            onClick={() => { setShowJoin(false); setShowCreate(true); }}
             title={t('common.create')}
             className="flex items-center gap-1.5 bg-brand-gradient hover:bg-brand-gradient-hover text-white rounded-xl px-3 h-9 text-sm font-semibold transition"
           >

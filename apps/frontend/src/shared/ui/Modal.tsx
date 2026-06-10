@@ -27,9 +27,14 @@ export function Modal({
 }: Props) {
   useEffect(() => {
     if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prev;
+    };
   }, [open, onClose]);
 
   return createPortal(
@@ -49,7 +54,7 @@ export function Modal({
             exit={{ opacity: 0, scale: 0.96, y: 10 }}
             transition={spring}
             className={cn(
-              'w-full bg-white rounded-card-lg shadow-card-lg my-auto',
+              'w-full bg-white/95 backdrop-blur-sm rounded-card-lg shadow-card-lg my-auto',
               sizes[size],
             )}
             onClick={(e) => e.stopPropagation()}

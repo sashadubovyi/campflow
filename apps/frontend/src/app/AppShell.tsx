@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { DesktopNav } from './DesktopNav';
 import { MobileTabBar } from './MobileTabBar';
 import { CreateRoomModal } from '../pages/rooms/CreateRoomModal';
+import { JoinRoomModal } from '../pages/rooms/JoinRoomModal';
 
 const pageTransition = {
   initial: { opacity: 0, y: 8 },
@@ -16,10 +17,14 @@ export function AppShell() {
   const navigate = useNavigate();
   const location = useLocation();
   const [showCreate, setShowCreate] = useState(false);
+  const [showJoin, setShowJoin] = useState(false);
 
   return (
     <div className="flex h-[100dvh] bg-neutral-50 overflow-hidden">
-      <DesktopNav onCreateRoom={() => setShowCreate(true)} />
+      <DesktopNav
+        onCreateRoom={() => { setShowJoin(false); setShowCreate(true); }}
+        onJoinRoom={() => { setShowCreate(false); setShowJoin(true); }}
+      />
       <main className="flex-1 min-w-0 overflow-hidden pb-14 md:pb-0 relative">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
@@ -38,6 +43,15 @@ export function AppShell() {
           onCreated={(roomId) => {
             setShowCreate(false);
             navigate(`/rooms/${roomId}`);
+          }}
+        />
+      )}
+      {showJoin && (
+        <JoinRoomModal
+          onClose={() => setShowJoin(false)}
+          onJoined={(id) => {
+            setShowJoin(false);
+            navigate(`/rooms/${id}`);
           }}
         />
       )}
