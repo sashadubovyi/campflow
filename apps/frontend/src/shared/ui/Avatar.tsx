@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { getMediaUrl } from '../lib/getMediaUrl';
 
 interface AvatarProps {
@@ -39,6 +40,8 @@ export function Avatar({
   isOnline,
   showStatus = false,
 }: AvatarProps) {
+  const [imgFailed, setImgFailed] = useState(false);
+
   const ringClass = showStatus
     ? isOnline
       ? 'ring-2 ring-accent-500'
@@ -49,11 +52,12 @@ export function Avatar({
 
   const wrapperStyle = { width: size, height: size };
 
-  if (avatarUrl) {
+  if (avatarUrl && !imgFailed) {
     return (
       <img
         src={getMediaUrl(avatarUrl)}
         alt={fullName}
+        onError={() => setImgFailed(true)}
         className={`rounded-full object-cover shrink-0 transition ${ringClass} ${opacityClass}`}
         style={wrapperStyle}
       />

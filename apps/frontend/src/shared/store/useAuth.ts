@@ -1,5 +1,6 @@
 import { useAuthStore } from './auth.store';
 import { authApi, type LoginPayload, type RegisterPayload } from '../api/auth.api';
+import { queryClient } from '../api/queryClient';
 
 export function useAuth() {
   const { user, accessToken, isInitialized, setAuth, clear, setUser, setInitialized } =
@@ -40,6 +41,7 @@ export function useAuth() {
       await authApi.logout();
     } finally {
       clear();
+      queryClient.clear();
     }
   }
 

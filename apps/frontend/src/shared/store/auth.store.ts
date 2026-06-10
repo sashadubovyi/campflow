@@ -27,7 +27,11 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'au-session',
-      partialize: (state) => ({ user: state.user }),
+      // avatarUrl can be a 2-3 MB base64 string — don't persist it to localStorage
+      // to avoid silent quota failures. It is re-fetched fresh on every bootstrap.
+      partialize: (state) => ({
+        user: state.user ? { ...state.user, avatarUrl: null } : null,
+      }),
     },
   ),
 );

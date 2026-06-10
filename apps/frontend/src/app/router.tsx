@@ -25,6 +25,14 @@ export const router: ReturnType<typeof createBrowserRouter> = createBrowserRoute
   { path: '/register', element: <RegisterPage /> },
   { path: '/join/:code', element: <JoinByLinkPage /> },
   {
+    path: '/onboarding',
+    element: (
+      <ProtectedRoute>
+        <OnboardingPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
     element: (
       <ProtectedRoute>
         <AppShell />
@@ -45,7 +53,6 @@ export const router: ReturnType<typeof createBrowserRouter> = createBrowserRoute
       { path: '/events', element: <EventsPage /> },
       { path: '/search', element: <SearchPage /> },
       { path: '/settings/language', element: <LanguagePage /> },
-      { path: '/onboarding', element: <OnboardingPage /> },
     ],
   },
   { path: '/', element: <Navigate to="/rooms" replace /> },

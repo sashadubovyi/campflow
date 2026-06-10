@@ -1,18 +1,10 @@
 import { useEffect } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider } from 'react-router-dom';
 import { router } from './app/router';
 import { useAuth } from './shared/store/useAuth';
 import { useNotificationsSubscription } from './shared/api/notifications.hooks';
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      refetchOnWindowFocus: false,
-    },
-  },
-});
+import { queryClient } from './shared/api/queryClient';
 
 function AppContent() {
   const { bootstrap } = useAuth();
