@@ -26,7 +26,7 @@ export function AppShell() {
         onJoinRoom={() => { setShowCreate(false); setShowJoin(true); }}
       />
       <main className="flex-1 min-w-0 overflow-hidden pb-14 md:pb-0 relative">
-        <AnimatePresence mode="wait" initial={false}>
+        <AnimatePresence mode="wait">
           <m.div
             key={location.pathname}
             variants={pageVariants}

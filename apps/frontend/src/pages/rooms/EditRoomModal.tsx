@@ -93,25 +93,25 @@ export function EditRoomModal({ room, onClose }: Props) {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1.5">
+              <label className="block text-xs font-medium text-neutral-600 mb-1">
                 {t('rooms.startsAt')}
               </label>
               <input
                 type="datetime-local"
                 value={startsAt}
                 onChange={(e) => setStartsAt(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 outline-none transition text-sm"
+                className="w-full px-2 py-1.5 rounded-xl border border-neutral-200 focus:border-accent-500 outline-none transition text-xs text-neutral-700 [&::-webkit-calendar-picker-indicator]:opacity-40"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1.5">
+              <label className="block text-xs font-medium text-neutral-600 mb-1">
                 {t('rooms.endsAt')}
               </label>
               <input
                 type="datetime-local"
                 value={endsAt}
                 onChange={(e) => setEndsAt(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 outline-none transition text-sm"
+                className="w-full px-2 py-1.5 rounded-xl border border-neutral-200 focus:border-accent-500 outline-none transition text-xs text-neutral-700 [&::-webkit-calendar-picker-indicator]:opacity-40"
               />
             </div>
           </div>

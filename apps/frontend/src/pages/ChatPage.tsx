@@ -7,8 +7,11 @@ import { Avatar } from '../shared/ui/Avatar';
 import { PageHeader } from '../shared/ui';
 import { relativeTime } from '../shared/lib/relativeTime';
 
-const SWIPE_THRESHOLD = 72; // px для автоматичного розкриття кнопки
-const DELETE_BTN_WIDTH = 72;
+// Зміни: кнопка видалення з'являється розширенням від ширини 0 (не translate)
+// Чат стискається, а не зсувається
+
+const DELETE_BTN_WIDTH = 76;
+const SWIPE_THRESHOLD = 50;
 
 function SwipeableChat({
   chat,
@@ -20,80 +23,66 @@ function SwipeableChat({
   onDelete: () => void;
 }) {
   const { t } = useTranslation();
-  const [offsetX, setOffsetX] = useState(0); // 0..DELETE_BTN_WIDTH
+  const [revealW, setRevealW] = useState(0); // 0 → DELETE_BTN_WIDTH
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
   const isHoriz = useRef<boolean | null>(null);
+  const lastRevealW = useRef(0);
 
   function onTouchStart(e: React.TouchEvent) {
-    const t = e.touches[0];
-    if (!t) return;
-    touchStartX.current = t.clientX;
-    touchStartY.current = t.clientY;
+    const touch = e.touches[0];
+    if (!touch) return;
+    touchStartX.current = touch.clientX;
+    touchStartY.current = touch.clientY;
     isHoriz.current = null;
+    lastRevealW.current = revealW;
   }
 
   function onTouchMove(e: React.TouchEvent) {
-    const t = e.touches[0];
-    if (!t) return;
-    const dx = t.clientX - touchStartX.current;
-    const dy = Math.abs(t.clientY - touchStartY.current);
+    const touch = e.touches[0];
+    if (!touch) return;
+    const dx = touchStartX.current - touch.clientX; // positive = swipe left
+    const dy = Math.abs(touch.clientY - touchStartY.current);
 
-    if (isHoriz.current === null && (Math.abs(dx) > 4 || dy > 4)) {
+    if (isHoriz.current === null && (Math.abs(dx) > 5 || dy > 5)) {
       isHoriz.current = Math.abs(dx) > dy;
     }
+    if (!isHoriz.current) return;
 
-    if (isHoriz.current && dx < 0) {
-      const raw = Math.min(-dx + offsetX, DELETE_BTN_WIDTH);
-      setOffsetX(raw);
-    } else if (isHoriz.current && dx > 0) {
-      setOffsetX(Math.max(offsetX - dx, 0));
-    }
+    const next = Math.max(0, Math.min(DELETE_BTN_WIDTH, lastRevealW.current + dx));
+    setRevealW(next);
   }
 
   function onTouchEnd() {
     if (!isHoriz.current) return;
-    const snap = offsetX >= SWIPE_THRESHOLD ? DELETE_BTN_WIDTH : 0;
-    setOffsetX(snap);
+    setRevealW(revealW >= SWIPE_THRESHOLD ? DELETE_BTN_WIDTH : 0);
   }
 
-  function handleMainClick() {
-    if (offsetX > 0) {
-      setOffsetX(0);
+  function handleChatClick() {
+    if (revealW > 0) {
+      setRevealW(0);
       return;
     }
     onOpen();
   }
 
-  return (
-    <div className="relative overflow-hidden">
-      {/* Delete button (фіксований праворуч) */}
-      <div
-        style={{ width: DELETE_BTN_WIDTH }}
-        className="absolute right-0 top-0 bottom-0 flex items-center justify-center bg-red-500"
-      >
-        <button
-          onClick={onDelete}
-          className="w-full h-full flex flex-col items-center justify-center gap-0.5 text-white active:bg-red-600 transition"
-        >
-          <Trash2 size={18} />
-          <span className="text-[10px] font-semibold">{t('dm.deleteChat', 'Видалити')}</span>
-        </button>
-      </div>
+  const isTransitioning = isHoriz.current === null || !isHoriz.current;
+  const transition = isTransitioning
+    ? 'width 0.22s cubic-bezier(0.2,0,0,1)'
+    : 'none';
 
-      {/* Основний вміст (ковзає ліворуч) */}
+  return (
+    <div className="flex items-stretch overflow-hidden">
+      {/* Chat content — shrinks naturally as delete button expands */}
       <div
-        style={{
-          transform: `translateX(-${offsetX}px)`,
-          transition: isHoriz.current ? 'none' : 'transform 0.2s ease',
-        }}
+        style={{ flex: 1, minWidth: 0 }}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
-        onClick={handleMainClick}
-        className="glass-card !rounded-none !shadow-none cursor-pointer"
+        onClick={handleChatClick}
+        className="cursor-pointer"
       >
-        <div className="w-full flex items-center gap-3 p-4 hover:bg-white/50 transition text-left">
+        <div className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-white/50 transition text-left">
           <Avatar
             fullName={chat.peer.fullName}
             avatarUrl={chat.peer.avatarUrl}
@@ -124,6 +113,21 @@ function SwipeableChat({
             </p>
           </div>
         </div>
+      </div>
+
+      {/* Delete button — expands from width 0, separate element */}
+      <div
+        style={{ width: revealW, transition, overflow: 'hidden', flexShrink: 0 }}
+        className="bg-red-500 flex items-center justify-center"
+      >
+        <button
+          onClick={onDelete}
+          style={{ width: DELETE_BTN_WIDTH }}
+          className="h-full flex flex-col items-center justify-center gap-0.5 text-white active:bg-red-600 transition shrink-0"
+        >
+          <Trash2 size={18} />
+          <span className="text-[10px] font-semibold">{t('dm.deleteChat', 'Видалити')}</span>
+        </button>
       </div>
     </div>
   );
@@ -179,23 +183,23 @@ export function ChatPage() {
         )}
 
         {chats && chats.length > 0 && (
-          <div className="glass-card shadow-sm divide-y divide-neutral-100 overflow-hidden">
+          <div className="glass-card overflow-hidden divide-y divide-white/40">
             {chats.map((c) =>
               deleteConfirmId === c.id ? (
-                <div key={c.id} className="flex items-center gap-2 px-4 py-3 bg-red-50">
-                  <p className="flex-1 text-sm text-red-700 font-medium">
+                <div key={c.id} className="flex items-center gap-2 px-4 py-3 bg-danger-500/8">
+                  <p className="flex-1 text-sm text-danger-700 font-medium">
                     {t('dm.deleteChatConfirm', 'Видалити цей чат?')}
                   </p>
                   <button
                     onClick={() => handleDelete(c.id)}
                     disabled={deleteChat.isPending}
-                    className="text-xs bg-red-500 text-white rounded-lg px-3 py-1.5 hover:bg-red-600 transition disabled:opacity-50"
+                    className="text-xs bg-red-500 text-white rounded-xl px-3 py-1.5 hover:bg-red-600 transition disabled:opacity-50"
                   >
                     {deleteChat.isPending ? '…' : t('common.yes', 'Так')}
                   </button>
                   <button
                     onClick={() => setDeleteConfirmId(null)}
-                    className="text-xs bg-neutral-200 text-neutral-700 rounded-lg px-3 py-1.5 hover:bg-neutral-300 transition"
+                    className="text-xs bg-white/55 border border-white/70 text-neutral-600 rounded-xl px-3 py-1.5 hover:bg-white/72 transition"
                   >
                     {t('common.no', 'Ні')}
                   </button>

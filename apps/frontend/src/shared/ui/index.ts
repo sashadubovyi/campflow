@@ -12,3 +12,4 @@ export { BackButton } from './BackButton';
 export { PageHeader } from './PageHeader';
 export { GradientButton } from './GradientButton';
 export { BrandLoader } from './BrandLoader';
+export { GlassButton } from './GlassButton';
