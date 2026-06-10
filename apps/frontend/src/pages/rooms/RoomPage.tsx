@@ -95,7 +95,7 @@ export function RoomPage() {
 
   const closeBtn = isAdmin && !isClosed && (
     <button
-      onClick={() => { setInfoOpen(false); setShowCloseModal(true); }}
+      onClick={() => { setMobileView('chat'); setShowCloseModal(true); }}
       title={t('polls.ai.closeRoom')}
       aria-label={t('polls.ai.closeRoom')}
       className="w-full flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl transition bg-danger-gradient text-white text-sm font-semibold whitespace-nowrap"
@@ -119,7 +119,7 @@ export function RoomPage() {
     return (
       <div className="h-full flex flex-col bg-neutral-50 overflow-hidden">
         {/* Хедер — h1 абсолютно позиціонований щоб не зсувався від кнопок */}
-        <header className="relative bg-white border-b border-neutral-100 shrink-0 px-4 h-12 flex items-center">
+        <header className="relative bg-white/75 backdrop-blur-xl border-b border-neutral-100/50 shrink-0 px-4 h-12 flex items-center">
           <div className="flex items-center justify-start min-w-[2.5rem] shrink-0">
             <BackButton />
           </div>
@@ -264,7 +264,7 @@ export function RoomPage() {
   /* ---------- MOBILE ---------- */
   return (
     <div className="h-full flex flex-col bg-neutral-50 overflow-hidden">
-      <header className="relative bg-white border-b border-neutral-100 shrink-0 px-2 h-12 flex items-center gap-1">
+      <header className="relative bg-white/75 backdrop-blur-xl border-b border-neutral-100/50 shrink-0 px-2 h-12 flex items-center gap-1">
         <button
           onClick={() => (mobileView !== 'chat' ? setMobileView('chat') : navigate('/rooms'))}
           className="p-2 text-neutral-500 hover:text-neutral-900 rounded-lg shrink-0"
@@ -351,7 +351,7 @@ export function RoomPage() {
                   <Pencil size={16} />
                 </button>
                 <button
-                  onClick={() => { setInfoOpen(false); setShowCloseModal(true); }}
+                  onClick={() => { setMobileView('chat'); setShowCloseModal(true); }}
                   title={t('polls.ai.closeRoom')}
                   aria-label={t('polls.ai.closeRoom')}
                   className="flex items-center justify-center py-2 rounded-xl bg-danger-gradient text-white transition"

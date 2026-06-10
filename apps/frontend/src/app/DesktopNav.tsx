@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   Plus,
@@ -15,18 +14,18 @@ import { useAuth } from '../shared/store/useAuth';
 import { useUnreadCount } from '../shared/api/notifications.hooks';
 import { cn } from '../shared/ui';
 import { getMediaUrl } from '../shared/lib/getMediaUrl';
-import { JoinRoomModal } from '../pages/rooms/JoinRoomModal';
 
 interface Props {
   onCreateRoom: () => void;
+  onJoinRoom: () => void;
 }
 
 const itemClass = ({ isActive }: { isActive: boolean }) =>
   cn(
-    'flex items-center justify-center w-11 h-11 rounded-xl transition-colors',
+    'flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-200 border',
     isActive
-      ? 'bg-accent-50 text-accent-600'
-      : 'text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600',
+      ? 'bg-gemini-active border-accent-200/50 text-accent-600'
+      : 'border-transparent text-neutral-400 hover:bg-gemini-active-hover hover:border-accent-200/30 hover:text-accent-600',
   );
 
 function initials(name?: string) {
@@ -39,12 +38,11 @@ function initials(name?: string) {
     .join('');
 }
 
-export function DesktopNav({ onCreateRoom }: Props) {
+export function DesktopNav({ onCreateRoom, onJoinRoom }: Props) {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { data: unread } = useUnreadCount();
-  const [showJoin, setShowJoin] = useState(false);
 
   async function handleLogout() {
     await logout();
@@ -55,7 +53,7 @@ export function DesktopNav({ onCreateRoom }: Props) {
 
   return (
     <>
-      <nav className="hidden md:flex w-[10vw] min-w-[72px] max-w-[110px] shrink-0 flex-col items-center py-4 bg-white border-r border-neutral-100">
+      <nav className="hidden md:flex w-[10vw] min-w-[72px] max-w-[110px] shrink-0 flex-col items-center py-4 bg-white/75 backdrop-blur-xl border-r border-neutral-100/50">
         {/* ── ВГОРУ: профіль + дії ───────────────────── */}
         <div className="flex flex-col items-center gap-1">
           {user?.username && (
@@ -87,9 +85,9 @@ export function DesktopNav({ onCreateRoom }: Props) {
             <Plus size={22} />
           </button>
           <button
-            onClick={() => setShowJoin(true)}
+            onClick={onJoinRoom}
             title={t('rooms.joinByCode') as string}
-            className="flex items-center justify-center w-11 h-11 rounded-xl text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 transition-colors"
+            className="flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-200 border border-transparent text-neutral-400 hover:bg-gemini-active-hover hover:border-accent-200/30 hover:text-accent-600"
           >
             <KeyRound size={18} />
           </button>
@@ -122,22 +120,13 @@ export function DesktopNav({ onCreateRoom }: Props) {
           <button
             onClick={handleLogout}
             title={t('common.logout') as string}
-            className="flex items-center justify-center w-11 h-11 rounded-xl text-neutral-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+            className="flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-200 border border-transparent text-neutral-400 hover:bg-red-50/80 hover:border-red-200/50 hover:text-red-600"
           >
             <LogOut size={20} />
           </button>
         </div>
       </nav>
 
-      {showJoin && (
-        <JoinRoomModal
-          onClose={() => setShowJoin(false)}
-          onJoined={(id) => {
-            setShowJoin(false);
-            navigate(`/rooms/${id}`);
-          }}
-        />
-      )}
     </>
   );
 }

@@ -15,24 +15,26 @@ const NAV_TABS = [
 function TabIcon({ isActive, children }: { isActive: boolean; children: React.ReactNode }) {
   return (
     <motion.div
-      className="relative flex items-center justify-center w-10 h-10"
-      whileTap={{ scale: 0.78 }}
+      className="relative flex items-center justify-center w-11 h-11 rounded-xl overflow-hidden"
+      whileTap={{ scale: 0.80 }}
       transition={spring}
     >
-      <motion.div
-        animate={{ scale: isActive ? 1.12 : 1, color: isActive ? '#1a56e0' : '#9aa1b1' }}
+      <motion.span
+        className="absolute inset-0 rounded-xl"
+        animate={{
+          opacity: isActive ? 1 : 0,
+          background: 'linear-gradient(135deg, rgba(72,140,251,0.14) 0%, rgba(41,219,188,0.09) 50%, rgba(101,90,220,0.11) 100%)',
+        }}
         transition={spring}
-        className="flex items-center justify-center"
+        style={{ border: isActive ? '1px solid rgba(45,111,248,0.18)' : 'none' }}
+      />
+      <motion.div
+        animate={{ scale: isActive ? 1.08 : 1, color: isActive ? '#1a56e0' : '#9aa1b1' }}
+        transition={spring}
+        className="relative flex items-center justify-center"
       >
         {children}
       </motion.div>
-      {isActive && (
-        <motion.span
-          layoutId="tab-dot"
-          className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-accent-600"
-          transition={spring}
-        />
-      )}
     </motion.div>
   );
 }
@@ -48,7 +50,7 @@ export function MobileTabBar() {
     location.pathname === profilePath || location.pathname === `/u/${user?.username}`;
 
   return (
-    <nav className="flex md:hidden fixed bottom-0 inset-x-0 z-40 h-14 bg-white border-t border-neutral-100 pb-[env(safe-area-inset-bottom)]">
+    <nav className="flex md:hidden fixed bottom-0 inset-x-0 z-40 h-14 bg-white/75 backdrop-blur-xl border-t border-neutral-100/50 pb-[env(safe-area-inset-bottom)]">
       {NAV_TABS.map(({ to, Icon, label }) => {
         const isActive = location.pathname === to || location.pathname.startsWith(to + '/');
         return (
