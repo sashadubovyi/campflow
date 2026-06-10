@@ -1,6 +1,6 @@
 import { type ReactNode, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 
 interface Props {
   open: boolean;
@@ -32,25 +32,27 @@ export function Drawer({
     <AnimatePresence>
       {open && (
         <>
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.22 }}
             onClick={onClose}
-            className="fixed inset-x-0 z-40 bg-neutral-900/40"
+            className="fixed inset-x-0 z-40 bg-neutral-900/30 backdrop-blur-sm"
             style={{ top: topOffset, bottom: bottomOffset }}
           />
-          <motion.div
+          <m.div
             initial={{ x: side === 'left' ? '-100%' : '100%' }}
             animate={{ x: 0 }}
             exit={{ x: side === 'left' ? '-100%' : '100%' }}
             transition={spring}
-            className={`fixed z-50 w-[82%] max-w-[360px] bg-white shadow-card-lg flex flex-col ${side === 'left' ? 'left-0' : 'right-0'}`}
+            className={`fixed z-50 w-[82%] max-w-[360px] glass-surface flex flex-col ${
+              side === 'left' ? 'left-0 rounded-r-3xl' : 'right-0 rounded-l-3xl'
+            }`}
             style={{ top: topOffset, bottom: bottomOffset }}
           >
             {children}
-          </motion.div>
+          </m.div>
         </>
       )}
     </AnimatePresence>,

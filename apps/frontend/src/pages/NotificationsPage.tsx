@@ -17,7 +17,7 @@ export function NotificationsPage() {
   const unreadCount = notifications?.filter((n) => !n.readAt).length ?? 0;
 
   return (
-    <div className="h-full flex flex-col bg-neutral-50 font-body">
+    <div className="h-full flex flex-col font-body">
       <PageHeader
         title={<span className="font-display">{t('nav.titles.notifications')}</span>}
         left={<BackButton />}
@@ -42,7 +42,7 @@ export function NotificationsPage() {
         )}
 
         {!isLoading && notifications && notifications.length === 0 && (
-          <div className="bg-white rounded-2xl border border-neutral-100 border-dashed p-10 text-center flex flex-col items-center">
+          <div className="glass-card p-10 text-center flex flex-col items-center border-dashed">
             <Bell size={40} className="text-neutral-300 mb-3" />
             <p className="font-display text-lg text-neutral-900 mb-1">{t('notifications.empty')}</p>
             <p className="text-neutral-400 text-sm">{t('notifications.emptyHint')}</p>
@@ -136,8 +136,8 @@ function InviteCard({
 
   return (
     <li
-      className={`bg-white rounded-2xl border shadow-sm p-4 transition ${
-        isUnread && isPending ? 'border-accent-500/30 bg-accent-500/5' : 'border-neutral-100'
+      className={`glass-card p-4 transition ${
+        isUnread && isPending ? '!bg-accent-500/10 !border-accent-500/30' : ''
       } ${!isPending ? 'opacity-60' : ''}`}
     >
       <div className="flex items-start gap-3">
@@ -156,7 +156,7 @@ function InviteCard({
             <span className="font-semibold">«{payload.roomName}»</span>
           </p>
           {payload.message && (
-            <p className="text-xs text-neutral-700 mt-1.5 italic bg-neutral-50 rounded-lg px-2 py-1.5">
+            <p className="text-xs text-neutral-700 mt-1.5 italic bg-white/40 rounded-xl px-2 py-1.5">
               «{payload.message}»
             </p>
           )}
@@ -167,14 +167,14 @@ function InviteCard({
               <button
                 onClick={handleAccept}
                 disabled={loading}
-                className="btn-glass-blue disabled:opacity-50 text-white text-xs font-semibold px-4 py-1.5 rounded-lg transition"
+                className="btn-glass-blue disabled:opacity-50 text-xs font-semibold px-4 py-1.5 rounded-xl transition"
               >
                 {accept.isPending ? t('notifications.accepting') : t('notifications.accept')}
               </button>
               <button
                 onClick={handleDefer}
                 disabled={loading}
-                className="bg-neutral-50 hover:bg-neutral-100 disabled:opacity-50 text-neutral-700 text-xs font-semibold px-4 py-1.5 rounded-lg transition"
+                className="bg-white/55 border border-white/70 backdrop-blur-sm disabled:opacity-50 text-neutral-700 text-xs font-semibold px-4 py-1.5 rounded-xl transition hover:bg-white/72"
               >
                 {t('notifications.defer')}
               </button>
@@ -242,8 +242,8 @@ function JoinRequestCard({
 
   return (
     <li
-      className={`bg-white rounded-2xl border shadow-sm p-4 transition ${
-        isUnread && !isDone ? 'border-accent-500/30 bg-accent-500/5' : 'border-neutral-100'
+      className={`glass-card p-4 transition ${
+        isUnread && !isDone ? '!bg-accent-500/10 !border-accent-500/30' : ''
       } ${isDone ? 'opacity-60' : ''}`}
     >
       <div className="flex items-start gap-3">
@@ -267,7 +267,7 @@ function JoinRequestCard({
               <button
                 onClick={handleAccept}
                 disabled={loading}
-                className="btn-glass-blue disabled:opacity-50 text-white text-xs font-semibold px-4 py-1.5 rounded-lg transition"
+                className="btn-glass-blue disabled:opacity-50 text-xs font-semibold px-4 py-1.5 rounded-xl transition"
               >
                 {accept.isPending ? t('notifications.accepting') : t('notifications.accept')}
               </button>
@@ -309,12 +309,12 @@ function SystemCard({
   return (
     <li
       onClick={onClick}
-      className={`bg-white rounded-2xl border shadow-sm p-4 cursor-pointer transition ${
-        isUnread ? 'border-accent-500/30 bg-accent-500/5' : 'border-neutral-100'
+      className={`glass-card p-4 cursor-pointer transition ${
+        isUnread ? '!bg-accent-500/10 !border-accent-500/30' : ''
       }`}
     >
       <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-full bg-neutral-50 flex items-center justify-center text-lg shrink-0">
+        <div className="w-10 h-10 rounded-full bg-white/50 border border-white/70 flex items-center justify-center shrink-0">
           {iconForKind(n.kind)}
         </div>
         <div className="flex-1 min-w-0">

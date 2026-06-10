@@ -41,8 +41,8 @@ export function PublicRoomCard({ room }: Props) {
   return (
     <article
       onClick={handleClick}
-      className={`bg-white rounded-card shadow-card overflow-hidden transition-all duration-200 ${
-        room.isMember ? 'cursor-pointer hover:shadow-card-lg' : ''
+      className={`glass-card overflow-hidden transition-all duration-200 ${
+        room.isMember ? 'cursor-pointer hover:shadow-glass-hover' : ''
       }`}
     >
       {/* Header: admin info */}
@@ -121,7 +121,7 @@ export function PublicRoomCard({ room }: Props) {
           <button
             onClick={handleJoin}
             disabled={requestJoin.isPending}
-            className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl btn-glass-blue disabled:opacity-60 text-white text-xs font-semibold transition"
+            className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl btn-glass-blue disabled:opacity-60 text-xs font-semibold transition"
           >
             {requestJoin.isPending ? <Loader2 size={14} className="animate-spin" /> : null}
             {t('feed.requestJoin', 'Подати запит')}

@@ -227,7 +227,7 @@ export function CreatePollModal({ roomId, onClose }: Props) {
           <div className="relative flex bg-neutral-100 rounded-2xl p-1.5 gap-1">
             {/* Ковзаючий індикатор */}
             <div
-              className="absolute top-1.5 bottom-1.5 rounded-xl bg-white shadow-card transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
+              className="absolute top-1.5 bottom-1.5 rounded-xl bg-white/85 border border-white/90 shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
               style={{
                 left: '6px',
                 width: 'calc((100% - 12px - 8px) / 3)',
@@ -359,7 +359,7 @@ export function CreatePollModal({ roomId, onClose }: Props) {
                 type="button"
                 onClick={handleAiGenerate}
                 disabled={generateChecklist.isPending || aiDescription.trim().length < 5}
-                className="w-full btn-glass-blue disabled:opacity-50 text-white font-semibold py-2 rounded-lg text-sm transition"
+                className="w-full btn-glass-blue disabled:opacity-50 font-semibold py-2 rounded-2xl text-sm transition"
               >
                 {generateChecklist.isPending ? t('polls.ai.generating') : t('polls.ai.generate')}
               </button>
@@ -419,7 +419,7 @@ export function CreatePollModal({ roomId, onClose }: Props) {
               <MapPicker onPick={handleMapPick} />
 
               {pendingPick && (
-                <div className="bg-neutral-50 rounded-xl p-3 space-y-2">
+                <div className="bg-white/35 border border-white/50 backdrop-blur-sm rounded-2xl p-3 space-y-2">
                   <p className="text-xs text-neutral-700">
                     {t('polls.pointSelected')}: {pendingPick.latitude.toFixed(4)},{' '}
                     {pendingPick.longitude.toFixed(4)}
@@ -437,7 +437,7 @@ export function CreatePollModal({ roomId, onClose }: Props) {
                     <button
                       type="button"
                       onClick={confirmLocationDraft}
-                      className="btn-glass-blue text-white font-semibold px-4 rounded-lg text-sm transition"
+                      className="btn-glass-blue font-semibold px-4 rounded-lg text-sm transition"
                     >
                       {t('polls.addPoint')}
                     </button>
@@ -450,7 +450,7 @@ export function CreatePollModal({ roomId, onClose }: Props) {
                   {locationDrafts.map((d, idx) => (
                     <li
                       key={idx}
-                      className="flex items-center justify-between gap-2 bg-white border border-neutral-100 rounded-lg px-3 py-2"
+                      className="flex items-center justify-between gap-2 glass-card !rounded-xl !shadow-none px-3 py-2"
                     >
                       <div className="min-w-0 flex-1">
                         <p className="text-sm text-neutral-900 truncate">{d.label}</p>
@@ -487,7 +487,7 @@ export function CreatePollModal({ roomId, onClose }: Props) {
             <button
               type="submit"
               disabled={isLoading}
-              className="flex-1 btn-glass-blue disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition"
+              className="flex-1 btn-glass-blue disabled:opacity-60 font-semibold py-2.5 rounded-2xl transition"
             >
               {isLoading ? t('common.creating') : t('common.create')}
             </button>

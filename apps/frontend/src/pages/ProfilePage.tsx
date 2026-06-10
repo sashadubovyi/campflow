@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { m, useScroll, useTransform } from 'framer-motion';
 import {
   Mail,
   Phone,
@@ -116,7 +116,7 @@ export function ProfilePage() {
 
   if (!username || isLoading) {
     return (
-      <div className="h-full flex flex-col bg-neutral-50 overflow-hidden">
+      <div className="h-full flex flex-col overflow-hidden">
         <div className="glass-header shadow-[0_0.5px_0_rgba(0,0,0,0.06)] shrink-0 h-12" />
         <div className="flex-1 overflow-y-auto px-4 md:px-6 py-6 space-y-4">
           <div className="flex flex-col items-center pt-4 pb-6 space-y-3">
@@ -124,11 +124,11 @@ export function ProfilePage() {
             <Skeleton className="h-6 w-40" />
             <Skeleton className="h-4 w-24" />
           </div>
-          <div className="bg-white rounded-card shadow-card p-5 space-y-2">
+          <div className="glass-card p-5 space-y-2">
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-4 w-3/4" />
           </div>
-          <div className="bg-white rounded-card shadow-card p-5 space-y-2">
+          <div className="glass-card p-5 space-y-2">
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-4 w-1/2" />
           </div>
@@ -154,10 +154,10 @@ export function ProfilePage() {
   const age = calculateAge(profile.birthDate);
 
   return (
-    <div className="h-full flex flex-col bg-neutral-50 overflow-hidden">
+    <div className="h-full flex flex-col overflow-hidden">
       {/* Collapsing header — always visible, background fades in on scroll */}
       <header className="shrink-0 relative z-10 h-12 flex items-center px-2 md:px-4">
-        <motion.div
+        <m.div
           className="absolute inset-0 glass-header shadow-[0_0.5px_0_rgba(0,0,0,0.06)] pointer-events-none"
           style={{ opacity: headerBgOpacity }}
         />
@@ -166,12 +166,12 @@ export function ProfilePage() {
           {!profile.isSelf && <BackButton />}
         </div>
         {/* Animated title */}
-        <motion.h1
+        <m.h1
           style={{ opacity: titleOpacity }}
           className="relative z-10 flex-1 text-center font-display text-base font-bold text-neutral-900 truncate px-2"
         >
           {profile.fullName}
-        </motion.h1>
+        </m.h1>
         {/* Right slot */}
         <div className="relative z-10 w-10 flex items-center justify-end">
           {profile.isSelf && (
@@ -208,7 +208,7 @@ export function ProfilePage() {
         <main className="px-4 md:px-6 pb-6 space-y-4">
           {/* ContactButton for other users */}
           {!profile.isSelf && (
-            <section className="bg-white rounded-card shadow-card p-4">
+            <section className="glass-card p-4">
               <ContactButton
                 profileId={profile.id}
                 profileUsername={profile.username}
@@ -220,14 +220,14 @@ export function ProfilePage() {
           )}
 
           {/* Stats */}
-          <section className="bg-white rounded-card shadow-card overflow-hidden">
+          <section className="glass-card overflow-hidden">
             <ProfileStats profile={profile} />
           </section>
 
           {profile.isSelf ? (
             <>
               {/* Hub menu */}
-              <section className="bg-white rounded-card shadow-card overflow-hidden divide-y divide-neutral-100">
+              <section className="glass-card overflow-hidden divide-y divide-neutral-100">
                 <MenuRow
                   icon={<Eye size={19} />}
                   label={t('profile.menu.viewPublic')}
@@ -268,7 +268,7 @@ export function ProfilePage() {
               </section>
 
               {/* Logout */}
-              <section className="bg-white rounded-card shadow-card overflow-hidden">
+              <section className="glass-card overflow-hidden">
                 <MenuRow
                   icon={<LogOut size={19} />}
                   label={t('profile.menu.logout')}
@@ -379,7 +379,7 @@ function MenuRow({
       </span>
       {hint && <span className="text-xs text-neutral-400 mr-1">{hint}</span>}
       {badge !== undefined && badge > 0 && (
-        <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-brand-gradient text-white text-[10px] font-bold mr-1">
+        <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-accent-500 text-white text-[10px] font-bold mr-1">
           {badge > 99 ? '99+' : badge}
         </span>
       )}
@@ -451,7 +451,7 @@ function PublicDetails({
   return (
     <>
       {hasMeta && (
-        <section className="bg-white rounded-card shadow-card p-5">
+        <section className="glass-card p-5">
           <p className="text-sm text-neutral-700 flex flex-wrap gap-x-4 gap-y-1">
             {age !== null && (
               <span className="flex items-center gap-1">
@@ -473,7 +473,7 @@ function PublicDetails({
       )}
 
       {profile.bio && (
-        <section className="bg-white rounded-card shadow-card p-5">
+        <section className="glass-card p-5">
           <h2 className="text-xs uppercase tracking-widest text-neutral-400 mb-2">
             {t('profile.sections.about')}
           </h2>
@@ -482,7 +482,7 @@ function PublicDetails({
       )}
 
       {allHobbies.length > 0 && (
-        <section className="bg-white rounded-card shadow-card p-5">
+        <section className="glass-card p-5">
           <h2 className="text-xs uppercase tracking-widest text-neutral-400 mb-3">
             {t('profile.sections.hobbies')}
           </h2>
@@ -500,7 +500,7 @@ function PublicDetails({
       )}
 
       {contacts.length > 0 && (
-        <section className="bg-white rounded-card shadow-card p-5">
+        <section className="glass-card p-5">
           <h2 className="text-xs uppercase tracking-widest text-neutral-400 mb-3">
             {t('profile.sections.contacts')}
           </h2>
@@ -531,7 +531,7 @@ function PublicDetails({
       )}
 
       {!profile.bio && allHobbies.length === 0 && contacts.length === 0 && (
-        <section className="bg-white rounded-card shadow-card border border-dashed border-neutral-200 p-8 text-center">
+        <section className="glass-card border border-dashed border-neutral-200 p-8 text-center">
           <p className="text-neutral-400 text-sm">{t('profile.empty')}</p>
         </section>
       )}

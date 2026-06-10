@@ -4,64 +4,156 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─────────────────────────────────────────────────────────────────
+   macOS Sonoma / Sequoia — Liquid Glass Design System
+   ───────────────────────────────────────────────────────────────── */
+
 @layer components {
-  /* Secondary button — transparent with thin border, Gemini tint on hover */
+
+  /* ── Frosted glass card — the main surface building block ── */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.62);
+    backdrop-filter: saturate(200%) blur(32px);
+    -webkit-backdrop-filter: saturate(200%) blur(32px);
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    box-shadow:
+      0 0 0 0.5px rgba(0, 0, 0, 0.04),
+      0 2px 8px rgba(0, 0, 0, 0.04),
+      0 8px 28px rgba(0, 0, 0, 0.07),
+      inset 0 1px 0 rgba(255, 255, 255, 0.85);
+    border-radius: 24px;
+    transition: background 0.28s cubic-bezier(0.2, 0, 0, 1),
+                box-shadow 0.28s cubic-bezier(0.2, 0, 0, 1),
+                border-color 0.28s cubic-bezier(0.2, 0, 0, 1);
+  }
+  .glass-card:hover {
+    background: rgba(255, 255, 255, 0.73);
+    border-color: rgba(255, 255, 255, 0.82);
+    box-shadow:
+      0 0 0 0.5px rgba(0, 0, 0, 0.04),
+      0 4px 16px rgba(0, 0, 0, 0.06),
+      0 16px 48px rgba(0, 0, 0, 0.10),
+      inset 0 1px 0 rgba(255, 255, 255, 0.92);
+  }
+
+  /* ── Modal / elevated panel ── */
+  .glass-surface {
+    background: rgba(255, 255, 255, 0.80);
+    backdrop-filter: saturate(200%) blur(48px);
+    -webkit-backdrop-filter: saturate(200%) blur(48px);
+    border: 1px solid rgba(255, 255, 255, 0.88);
+    box-shadow:
+      0 0 0 0.5px rgba(0, 0, 0, 0.04),
+      0 4px 16px rgba(0, 0, 0, 0.06),
+      0 20px 60px rgba(0, 0, 0, 0.11),
+      inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  }
+
+  /* ── Secondary button — thin border, Gemini tint hover ── */
   .glass-btn {
-    @apply bg-transparent border border-neutral-200/70 text-neutral-700 font-semibold rounded-xl
+    @apply bg-transparent border border-neutral-200/70 text-neutral-700 font-semibold rounded-2xl
            hover:bg-gemini-active-hover hover:border-accent-200/40 hover:text-accent-700
            transition-all duration-200;
   }
-  /* Icon / ghost button — same but no initial border */
+
+  /* ── Ghost / icon button ── */
   .glass-icon {
     @apply bg-transparent border border-transparent text-neutral-500 rounded-xl
            hover:bg-gemini-active-hover hover:border-accent-200/30 hover:text-accent-600
            transition-all duration-200;
   }
-  /* Frosted glass surface (modals, panels) */
-  .glass-surface {
-    background: rgba(255, 255, 255, 0.72);
-    backdrop-filter: saturate(180%) blur(24px);
-    -webkit-backdrop-filter: saturate(180%) blur(24px);
-    border: 1px solid rgba(255, 255, 255, 0.55);
-  }
-  /* iOS gradient blur header — matches page bg, fades to transparent at bottom edge */
+
+  /* ── Liquid Glass header (page top bar) ── */
   .glass-header {
-    background: linear-gradient(to bottom, rgba(247, 248, 250, 0.92) 0%, rgba(247, 248, 250, 0.74) 100%);
-    backdrop-filter: saturate(180%) blur(24px);
-    -webkit-backdrop-filter: saturate(180%) blur(24px);
+    background: rgba(232, 236, 245, 0.84);
+    backdrop-filter: saturate(200%) blur(40px);
+    -webkit-backdrop-filter: saturate(200%) blur(40px);
+    border-bottom: 0.5px solid rgba(255, 255, 255, 0.60);
   }
-  /* iOS gradient blur sidebar nav */
+
+  /* ── Liquid Glass sidebar nav ── */
   .glass-nav {
-    background: linear-gradient(to right, rgba(247, 248, 250, 0.93) 0%, rgba(247, 248, 250, 0.75) 100%);
-    backdrop-filter: saturate(180%) blur(24px);
-    -webkit-backdrop-filter: saturate(180%) blur(24px);
+    background: rgba(232, 236, 245, 0.88);
+    backdrop-filter: saturate(200%) blur(40px);
+    -webkit-backdrop-filter: saturate(200%) blur(40px);
+    border-right: 0.5px solid rgba(255, 255, 255, 0.65);
   }
-  /* iOS gradient blur bottom tab bar */
+
+  /* ── Liquid Glass bottom tab bar ── */
   .glass-tabbar {
-    background: linear-gradient(to top, rgba(247, 248, 250, 0.96) 0%, rgba(247, 248, 250, 0.72) 100%);
-    backdrop-filter: saturate(180%) blur(24px);
-    -webkit-backdrop-filter: saturate(180%) blur(24px);
+    background: rgba(232, 236, 245, 0.92);
+    backdrop-filter: saturate(200%) blur(40px);
+    -webkit-backdrop-filter: saturate(200%) blur(40px);
+    border-top: 0.5px solid rgba(255, 255, 255, 0.70);
   }
-  /* Liquid glass blue primary button */
+
+  /* ── Liquid Glass blue primary button ── */
   .btn-glass-blue {
-    background: rgba(45, 111, 248, 0.82);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 4px 20px rgba(45, 111, 248, 0.42);
-    border: 1px solid rgba(89, 141, 255, 0.36);
-    color: white;
+    background: rgba(45, 111, 248, 0.13);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(45, 111, 248, 0.30);
+    color: #1543b4;
     font-weight: 600;
-    transition: all 0.2s ease;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.42),
+      0 1px 4px rgba(45, 111, 248, 0.10);
+    transition: all 0.22s cubic-bezier(0.2, 0, 0, 1);
   }
   .btn-glass-blue:hover {
-    background: rgba(26, 86, 224, 0.90);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 6px 26px rgba(45, 111, 248, 0.52);
+    background: rgba(45, 111, 248, 0.20);
+    border-color: rgba(45, 111, 248, 0.42);
+    color: #1a56e0;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.36),
+      0 4px 16px rgba(45, 111, 248, 0.22);
+    transform: translateY(-1px);
+  }
+  .btn-glass-blue:active {
+    transform: translateY(0);
+    background: rgba(45, 111, 248, 0.24);
   }
   .btn-glass-blue:disabled {
-    opacity: 0.55;
+    opacity: 0.45;
     pointer-events: none;
+    transform: none;
+  }
+
+  /* ── Glass input field ── */
+  .glass-input {
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.70);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+    transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+  }
+  .glass-input:focus {
+    background: rgba(255, 255, 255, 0.80);
+    border-color: rgba(45, 111, 248, 0.50);
+    box-shadow:
+      inset 0 1px 2px rgba(0, 0, 0, 0.03),
+      0 0 0 3px rgba(45, 111, 248, 0.12);
+    outline: none;
+  }
+
+  /* ── Skeleton shimmer ── */
+  .glass-skeleton {
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.40) 25%,
+      rgba(255, 255, 255, 0.70) 50%,
+      rgba(255, 255, 255, 0.40) 75%
+    );
+    background-size: 200% 100%;
+    animation: glass-shimmer 1.8s ease-in-out infinite;
+    border: 1px solid rgba(255, 255, 255, 0.50);
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────
+   Global base styles
+   ───────────────────────────────────────────────────────────────── */
 
 :root {
   color-scheme: light;
@@ -74,99 +166,96 @@ body {
 
 body {
   font-family: 'Inter Variable', Inter, system-ui, sans-serif;
-  background-color: #f7f8fa;
+  background-color: #dce3f0;
+  background-image:
+    radial-gradient(ellipse 900px 700px at 10% 15%, rgba(99, 102, 241, 0.11) 0%, transparent 60%),
+    radial-gradient(ellipse 700px 600px at 88% 10%, rgba(45, 111, 248, 0.09) 0%, transparent 55%),
+    radial-gradient(ellipse 600px 800px at 60% 90%, rgba(139, 92, 246, 0.08) 0%, transparent 55%),
+    radial-gradient(ellipse 800px 500px at 5% 75%, rgba(20, 184, 166, 0.06) 0%, transparent 50%);
+  background-attachment: fixed;
   color: #111521;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
-/* Leaflet: containment через isolation:isolate на батьківському div карти.
-   НЕ чіпаємо .leaflet-marker-pane, .leaflet-marker-icon, .leaflet-marker-shadow —
-   будь-який reset z-index на цих класах ламає divIcon після Leaflet-анімації
-   (маркери зникають через ~1 с через transition на opacity/transform у pane). */
-.leaflet-container {
-  z-index: 0;
-}
-/* Тільки tile/overlay panes можна занулити — вони не впливають на маркери */
-.leaflet-tile-pane {
-  z-index: 1 !important;
-}
-.leaflet-overlay-pane {
-  z-index: 2 !important;
-}
-/* Маркерний і shadow pane — зберігаємо дефолтні Leaflet z-indices */
-.leaflet-shadow-pane {
-  z-index: 499 !important;
-}
-.leaflet-marker-pane {
-  z-index: 600 !important;
-}
-.leaflet-tooltip-pane {
-  z-index: 650 !important;
-}
-.leaflet-popup-pane {
-  z-index: 700 !important;
-}
-.leaflet-control {
-  z-index: 800 !important;
-}
+/* ─────────────────────────────────────────────────────────────────
+   Leaflet — keep z-index structure intact
+   ───────────────────────────────────────────────────────────────── */
 
-/* iOS-like tap highlight removal for custom interactive elements */
+.leaflet-container { z-index: 0; }
+.leaflet-tile-pane { z-index: 1 !important; }
+.leaflet-overlay-pane { z-index: 2 !important; }
+.leaflet-shadow-pane { z-index: 499 !important; }
+.leaflet-marker-pane { z-index: 600 !important; }
+.leaflet-tooltip-pane { z-index: 650 !important; }
+.leaflet-popup-pane { z-index: 700 !important; }
+.leaflet-control { z-index: 800 !important; }
+
+/* ─────────────────────────────────────────────────────────────────
+   Touch / interaction polish
+   ───────────────────────────────────────────────────────────────── */
+
 button, a, [role="button"] {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Smooth font rendering on mobile */
 * {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Date input placeholder */
-input[type="date"]::-webkit-datetime-edit {
-  color: #374151;
-}
+/* ─────────────────────────────────────────────────────────────────
+   Form inputs
+   ───────────────────────────────────────────────────────────────── */
+
+input[type="date"]::-webkit-datetime-edit { color: #374151; }
 input[type="date"]::-webkit-calendar-picker-indicator {
   opacity: 0.4;
   cursor: pointer;
 }
 
-/* Mobile performance: апаратне прискорення для прокручуваних списків */
+/* ─────────────────────────────────────────────────────────────────
+   Scroll performance
+   ───────────────────────────────────────────────────────────────── */
+
 .overflow-y-auto,
 .overflow-x-auto {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Пришвидшення рендерингу повідомлень на мобільних */
 [class*="ChatPanel"] .message-bubble,
 .campflow-message-list > * {
   contain: layout style;
 }
 
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
+/* ─────────────────────────────────────────────────────────────────
+   Scrollbar styling
+   ───────────────────────────────────────────────────────────────── */
+
+.scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 
-.scrollbar-thin::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
+.scrollbar-thin::-webkit-scrollbar { width: 5px; height: 5px; }
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: #cbd0db;
+  background: rgba(203, 208, 219, 0.70);
   border-radius: 999px;
 }
-.scrollbar-thin::-webkit-scrollbar-track {
-  background: transparent;
-}
+.scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+
+/* ─────────────────────────────────────────────────────────────────
+   AI border animation
+   ───────────────────────────────────────────────────────────────── */
 
 @keyframes ai-hue {
-  to {
-    filter: hue-rotate(1turn);
-  }
+  to { filter: hue-rotate(1turn); }
+}
+
+@keyframes glass-shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
 }
 
 .ai-border {
@@ -181,12 +270,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   padding: 2.5px;
   border-radius: inherit;
   background: conic-gradient(#488cfb, #29dbbc, #ddf505, #ff9f0e, #e440bb, #655adc, #488cfb);
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask:         linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: destination-out;
   mask-composite: exclude;
   animation: ai-hue 4s linear infinite;

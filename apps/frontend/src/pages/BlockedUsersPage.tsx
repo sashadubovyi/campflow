@@ -11,7 +11,7 @@ export function BlockedUsersPage() {
   const unblock = useUnblockUser();
 
   return (
-    <div className="h-full flex flex-col bg-neutral-50 font-body">
+    <div className="h-full flex flex-col font-body">
       <PageHeader title={<span className="font-display">{t('nav.titles.blocked')}</span>} left={<BackButton />} />
 
       <main className="flex-1 overflow-y-auto max-w-2xl mx-auto w-full px-4 md:px-6 py-6">
@@ -20,7 +20,7 @@ export function BlockedUsersPage() {
         )}
 
         {!isLoading && blocked && blocked.length === 0 && (
-          <div className="bg-white rounded-2xl border border-neutral-100 border-dashed p-10 text-center flex flex-col items-center">
+          <div className="glass-card border-dashed p-10 text-center flex flex-col items-center">
             <ShieldOff size={40} className="text-neutral-300 mb-3" />
             <p className="font-display text-lg text-neutral-900 mb-1">{t('blocked.empty')}</p>
             <p className="text-neutral-400 text-sm">{t('blocked.emptyHint')}</p>
@@ -28,7 +28,7 @@ export function BlockedUsersPage() {
         )}
 
         {blocked && blocked.length > 0 && (
-          <ul className="bg-white rounded-2xl border border-neutral-100 shadow-sm divide-y divide-neutral-100 overflow-hidden">
+          <ul className="glass-card shadow-sm divide-y divide-neutral-100 overflow-hidden">
             {blocked.map((b) => (
               <li key={b.id} className="flex items-center gap-3 p-4">
                 <Avatar fullName={b.user.fullName} avatarUrl={b.user.avatarUrl} size={44} />
@@ -43,7 +43,7 @@ export function BlockedUsersPage() {
                 <button
                   onClick={() => unblock.mutate(b.user.id)}
                   disabled={unblock.isPending}
-                  className="text-xs text-accent-600 hover:bg-neutral-50 font-semibold px-3 py-1.5 rounded-lg transition disabled:opacity-50"
+                  className="text-xs text-accent-600 hover:bg-white/50 font-semibold px-3 py-1.5 rounded-lg transition disabled:opacity-50"
                 >
                   {t('blocked.unblock')}
                 </button>

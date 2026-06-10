@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import {
   MapPin, Smile, Calendar, AlignLeft, Phone, ShieldCheck, ChevronRight,
   User, Camera, Check, X, Loader2, Upload, AtSign, Send, MessageCircle,
@@ -104,7 +104,7 @@ function SlideStep({
   children: React.ReactNode; direction: number; stepKey: number;
 }) {
   return (
-    <motion.div
+    <m.div
       key={stepKey}
       initial={{ opacity: 0, x: direction > 0 ? 48 : -48 }}
       animate={{ opacity: 1, x: 0 }}
@@ -113,7 +113,7 @@ function SlideStep({
       className="w-full"
     >
       {children}
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -157,7 +157,7 @@ function StepIdentity({
           <input
             value={firstName}
             onChange={(e) => onFirstName(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 outline-none text-base transition"
+            className="w-full px-4 py-3 rounded-2xl glass-input focus:ring-0 outline-none text-base text-neutral-900 transition"
           />
         </div>
         <div>
@@ -167,7 +167,7 @@ function StepIdentity({
           <input
             value={lastName}
             onChange={(e) => onLastName(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 outline-none text-base transition"
+            className="w-full px-4 py-3 rounded-2xl glass-input focus:ring-0 outline-none text-base text-neutral-900 transition"
           />
         </div>
         <div>
@@ -184,7 +184,7 @@ function StepIdentity({
                 onUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))
               }
               placeholder={t('onboarding.identity.usernamePlaceholder')}
-              className="w-full pl-8 pr-10 py-3 rounded-xl border border-neutral-200 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 outline-none text-base transition"
+              className="w-full pl-8 pr-10 py-3 rounded-2xl glass-input focus:ring-0 outline-none text-base text-neutral-900 transition"
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2">
               {usernameStatus === 'checking' && (
@@ -232,7 +232,7 @@ function StepAvatar({
         <p className="text-sm text-neutral-400 mt-1">{t('onboarding.avatar.subtitle')}</p>
       </div>
       <div className="flex flex-col items-center gap-4 pt-2">
-        <motion.button
+        <m.button
           type="button"
           whileTap={{ scale: 0.97 }}
           onClick={() => inputRef.current?.click()}
@@ -251,7 +251,7 @@ function StepAvatar({
               <span className="text-xs font-medium">{t('onboarding.avatar.upload')}</span>
             </div>
           )}
-        </motion.button>
+        </m.button>
         <input
           ref={inputRef}
           type="file"
@@ -287,7 +287,7 @@ function StepCity({ value, onChange }: { value: string; onChange: (v: string) =>
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={t('onboarding.city.placeholder')}
-        className="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 outline-none text-base transition"
+        className="w-full px-4 py-3 rounded-2xl glass-input focus:ring-0 outline-none text-base text-neutral-900 transition"
       />
     </div>
   );
@@ -313,7 +313,7 @@ function StepInterests({
         {HOBBY_TAGS.map((tag, i) => {
           const active = hobbies.includes(tag);
           return (
-            <motion.button
+            <m.button
               key={tag} type="button" whileTap={{ scale: 0.94 }}
               onClick={() => onToggle(tag)}
               style={active ? { background: HOBBY_COLORS[i % HOBBY_COLORS.length] } : undefined}
@@ -322,7 +322,7 @@ function StepInterests({
               }`}
             >
               {tag}
-            </motion.button>
+            </m.button>
           );
         })}
       </div>
@@ -330,7 +330,7 @@ function StepInterests({
         value={custom}
         onChange={(e) => onCustomChange(e.target.value)}
         placeholder={t('onboarding.interests.customPlaceholder')}
-        className="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 outline-none text-sm transition"
+        className="w-full px-4 py-3 rounded-2xl glass-input focus:ring-0 outline-none text-sm text-neutral-900 transition"
       />
     </div>
   );
@@ -357,7 +357,7 @@ function StepBirthdate({
           type="date"
           value={birthDate}
           onChange={(e) => onBirthDate(e.target.value)}
-          className="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 outline-none text-base transition"
+          className="w-full px-4 py-3 rounded-2xl glass-input focus:ring-0 outline-none text-base text-neutral-900 transition"
         />
       </div>
       <div>
@@ -366,18 +366,18 @@ function StepBirthdate({
         </label>
         <div className="flex gap-3">
           {GENDER_OPTIONS.map(({ value, labelKey, Icon }) => (
-            <motion.button
+            <m.button
               key={value} type="button" whileTap={{ scale: 0.94 }}
               onClick={() => onGender(value)}
               className={`flex-1 flex flex-col items-center gap-1.5 py-3 rounded-xl border-2 transition text-sm font-medium ${
                 gender === value
                   ? 'border-accent-500 bg-accent-50 text-accent-700'
-                  : 'border-neutral-200 text-neutral-600 hover:border-accent-300'
+                  : 'border-white/70 bg-white/50 text-neutral-600 hover:border-accent-300'
               }`}
             >
               <Icon size={20} />
               <span>{t(labelKey)}</span>
-            </motion.button>
+            </m.button>
           ))}
         </div>
       </div>
@@ -400,7 +400,7 @@ function StepBio({ value, onChange }: { value: string; onChange: (v: string) => 
         rows={5}
         maxLength={2000}
         placeholder={t('onboarding.bio.placeholder')}
-        className="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 outline-none text-sm resize-none transition"
+        className="w-full px-4 py-3 rounded-2xl glass-input focus:ring-0 outline-none text-sm text-neutral-900 resize-none transition"
       />
     </div>
   );
@@ -437,7 +437,7 @@ function StepSocials({
               onChange={(e) => onChange(field, e.target.value)}
               placeholder={placeholder}
               aria-label={label}
-              className="flex-1 px-4 py-2.5 rounded-xl border border-neutral-200 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 outline-none text-sm transition"
+              className="flex-1 px-4 py-2.5 rounded-2xl glass-input focus:ring-0 outline-none text-sm text-neutral-900 transition"
             />
           </div>
         ))}
@@ -463,7 +463,7 @@ function StepPhone({ value, onChange }: { value: string; onChange: (v: string) =
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={t('onboarding.phone.placeholder')}
-        className="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 outline-none text-base transition"
+        className="w-full px-4 py-3 rounded-2xl glass-input focus:ring-0 outline-none text-base text-neutral-900 transition"
       />
     </div>
   );
@@ -494,7 +494,7 @@ function StepPrivacy() {
         {items.map((item) => (
           <div key={item} className="flex items-center justify-between text-sm">
             <span className="text-neutral-700 font-medium">{item}</span>
-            <span className="text-neutral-400 bg-white px-2.5 py-0.5 rounded-lg text-xs border border-neutral-100">
+            <span className="text-neutral-400 bg-white/55 backdrop-blur-sm px-2.5 py-0.5 rounded-lg text-xs border border-white/70">
               {hiddenLabel}
             </span>
           </div>
@@ -689,12 +689,12 @@ export function OnboardingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex flex-col items-center justify-between px-6 py-8 font-body">
+    <div className="min-h-screen flex flex-col items-center justify-between px-6 py-8 font-body">
       {/* Progress dots */}
       <div className="w-full max-w-sm flex flex-col items-center gap-1">
         <div className="flex gap-1.5">
           {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
-            <motion.span
+            <m.span
               key={i}
               animate={{
                 width: i === step ? 24 : 8,
@@ -724,17 +724,17 @@ export function OnboardingPage() {
       {/* Actions */}
       <div className="w-full max-w-sm space-y-3">
         {finishError && (
-          <p className="text-red-500 text-sm bg-red-50 rounded-xl px-3 py-2 text-center">
+          <p className="text-danger-700 text-sm bg-danger-500/10 border border-danger-500/25 rounded-2xl px-3 py-2 text-center">
             {finishError}
           </p>
         )}
 
-        <motion.button
+        <m.button
           whileTap={{ scale: 0.97 }}
           transition={{ type: 'spring', stiffness: 500, damping: 30 }}
           onClick={isLast ? handleFinish : () => go(step + 1)}
           disabled={isBusy || usernameStatus === 'taken'}
-          className="w-full h-12 btn-glass-blue disabled:opacity-60 text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition"
+          className="w-full h-12 btn-glass-blue disabled:opacity-60 font-semibold rounded-xl flex items-center justify-center gap-2 transition"
         >
           {isBusy ? (
             <Loader2 size={20} className="animate-spin" />
@@ -744,7 +744,7 @@ export function OnboardingPage() {
               {!isLast && <ChevronRight size={18} />}
             </>
           )}
-        </motion.button>
+        </m.button>
 
         {step > 0 && (
           <button

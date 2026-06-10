@@ -45,7 +45,7 @@ export function InviteButton({ roomId, inviteCode, iconOnly = false }: Props) {
         className={
           iconOnly
             ? 'w-full flex items-center justify-center py-2 rounded-xl bg-gemini-active border border-accent-200/40 text-accent-600 hover:bg-gemini-active-hover transition-all duration-200'
-            : 'w-full flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-gemini-active border border-accent-200/40 text-accent-600 hover:bg-gemini-active-hover transition-all duration-200 shadow-card text-sm font-semibold'
+            : 'w-full flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-gemini-active border border-accent-200/40 text-accent-600 hover:bg-gemini-active-hover transition-all duration-200 text-sm font-semibold'
         }
       >
         <Ampersand size={16} />
@@ -245,7 +245,7 @@ function InviteByUsername({ roomId, onDone }: { roomId: string; onDone: () => vo
       <button
         onClick={handleSend}
         disabled={!check?.allowed || create.isPending}
-        className="w-full btn-glass-blue disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-xl transition text-sm"
+        className="w-full btn-glass-blue disabled:opacity-50 disabled:cursor-not-allowed font-semibold py-2.5 rounded-xl transition text-sm"
       >
         {create.isPending ? t('common.sending') : t('invites.send')}
       </button>
@@ -301,7 +301,7 @@ function InviteByLink({
 
       <button
         onClick={onClose}
-        className="w-full btn-glass-blue text-white font-semibold py-2.5 rounded-xl transition"
+        className="w-full btn-glass-blue font-semibold py-2.5 rounded-xl transition"
       >
         {t('common.done')}
       </button>

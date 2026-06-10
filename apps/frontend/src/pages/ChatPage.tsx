@@ -91,9 +91,9 @@ function SwipeableChat({
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
         onClick={handleMainClick}
-        className="bg-white cursor-pointer"
+        className="glass-card !rounded-none !shadow-none cursor-pointer"
       >
-        <div className="w-full flex items-center gap-3 p-4 hover:bg-neutral-50 transition text-left">
+        <div className="w-full flex items-center gap-3 p-4 hover:bg-white/50 transition text-left">
           <Avatar
             fullName={chat.peer.fullName}
             avatarUrl={chat.peer.avatarUrl}
@@ -143,7 +143,7 @@ export function ChatPage() {
   }
 
   return (
-    <div className="h-full flex flex-col bg-neutral-50 font-body">
+    <div className="h-full flex flex-col font-body">
       <PageHeader
         title={<span className="font-display">{t('nav.titles.chats')}</span>}
         right={
@@ -179,7 +179,7 @@ export function ChatPage() {
         )}
 
         {chats && chats.length > 0 && (
-          <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm divide-y divide-neutral-100 overflow-hidden">
+          <div className="glass-card shadow-sm divide-y divide-neutral-100 overflow-hidden">
             {chats.map((c) =>
               deleteConfirmId === c.id ? (
                 <div key={c.id} className="flex items-center gap-2 px-4 py-3 bg-red-50">

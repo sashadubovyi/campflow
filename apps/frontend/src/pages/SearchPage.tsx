@@ -45,7 +45,7 @@ export function SearchPage() {
   }
 
   return (
-    <div className="h-full flex flex-col bg-neutral-50 font-body">
+    <div className="h-full flex flex-col font-body">
       <PageHeader
         title={<span className="font-display">{t('nav.titles.search')}</span>}
         left={<BackButton />}
@@ -53,7 +53,7 @@ export function SearchPage() {
 
       <div className="glass-header shadow-[0_0.5px_0_rgba(0,0,0,0.06)] px-4 md:px-6 pt-3 pb-2 sticky top-0 z-10">
         <div className="max-w-2xl mx-auto w-full">
-          <div className="flex items-center gap-2 bg-neutral-50 rounded-xl px-3 h-11 border border-neutral-100 focus-within:border-accent-500 transition">
+          <div className="flex items-center gap-2 glass-input rounded-2xl px-3 h-11 focus-within:border-accent-500/60 transition">
             <Search size={16} className="text-neutral-400 shrink-0" />
             <input
               autoFocus
@@ -81,7 +81,7 @@ export function SearchPage() {
                   'shrink-0 px-3 py-1 rounded-full text-xs font-semibold transition border',
                   by === tab.id
                     ? 'bg-accent-50 border-accent-500/40 text-accent-600'
-                    : 'bg-white border-neutral-100 text-neutral-500 hover:border-accent-500/30 hover:text-neutral-700',
+                    : 'bg-white/50 border-white/70 text-neutral-500 hover:border-accent-500/30 hover:text-neutral-700',
                 )}
               >
                 {t(`search.by.${tab.id}`, tab.label)}
@@ -111,11 +111,11 @@ export function SearchPage() {
         )}
 
         {results && results.length > 0 && (
-          <ul className="bg-white rounded-2xl border border-neutral-100 shadow-sm divide-y divide-neutral-100 overflow-hidden">
+          <ul className="glass-card shadow-sm divide-y divide-neutral-100 overflow-hidden">
             {results.map((u) => {
               const isContact = contactIds.has(u.id);
               return (
-                <li key={u.id} className="flex items-center gap-3 p-4 hover:bg-neutral-50 transition">
+                <li key={u.id} className="flex items-center gap-3 p-4 hover:bg-white/50 transition">
                   <button
                     onClick={() => navigate(`/u/${u.username}`)}
                     className="flex items-center gap-3 flex-1 min-w-0 text-left"
@@ -147,7 +147,7 @@ export function SearchPage() {
                     <button
                       onClick={(e) => handleAdd(u.id, e)}
                       disabled={addContact.isPending}
-                      className="flex items-center justify-center gap-1 px-2.5 h-8 rounded-lg btn-glass-blue text-white text-[11px] font-semibold transition disabled:opacity-60"
+                      className="flex items-center justify-center gap-1 px-2.5 h-8 rounded-lg btn-glass-blue text-[11px] font-semibold transition disabled:opacity-60"
                     >
                       {addContact.isPending && addContact.variables === u.id ? (
                         <Loader2 size={13} className="animate-spin" />

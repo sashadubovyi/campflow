@@ -117,7 +117,7 @@ export function RoomPage() {
   /* ---------- DESKTOP ---------- */
   if (isDesktop) {
     return (
-      <div className="h-full flex flex-col bg-neutral-50 overflow-hidden">
+      <div className="h-full flex flex-col overflow-hidden">
         {/* Хедер — h1 абсолютно позиціонований щоб не зсувався від кнопок */}
         <header className="relative glass-header shadow-[0_0.5px_0_rgba(0,0,0,0.06)] shrink-0 px-4 h-12 flex items-center">
           <div className="flex items-center justify-start min-w-[2.5rem] shrink-0">
@@ -263,7 +263,7 @@ export function RoomPage() {
 
   /* ---------- MOBILE ---------- */
   return (
-    <div className="h-full flex flex-col bg-neutral-50 overflow-hidden">
+    <div className="h-full flex flex-col overflow-hidden">
       <header className="relative glass-header shadow-[0_0.5px_0_rgba(0,0,0,0.06)] shrink-0 px-2 h-12 flex items-center gap-1">
         <button
           onClick={() => (mobileView !== 'chat' ? setMobileView('chat') : navigate('/rooms'))}
@@ -311,7 +311,7 @@ export function RoomPage() {
           
         />
         <div
-          className={`absolute top-2 right-0 bottom-0 z-20 w-[85vw] bg-white shadow-card-lg flex flex-col transition-transform duration-300 ease-out overflow-hidden ${
+          className={`absolute top-2 right-0 bottom-0 z-20 w-[85vw] bg-white/75 backdrop-blur-2xl shadow-glass-panel flex flex-col transition-transform duration-300 ease-out overflow-hidden ${
             mobileView === 'members' ? 'translate-x-0' : 'translate-x-full'
           }`}
           style={{ borderTopLeftRadius: '14px' }}
@@ -319,12 +319,12 @@ export function RoomPage() {
           {members}
         </div>
         <div
-          className={`absolute top-2 right-0 bottom-0 z-20 w-[85vw] bg-white shadow-card-lg flex flex-col transition-transform duration-300 ease-out overflow-hidden ${
+          className={`absolute top-2 right-0 bottom-0 z-20 w-[85vw] bg-white/75 backdrop-blur-2xl shadow-glass-panel flex flex-col transition-transform duration-300 ease-out overflow-hidden ${
             mobileView === 'info' ? 'translate-x-0' : 'translate-x-full'
           }`}
           style={{ borderTopLeftRadius: '14px' }}
         >
-          <div className="border-b border-neutral-100 shrink-0">
+          <div className="border-b border-white/30 shrink-0">
             <div className="px-4 pt-3 pb-2 flex items-start justify-between gap-2">
               <div className="min-w-0 flex-1">
                 <h2 className="text-base font-bold text-neutral-900 truncate">{room.name}</h2>
@@ -340,11 +340,11 @@ export function RoomPage() {
               </button>
             </div>
             {isAdmin && !isClosed ? (
-              <div className="grid grid-cols-3 gap-1 bg-neutral-100 mx-2 mb-2 p-1 rounded-xl">
+              <div className="grid grid-cols-3 gap-1 bg-white/35 border border-white/50 backdrop-blur-md mx-2 mb-2 p-1 rounded-2xl">
                 <InviteButton roomId={room.id} inviteCode={room.inviteCode} iconOnly />
                 <button
                   onClick={() => { setMobileView('chat'); setShowEditModal(true); }}
-                  className="flex items-center justify-center py-2 rounded-xl text-neutral-500 hover:bg-white transition"
+                  className="flex items-center justify-center py-2 rounded-xl text-neutral-500 hover:bg-white/70 transition"
                   title={t('rooms.editRoom')}
                   aria-label={t('rooms.editRoom')}
                 >

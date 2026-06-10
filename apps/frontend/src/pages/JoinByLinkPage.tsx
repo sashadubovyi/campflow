@@ -39,7 +39,7 @@ export function JoinByLinkPage() {
   }, [isInitialized, isAuthenticated, code, navigate, t]);
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex items-center justify-center px-6">
+    <div className="min-h-screen flex items-center justify-center px-6">
       <div className="text-center font-body">
         <h1 className="font-display text-lg font-bold text-neutral-900 mb-4">
           Camp<span className="text-accent-600">Flow</span>
@@ -51,7 +51,7 @@ export function JoinByLinkPage() {
             <p className="text-neutral-700 mb-4">{error}</p>
             <button
               onClick={() => navigate('/rooms')}
-              className="btn-glass-blue text-white font-semibold px-5 py-2.5 rounded-xl transition"
+              className="btn-glass-blue font-semibold px-5 py-2.5 rounded-xl transition"
             >
               {t('rooms.title')}
             </button>

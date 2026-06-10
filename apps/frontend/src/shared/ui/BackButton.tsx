@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 interface BackButtonProps {
-  /** Явний маршрут. Якщо не задано — navigate(-1). */
   to?: string;
 }
 
@@ -13,9 +12,9 @@ export function BackButton({ to }: BackButtonProps) {
   return (
     <button
       onClick={() => (to ? navigate(to) : navigate(-1))}
-      className="flex items-center gap-1.5 text-sm font-medium text-neutral-500 hover:text-neutral-900 transition"
+      className="flex items-center gap-1 text-sm font-semibold text-accent-600 hover:text-accent-500 transition-colors"
     >
-      <ChevronLeft size={18} />
+      <ChevronLeft size={20} strokeWidth={2.5} />
       <span className="hidden sm:inline">{t('common.back')}</span>
     </button>
   );

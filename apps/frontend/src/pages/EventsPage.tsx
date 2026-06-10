@@ -99,7 +99,7 @@ function DesktopViewToggle({ view, onChange }: { view: EventView; onChange: (v: 
             key={id}
             onClick={() => onChange(id)}
             className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${
-              view === id ? 'bg-white text-accent-600 shadow-sm' : 'text-neutral-400 hover:text-neutral-600'
+              view === id ? 'bg-white/85 border border-white/90 text-accent-600 shadow-sm' : 'text-neutral-400 hover:text-neutral-600'
             }`}
           >
             <Icon size={16} />
@@ -126,7 +126,7 @@ function MobileViewToggle({ view, onChange }: { view: EventView; onChange: (v: E
               key={id}
               onClick={() => { onChange(id); setExpanded(false); }}
               className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${
-                view === id ? 'bg-white text-accent-600 shadow-sm' : 'text-neutral-400 hover:text-neutral-600'
+                view === id ? 'bg-white/85 border border-white/90 text-accent-600 shadow-sm' : 'text-neutral-400 hover:text-neutral-600'
               }`}
             >
               <Icon size={16} />
@@ -326,7 +326,7 @@ export function EventsPage() {
     <div className="flex items-center gap-1">
       <button
         onClick={() => setShowCreate(true)}
-        className="w-8 h-8 flex items-center justify-center rounded-xl bg-brand-gradient text-white shadow-fab"
+        className="w-8 h-8 flex items-center justify-center rounded-xl btn-glass-blue shadow-glass-blue"
         title={t('rooms.newRoom')}
       >
         <Plus size={16} />

@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { DesktopNav } from './DesktopNav';
 import { MobileTabBar } from './MobileTabBar';
 import { CreateRoomModal } from '../pages/rooms/CreateRoomModal';
 import { JoinRoomModal } from '../pages/rooms/JoinRoomModal';
 
 const pageVariants = {
-  initial: { opacity: 0, scale: 0.98, filter: 'blur(3px)' },
+  initial: { opacity: 0, scale: 0.97, filter: 'blur(4px)' },
   animate: { opacity: 1, scale: 1, filter: 'blur(0px)' },
-  exit: { opacity: 0, scale: 1.01, filter: 'blur(2px)' },
+  exit:    { opacity: 0, scale: 1.01, filter: 'blur(3px)' },
 };
 const pageSpring = { type: 'spring' as const, stiffness: 380, damping: 30 };
 
@@ -20,14 +20,14 @@ export function AppShell() {
   const [showJoin, setShowJoin] = useState(false);
 
   return (
-    <div className="flex h-[100dvh] bg-neutral-50 overflow-hidden">
+    <div className="flex h-[100dvh] overflow-hidden">
       <DesktopNav
         onCreateRoom={() => { setShowJoin(false); setShowCreate(true); }}
         onJoinRoom={() => { setShowCreate(false); setShowJoin(true); }}
       />
       <main className="flex-1 min-w-0 overflow-hidden pb-14 md:pb-0 relative">
         <AnimatePresence mode="wait" initial={false}>
-          <motion.div
+          <m.div
             key={location.pathname}
             variants={pageVariants}
             initial="initial"
@@ -37,7 +37,7 @@ export function AppShell() {
             className="h-full"
           >
             <Outlet />
-          </motion.div>
+          </m.div>
         </AnimatePresence>
       </main>
       <MobileTabBar />
