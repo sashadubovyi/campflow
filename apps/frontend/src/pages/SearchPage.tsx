@@ -6,7 +6,7 @@ import { useSearchUsers } from '../shared/api/profile.hooks';
 import type { UserSearchBy } from '../shared/api/profile.api';
 import { useContacts, useAddContact } from '../shared/api/contacts.hooks';
 import { Avatar } from '../shared/ui/Avatar';
-import { BackButton, PageHeader, cn } from '../shared/ui';
+import { PageHeader, cn } from '../shared/ui';
 
 const TABS: { id: UserSearchBy; label: string }[] = [
   { id: 'auto', label: 'Авто' },
@@ -48,7 +48,6 @@ export function SearchPage() {
     <div className="h-full flex flex-col font-body">
       <PageHeader
         title={<span className="font-display">{t('nav.titles.search')}</span>}
-        left={<BackButton />}
       />
 
       <div className="glass-header shadow-[0_0.5px_0_rgba(0,0,0,0.06)] px-4 md:px-6 pt-3 pb-2 sticky top-0 z-10">

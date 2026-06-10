@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   LogOut,
   ChevronRight,
+  FileText,
   Eye,
   QrCode,
   Bell,
@@ -184,17 +185,8 @@ export function ProfilePage() {
         >
           {profile.fullName}
         </m.h1>
-        {/* Right slot */}
-        <div className="relative z-10 w-10 flex items-center justify-end">
-          {profile.isSelf && (
-            <button
-              onClick={() => navigate('/settings/profile')}
-              className="glass-icon w-9 h-9 flex items-center justify-center rounded-xl"
-            >
-              <Pencil size={18} />
-            </button>
-          )}
-        </div>
+        {/* Right slot — intentionally empty for balance */}
+        <div className="relative z-10 w-10" />
       </header>
 
       {/* Scrollable content */}
@@ -276,6 +268,11 @@ export function ProfilePage() {
                   icon={<ShieldCheck size={19} />}
                   label={t('profile.menu.privacy')}
                   onClick={() => navigate('/settings/blocked')}
+                />
+                <MenuRow
+                  icon={<FileText size={19} />}
+                  label={t('profile.menu.publicOffer', 'Публічна оферта')}
+                  onClick={() => navigate('/offer')}
                 />
               </section>
 
@@ -624,9 +621,10 @@ function ContactButton({
           onClick={() => remove.mutate(profileId)}
           disabled={loading}
           title={t('common.remove')}
-          className="flex items-center justify-center w-11 h-11 rounded-2xl bg-danger-500/10 border border-danger-500/25 text-danger-600 hover:bg-danger-500/18 transition disabled:opacity-50 shrink-0"
+          className="flex items-center justify-center gap-1.5 w-11 sm:w-auto sm:px-3 h-11 rounded-2xl bg-danger-500/10 border border-danger-500/25 text-danger-600 hover:bg-danger-500/18 transition disabled:opacity-50 shrink-0"
         >
           <UserMinus size={16} />
+          <span className="hidden sm:inline text-sm font-semibold">{t('common.remove', 'Видалити')}</span>
         </button>
       )}
 
@@ -634,9 +632,10 @@ function ContactButton({
       <button
         onClick={() => navigate(`/dm/${profileUsername}`)}
         title={t('profile.sendMessage', 'Написати повідомлення')}
-        className="flex items-center justify-center w-11 h-11 rounded-2xl bg-accent-500/10 border border-accent-500/25 text-accent-600 hover:bg-accent-500/18 transition shrink-0"
+        className="flex items-center justify-center gap-1.5 w-11 sm:w-auto sm:px-3 h-11 rounded-2xl bg-accent-500/10 border border-accent-500/25 text-accent-600 hover:bg-accent-500/18 transition shrink-0"
       >
         <MessageSquare size={16} />
+        <span className="hidden sm:inline text-sm font-semibold">{t('common.chat', 'Чат')}</span>
       </button>
 
       {/* Block */}
@@ -644,9 +643,10 @@ function ContactButton({
         onClick={handleBlock}
         disabled={loading}
         title={t('profile.block')}
-        className="flex items-center justify-center w-11 h-11 rounded-2xl bg-white/40 border border-white/60 backdrop-blur-sm text-neutral-500 hover:bg-danger-500/10 hover:text-danger-600 hover:border-danger-500/25 transition disabled:opacity-50 shrink-0"
+        className="flex items-center justify-center gap-1.5 w-11 sm:w-auto sm:px-3 h-11 rounded-2xl bg-white/40 border border-white/60 backdrop-blur-sm text-neutral-500 hover:bg-danger-500/10 hover:text-danger-600 hover:border-danger-500/25 transition disabled:opacity-50 shrink-0"
       >
         <ShieldX size={16} />
+        <span className="hidden sm:inline text-sm font-semibold">{t('profile.block', 'Блокувати')}</span>
       </button>
     </div>
   );

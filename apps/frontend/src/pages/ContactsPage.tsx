@@ -5,9 +5,9 @@ import { useContacts, useRemoveContact } from '../shared/api/contacts.hooks';
 import { useBlockUser } from '../shared/api/blocks.hooks';
 import { Avatar } from '../shared/ui/Avatar';
 import { relativeTime } from '../shared/lib/relativeTime';
-import { BackButton, PageHeader, cn } from '../shared/ui';
+import { PageHeader, cn } from '../shared/ui';
 import { Modal } from '../shared/ui/Modal';
-import { Users, UserCheck, Clock, MessageCircle, Trash2, Search, ShieldX } from 'lucide-react';
+import { Users, UserCheck, Clock, MessageCircle, Trash2, Search, ShieldX, Shield } from 'lucide-react';
 
 type Tab = 'mutual' | 'pending';
 
@@ -34,10 +34,13 @@ export function ContactsPage() {
   async function handleRemoveAndBlock() {
     if (!removeTarget) return;
     await block.mutateAsync({ userId: removeTarget.userId });
-    // remove invalidates contacts автоматично через useBlockUser onSuccess,
-    // але деякі бекенди не видаляють контакт при блоці — підстрахуємось.
     await remove.mutateAsync(removeTarget.userId).catch(() => undefined);
     setRemoveTarget(null);
+  }
+
+  async function handleBlockContact(userId: string) {
+    await block.mutateAsync({ userId });
+    await remove.mutateAsync(userId).catch(() => undefined);
   }
 
   const { mutual, pending } = useMemo(() => {
@@ -54,7 +57,6 @@ export function ContactsPage() {
     <div className="h-full flex flex-col font-body">
       <PageHeader
         title={<span className="font-display">{t('nav.titles.friends')}</span>}
-        left={<BackButton />}
         right={
           <button
             onClick={() => navigate('/search')}
@@ -154,6 +156,15 @@ export function ContactsPage() {
                   aria-label={t('common.remove')}
                 >
                   <Trash2 size={16} />
+                </button>
+                <button
+                  onClick={() => handleBlockContact(c.user.id)}
+                  disabled={block.isPending || remove.isPending}
+                  className="flex items-center justify-center w-9 h-9 rounded-lg text-neutral-400 hover:text-danger-600 hover:bg-danger-50 transition disabled:opacity-50"
+                  title={t('profile.block', 'Заблокувати')}
+                  aria-label={t('profile.block', 'Заблокувати')}
+                >
+                  <Shield size={16} />
                 </button>
               </li>
             ))}

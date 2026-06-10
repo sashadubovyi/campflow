@@ -58,7 +58,7 @@ export function PublicRoomCard({ room }: Props) {
           </span>
           {room.admin && (
             <span className="text-xs text-neutral-400 truncate leading-tight mt-0.5">
-              @{room.admin.fullName}
+              {room.admin.fullName}
             </span>
           )}
         </div>

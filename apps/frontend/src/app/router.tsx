@@ -20,12 +20,14 @@ import { SearchPage } from '../pages/SearchPage';
 import { LanguagePage } from '../pages/LanguagePage';
 import { OnboardingPage } from '../pages/OnboardingPage';
 import { PrivacyPage } from '../pages/PrivacyPage';
+import { PublicOfferPage } from '../pages/PublicOfferPage';
 
 export const router: ReturnType<typeof createBrowserRouter> = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
   { path: '/register', element: <RegisterPage /> },
   { path: '/join/:code', element: <JoinByLinkPage /> },
   { path: '/privacy', element: <PrivacyPage /> },
+  { path: '/offer', element: <PublicOfferPage /> },
   {
     path: '/onboarding',
     element: (

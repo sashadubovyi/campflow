@@ -1,14 +1,12 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { MessageCircle, Search, Trash2 } from 'lucide-react';
+import { MessageCircle, Search, Trash2, MoreHorizontal, Shield } from 'lucide-react';
 import { useDmChats, useDeleteDmChat } from '../shared/api/dm.hooks';
+import { useBlockUser } from '../shared/api/blocks.hooks';
 import { Avatar } from '../shared/ui/Avatar';
 import { PageHeader } from '../shared/ui';
 import { relativeTime } from '../shared/lib/relativeTime';
-
-// Зміни: кнопка видалення з'являється розширенням від ширини 0 (не translate)
-// Чат стискається, а не зсувається
 
 const DELETE_BTN_WIDTH = 76;
 const SWIPE_THRESHOLD = 50;
@@ -17,17 +15,32 @@ function SwipeableChat({
   chat,
   onOpen,
   onDelete,
+  onBlock,
 }: {
-  chat: { id: string; peer: { fullName: string; avatarUrl: string | null; username: string; isOnline: boolean; lastSeenAt: string }; lastMessage: { id: string; content: string; createdAt: string; isOwn: boolean } | null; lastMessageAt: string };
+  chat: { id: string; peer: { id: string; fullName: string; avatarUrl: string | null; username: string; isOnline: boolean; lastSeenAt: string }; lastMessage: { id: string; content: string; createdAt: string; isOwn: boolean } | null; lastMessageAt: string };
   onOpen: () => void;
   onDelete: () => void;
+  onBlock: () => void;
 }) {
   const { t } = useTranslation();
-  const [revealW, setRevealW] = useState(0); // 0 → DELETE_BTN_WIDTH
+  const [revealW, setRevealW] = useState(0);
+  const [desktopMenuOpen, setDesktopMenuOpen] = useState(false);
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
   const isHoriz = useRef<boolean | null>(null);
   const lastRevealW = useRef(0);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!desktopMenuOpen) return;
+    function handler(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setDesktopMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [desktopMenuOpen]);
 
   function onTouchStart(e: React.TouchEvent) {
     const touch = e.touches[0];
@@ -41,7 +54,7 @@ function SwipeableChat({
   function onTouchMove(e: React.TouchEvent) {
     const touch = e.touches[0];
     if (!touch) return;
-    const dx = touchStartX.current - touch.clientX; // positive = swipe left
+    const dx = touchStartX.current - touch.clientX;
     const dy = Math.abs(touch.clientY - touchStartY.current);
 
     if (isHoriz.current === null && (Math.abs(dx) > 5 || dy > 5)) {
@@ -59,21 +72,16 @@ function SwipeableChat({
   }
 
   function handleChatClick() {
-    if (revealW > 0) {
-      setRevealW(0);
-      return;
-    }
+    if (revealW > 0) { setRevealW(0); return; }
     onOpen();
   }
 
   const isTransitioning = isHoriz.current === null || !isHoriz.current;
-  const transition = isTransitioning
-    ? 'width 0.22s cubic-bezier(0.2,0,0,1)'
-    : 'none';
+  const transition = isTransitioning ? 'width 0.22s cubic-bezier(0.2,0,0,1)' : 'none';
 
   return (
-    <div className="flex items-stretch overflow-hidden">
-      {/* Chat content — shrinks naturally as delete button expands */}
+    <div className="flex items-stretch overflow-hidden group relative">
+      {/* Chat content */}
       <div
         style={{ flex: 1, minWidth: 0 }}
         onTouchStart={onTouchStart}
@@ -115,10 +123,43 @@ function SwipeableChat({
         </div>
       </div>
 
-      {/* Delete button — expands from width 0, separate element */}
+      {/* Desktop: 3-dot hover menu (hidden on mobile) */}
+      <div
+        ref={menuRef}
+        className="hidden md:flex items-center pr-3 opacity-0 group-hover:opacity-100 transition-opacity relative"
+      >
+        <button
+          onClick={() => setDesktopMenuOpen((v) => !v)}
+          className="w-8 h-8 flex items-center justify-center rounded-lg text-neutral-400 hover:text-neutral-600 hover:bg-white/60 transition"
+          aria-label="Chat options"
+        >
+          <MoreHorizontal size={16} />
+        </button>
+
+        {desktopMenuOpen && (
+          <div className="absolute right-0 top-10 glass-surface rounded-2xl py-1.5 z-30 min-w-[180px]">
+            <button
+              onClick={() => { onDelete(); setDesktopMenuOpen(false); }}
+              className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
+            >
+              <Trash2 size={14} />
+              {t('dm.deleteChat', 'Видалити чат')}
+            </button>
+            <button
+              onClick={() => { onBlock(); setDesktopMenuOpen(false); }}
+              className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-sm text-neutral-700 hover:bg-white/50 transition-colors"
+            >
+              <Shield size={14} className="text-neutral-400" />
+              {t('profile.block', 'Заблокувати юзера')}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Mobile: swipe-to-delete (hidden on desktop) */}
       <div
         style={{ width: revealW, transition, overflow: 'hidden', flexShrink: 0 }}
-        className="bg-red-500 flex items-center justify-center"
+        className="bg-red-500 flex items-center justify-center md:hidden"
       >
         <button
           onClick={onDelete}
@@ -138,6 +179,7 @@ export function ChatPage() {
   const navigate = useNavigate();
   const { data: chats, isLoading } = useDmChats();
   const deleteChat = useDeleteDmChat();
+  const blockUser = useBlockUser();
 
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
@@ -210,6 +252,7 @@ export function ChatPage() {
                   chat={c}
                   onOpen={() => navigate(`/dm/${c.peer.username}`)}
                   onDelete={() => setDeleteConfirmId(c.id)}
+                  onBlock={() => blockUser.mutate({ userId: c.peer.id })}
                 />
               ),
             )}
