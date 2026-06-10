@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { LogOut } from 'lucide-react';
 import type { RoomMember } from '../../shared/api/rooms.api';
 import { Avatar } from '../../shared/ui/Avatar';
 import { relativeTime } from '../../shared/lib/relativeTime';
@@ -110,8 +111,9 @@ export function MembersPanel({ roomId, members, currentUserId, isAdmin }: Props)
           <button
             onClick={handleLeave}
             disabled={leave.isPending}
-            className="w-full text-xs text-red-500 hover:bg-red-50 disabled:opacity-50 font-semibold py-2 rounded-lg transition"
+            className="w-full flex items-center justify-center gap-1.5 text-xs text-red-500 hover:bg-red-50 disabled:opacity-50 font-semibold py-2 rounded-lg transition"
           >
+            <LogOut size={14} />
             {t('rooms.leaveRoom')}
           </button>
         </div>

@@ -119,7 +119,7 @@ export function OAuthButtons({ context = 'signin' }: Props) {
               setBusyProvider('google');
               setError(null);
               await loginWithGoogle(resp.credential);
-              navigate('/rooms');
+              navigate(context === 'signup' ? '/onboarding' : '/rooms');
             } catch (e) {
               const msg = e instanceof Error ? e.message : 'Sign-in failed';
               setError(msg);
@@ -170,7 +170,7 @@ export function OAuthButtons({ context = 'signin' }: Props) {
           undefined
         : undefined;
       await loginWithApple(result.authorization.id_token, fullName);
-      navigate('/rooms');
+      navigate(context === 'signup' ? '/onboarding' : '/rooms');
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Apple sign-in failed';
       // користувач закрив попап — не показуємо як помилку
@@ -206,7 +206,7 @@ export function OAuthButtons({ context = 'signin' }: Props) {
         return;
       }
       await loginWithFacebook(auth.accessToken);
-      navigate('/rooms');
+      navigate(context === 'signup' ? '/onboarding' : '/rooms');
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Facebook sign-in failed');
     } finally {

@@ -66,7 +66,7 @@
     "emptyHint": "Create your first room or join by an invite code.",
     "invite": "Invite",
     "inviteUsers": "Invite users",
-    "leaveRoom": "↩ Leave room",
+    "leaveRoom": "Leave room",
     "confirmLeave": "Are you sure you want to leave the room?",
     "confirmRemove": "Remove {{name}} from the room?",
     "transferAdmin": "Transfer admin rights",
@@ -413,5 +413,43 @@
   "map": {
     "empty": "No locations yet",
     "emptyHint": "Approve locations in polls — they will appear here"
+  },
+  "onboarding": {
+    "skip": "Skip",
+    "next": "Next",
+    "finish": "Get started",
+    "step": "{{current}} of {{total}}",
+    "city": {
+      "title": "What city do you live in?",
+      "placeholder": "e.g. Kyiv"
+    },
+    "interests": {
+      "title": "What do you love doing?",
+      "subtitle": "Pick from the list or type your own, comma-separated",
+      "customPlaceholder": "Your interests, comma-separated…"
+    },
+    "birthdate": {
+      "title": "Tell us about yourself",
+      "birth": "Date of birth",
+      "gender": "Gender"
+    },
+    "bio": {
+      "title": "A few words about you",
+      "placeholder": "Anything — work, hobbies, whatever you like…"
+    },
+    "socials": {
+      "title": "Where can people find you?",
+      "subtitle": "Share the contacts you want to be visible"
+    },
+    "phone": {
+      "title": "Your phone number",
+      "subtitle": "Helps friends find you",
+      "placeholder": "+1..."
+    },
+    "privacy": {
+      "title": "Privacy",
+      "subtitle": "All fields are hidden by default. Change anytime in settings."
+    },
+    "threads": "Threads (username)"
   }
 }
