@@ -199,6 +199,8 @@ export function ChatPanel({ roomId, roomName: _roomName, importantOnly = false, 
   );
 }
 
+const SWIPE_REPLY_THRESHOLD = 55;
+
 function MessageBubble({
   message,
   isOwn,
@@ -222,48 +224,72 @@ function MessageBubble({
   const [menuOpen, setMenuOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [openDown, setOpenDown] = useState(false);
+  const [swipeX, setSwipeX] = useState(0);
   const menuRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressTriggered = useRef(false);
+  const touchOrigin = useRef<{ x: number; y: number } | null>(null);
+  const gestureMode = useRef<'idle' | 'swipe' | 'longpress' | 'scroll'>('idle');
 
-  // Long-press (550мс) на бабл — відкриває те саме меню, що й три точки.
-  // Якщо touchmove > ~10px вважаємо це скролом і скасовуємо.
-  const touchStart = useRef<{ x: number; y: number } | null>(null);
-
-  function handleTouchStart(e: React.TouchEvent) {
-    if (message.type === 'system') return;
-    const t = e.touches[0];
-    if (!t) return;
-    touchStart.current = { x: t.clientX, y: t.clientY };
+  function startLongPress() {
     longPressTriggered.current = false;
     longPressTimer.current = setTimeout(() => {
-      longPressTriggered.current = true;
-      setOpenDown(false);
-      setMenuOpen(true);
-      // легка віброреакція якщо доступна
-      if ('vibrate' in navigator) {
+      if (gestureMode.current !== 'swipe' && gestureMode.current !== 'scroll') {
+        longPressTriggered.current = true;
+        gestureMode.current = 'longpress';
+        setOpenDown(false);
+        setMenuOpen(true);
         try { navigator.vibrate?.(15); } catch { /* ignore */ }
       }
     }, 550);
   }
 
-  function handleTouchMove(e: React.TouchEvent) {
-    const t = e.touches[0];
-    if (!t || !touchStart.current) return;
-    const dx = Math.abs(t.clientX - touchStart.current.x);
-    const dy = Math.abs(t.clientY - touchStart.current.y);
-    if (dx > 10 || dy > 10) cancelLongPress();
+  function cancelLongPress() {
+    if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null; }
   }
 
-  function cancelLongPress() {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
-      longPressTimer.current = null;
+  function handleTouchStart(e: React.TouchEvent) {
+    if (message.type === 'system') return;
+    const touch = e.touches[0];
+    if (!touch) return;
+    touchOrigin.current = { x: touch.clientX, y: touch.clientY };
+    gestureMode.current = 'idle';
+    startLongPress();
+  }
+
+  function handleTouchMove(e: React.TouchEvent) {
+    const touch = e.touches[0];
+    if (!touch || !touchOrigin.current) return;
+    const dx = touch.clientX - touchOrigin.current.x;
+    const adx = Math.abs(dx);
+    const ady = Math.abs(touch.clientY - touchOrigin.current.y);
+
+    if (gestureMode.current === 'idle' && (adx > 5 || ady > 5)) {
+      if (adx > ady && dx < 0) {
+        gestureMode.current = 'swipe';
+        cancelLongPress();
+      } else {
+        gestureMode.current = 'scroll';
+        cancelLongPress();
+      }
+    }
+
+    if (gestureMode.current === 'swipe' && dx < 0) {
+      setSwipeX(Math.min(-dx, 70));
     }
   }
 
-  // Close menu on outside click
+  function handleTouchEnd() {
+    cancelLongPress();
+    if (gestureMode.current === 'swipe' && swipeX >= SWIPE_REPLY_THRESHOLD) {
+      onReply();
+      try { navigator.vibrate?.(15); } catch { /* ignore */ }
+    }
+    setSwipeX(0);
+    gestureMode.current = 'idle';
+  }
+
   useEffect(() => {
     if (!menuOpen) return;
     function handler(e: MouseEvent) {
@@ -297,32 +323,20 @@ function MessageBubble({
 
   const isFailed = message._status === 'failed';
   const isSending = message._status === 'sending';
+  const replyIconOpacity = swipeX > 15 ? Math.min((swipeX - 15) / 30, 1) : 0;
 
-  const bubbleContent = (
+  const bubbleInner = (
     <div
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={cancelLongPress}
-      onTouchCancel={cancelLongPress}
-      onContextMenu={(e) => {
-        // На mobile довгий тач інколи викликає системне меню — блокуємо.
-        if (longPressTriggered.current) e.preventDefault();
-      }}
-      className={`px-3.5 py-2 text-sm leading-relaxed transition-opacity select-none ${isSending || isFailed ? 'opacity-50' : 'opacity-100'} ${
+      className={`px-3.5 py-2 text-sm leading-relaxed select-none ${isSending || isFailed ? 'opacity-50' : ''} ${
         isOwn
           ? 'bg-gradient-to-br from-accent-400 to-accent-600 text-white rounded-2xl rounded-tr-md shadow-sm'
           : 'bg-gradient-to-br from-white to-neutral-100 text-neutral-900 shadow-card rounded-2xl rounded-tl-md'
       }`}
     >
-      {/* Reply preview inside bubble — клікабельний, ілюзія цитати */}
       {message.replyTo && (
-        <div
-          className={`mb-1.5 px-2 py-1 rounded-md border-l-2 text-[11px] leading-tight ${
-            isOwn
-              ? 'bg-white/10 border-white/60 text-white/90'
-              : 'bg-neutral-100 border-accent-400 text-neutral-600'
-          }`}
-        >
+        <div className={`mb-1.5 px-2 py-1 rounded-md border-l-2 text-[11px] leading-tight ${
+          isOwn ? 'bg-white/10 border-white/60 text-white/90' : 'bg-neutral-100 border-accent-400 text-neutral-600'
+        }`}>
           <p className={`font-semibold truncate ${isOwn ? 'text-white' : 'text-accent-700'}`}>
             {message.replyTo.author?.fullName ?? t('common.you', 'Ви')}
           </p>
@@ -334,20 +348,19 @@ function MessageBubble({
   );
 
   return (
-    <div className={`flex gap-2.5 group items-end ${isOwn ? 'flex-row-reverse' : ''}`}>
-      {/* Avatar or spacer */}
-      {!isOwn &&
-        (showAvatar ? (
-          <Avatar
-            fullName={message.author?.fullName ?? '?'}
-            avatarUrl={message.author?.avatarUrl}
-            size={32}
-          />
-        ) : (
-          <div className="shrink-0" style={{ width: 32 }} />
-        ))}
+    <div
+      className={`flex gap-2.5 group items-end ${isOwn ? 'flex-row-reverse' : ''}`}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchEnd}
+      onContextMenu={(e) => { if (longPressTriggered.current) e.preventDefault(); }}
+    >
+      {!isOwn && (showAvatar
+        ? <Avatar fullName={message.author?.fullName ?? '?'} avatarUrl={message.author?.avatarUrl} size={32} />
+        : <div className="shrink-0" style={{ width: 32 }} />
+      )}
 
-      {/* Bubble */}
       <div className={`max-w-[75%] flex flex-col ${isOwn ? 'items-end' : 'items-start'}`}>
         {showAvatar && !isOwn && (
           <div className="flex items-baseline gap-2 px-1 mb-0.5">
@@ -356,48 +369,59 @@ function MessageBubble({
           </div>
         )}
         {!showAvatar && !isOwn && (
-          <div className="px-1 mb-0.5">
-            <span className="text-[10px] text-neutral-400">{formatTime(message.createdAt, locale)}</span>
-          </div>
+          <div className="px-1 mb-0.5"><span className="text-[10px] text-neutral-400">{formatTime(message.createdAt, locale)}</span></div>
         )}
         {isOwn && (
-          <div className="px-1 mb-0.5">
-            <span className="text-[10px] text-neutral-400">{formatTime(message.createdAt, locale)}</span>
-          </div>
+          <div className="px-1 mb-0.5"><span className="text-[10px] text-neutral-400">{formatTime(message.createdAt, locale)}</span></div>
         )}
 
-        {/* Important gradient border wrapper */}
-        {message.isImportant ? (
+        {/* Bubble + reply icon layer */}
+        <div className="relative flex items-center">
+          {/* Reply icon — appears behind the bubble when swiping left */}
           <div
-            className={`p-[1.5px] bg-gradient-to-br from-accent-400 via-violet-500 to-amber-400 animate-pulse ${
-              isOwn ? 'rounded-2xl rounded-tr-md' : 'rounded-2xl rounded-tl-md'
-            }`}
+            className="absolute pointer-events-none"
+            style={{
+              [isOwn ? 'right' : 'left']: '100%',
+              opacity: replyIconOpacity,
+              transform: `translateX(${isOwn ? '' : '-'}${Math.min(swipeX * 0.4, 16)}px)`,
+              transition: swipeX === 0 ? 'opacity 0.15s' : 'none',
+            }}
           >
-            {bubbleContent}
+            <CornerUpLeft
+              size={18}
+              className={swipeX >= SWIPE_REPLY_THRESHOLD ? 'text-accent-600' : 'text-neutral-400'}
+            />
           </div>
-        ) : (
-          bubbleContent
-        )}
 
-        {/* Retry button for failed messages */}
-        {isFailed && (
-          <button
-            onClick={onRetry}
-            className="mt-1 flex items-center gap-1 text-xs text-red-500 hover:text-red-600 transition-colors"
+          {/* Bubble with swipe transform */}
+          <div
+            style={{
+              transform: `translateX(-${swipeX}px)`,
+              transition: swipeX === 0 ? 'transform 0.2s ease' : 'none',
+            }}
           >
-            <RefreshCw size={12} />
-            <span>{t('chat.retry') ?? 'Retry'}</span>
+            {message.isImportant ? (
+              <div className={`p-[1.5px] bg-gradient-to-br from-accent-400 via-violet-500 to-amber-400 animate-pulse ${isOwn ? 'rounded-2xl rounded-tr-md' : 'rounded-2xl rounded-tl-md'}`}>
+                {bubbleInner}
+              </div>
+            ) : (
+              bubbleInner
+            )}
+          </div>
+        </div>
+
+        {isFailed && (
+          <button onClick={onRetry} className="mt-1 flex items-center gap-1 text-xs text-red-500 hover:text-red-600">
+            <RefreshCw size={12} /><span>{t('chat.retry') ?? 'Retry'}</span>
           </button>
         )}
       </div>
 
-      {/* Three-dot menu: на desktop — hover, на mobile — показується після long-press */}
+      {/* Three-dot menu: desktop — hover; mobile — long-press */}
       <div
         ref={menuRef}
         className={`self-end mb-1 relative transition-opacity ${
-          menuOpen
-            ? 'flex opacity-100'
-            : 'md:flex md:opacity-0 md:group-hover:opacity-100 hidden'
+          menuOpen ? 'flex opacity-100' : 'md:flex md:opacity-0 md:group-hover:opacity-100 hidden'
         }`}
       >
         <button
@@ -410,36 +434,24 @@ function MessageBubble({
         </button>
 
         {menuOpen && (
-          <div
-            className={`absolute ${openDown ? 'top-8' : 'bottom-8'} ${isOwn ? 'right-0' : 'left-0'} bg-white rounded-xl shadow-card border border-neutral-100 py-1 z-20 min-w-[160px]`}
-          >
-            {/* Reply */}
+          <div className={`absolute ${openDown ? 'top-8' : 'bottom-8'} ${isOwn ? 'right-0' : 'left-0'} bg-white rounded-xl shadow-card border border-neutral-100 py-1 z-20 min-w-[160px]`}>
+            {/* Reply — desktop only, mobile uses swipe */}
             <button
-              onClick={() => {
-                onReply();
-                setMenuOpen(false);
-              }}
-              className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors"
+              onClick={() => { onReply(); setMenuOpen(false); }}
+              className="hidden md:flex w-full items-center gap-2.5 px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors"
             >
               <CornerUpLeft size={14} className="text-neutral-400" />
               {t('chat.reply', 'Відповісти')}
             </button>
 
-            {/* Mark important */}
             <button
-              onClick={() => {
-                onToggleImportant();
-                setMenuOpen(false);
-              }}
+              onClick={() => { onToggleImportant(); setMenuOpen(false); }}
               className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors"
             >
               <Star size={14} className={message.isImportant ? 'text-amber-400 fill-amber-400' : 'text-neutral-400'} />
-              {message.isImportant
-                ? (t('chat.unmarkImportant') ?? 'Unmark important')
-                : (t('chat.markImportant') ?? 'Mark important')}
+              {message.isImportant ? (t('chat.unmarkImportant') ?? 'Unmark important') : (t('chat.markImportant') ?? 'Mark important')}
             </button>
 
-            {/* Delete — own messages only */}
             {isOwn && (
               <>
                 <div className="mx-3 my-1 border-t border-neutral-100" />
@@ -448,27 +460,18 @@ function MessageBubble({
                     onClick={() => setDeleteConfirm(true)}
                     className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors"
                   >
-                    <Trash2 size={14} />
-                    {t('chat.delete') ?? 'Delete'}
+                    <Trash2 size={14} />{t('chat.delete') ?? 'Delete'}
                   </button>
                 ) : (
                   <div className="px-3 py-2">
                     <p className="text-xs text-neutral-500 mb-2">{t('chat.deleteConfirm') ?? 'Delete this message?'}</p>
                     <div className="flex gap-2">
-                      <button
-                        onClick={() => {
-                          onDelete();
-                          setMenuOpen(false);
-                          setDeleteConfirm(false);
-                        }}
-                        className="flex-1 text-xs bg-red-500 text-white rounded-lg py-1 hover:bg-red-600 transition-colors"
-                      >
+                      <button onClick={() => { onDelete(); setMenuOpen(false); setDeleteConfirm(false); }}
+                        className="flex-1 text-xs bg-red-500 text-white rounded-lg py-1 hover:bg-red-600 transition-colors">
                         {t('common.yes') ?? 'Yes'}
                       </button>
-                      <button
-                        onClick={() => setDeleteConfirm(false)}
-                        className="flex-1 text-xs bg-neutral-100 text-neutral-600 rounded-lg py-1 hover:bg-neutral-200 transition-colors"
-                      >
+                      <button onClick={() => setDeleteConfirm(false)}
+                        className="flex-1 text-xs bg-neutral-100 text-neutral-600 rounded-lg py-1 hover:bg-neutral-200 transition-colors">
                         {t('common.no') ?? 'No'}
                       </button>
                     </div>

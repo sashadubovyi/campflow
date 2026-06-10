@@ -11,27 +11,10 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname, join } from 'path';
+import { memoryStorage } from 'multer';
 import { UsersService } from './users.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { CurrentUser, AuthenticatedUser } from '../auth/decorators/current-user.decorator';
-
-const avatarStorage = diskStorage({
-  destination: join(__dirname, '..', '..', 'uploads', 'avatars'),
-  filename: (_req, file, cb) => {
-    const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    cb(null, `${unique}${extname(file.originalname)}`);
-  },
-});
-
-const coverStorage = diskStorage({
-  destination: join(__dirname, '..', '..', 'uploads', 'profile-covers'),
-  filename: (_req, file, cb) => {
-    const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    cb(null, `${unique}${extname(file.originalname)}`);
-  },
-});
 
 function imageFilter(
   _req: unknown,
@@ -43,6 +26,12 @@ function imageFilter(
   } else {
     cb(new BadRequestException('Only jpeg/png/webp allowed'), false);
   }
+}
+
+// Конвертуємо файл у base64 data URL для зберігання в БД.
+// Це вирішує проблему ephemeral-filesystem на Railway (файли зникали після перезапуску).
+function toDataUrl(file: Express.Multer.File): string {
+  return `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
 }
 
 @Controller('users')
@@ -62,9 +51,9 @@ export class UsersController {
   @Post('me/avatar')
   @UseInterceptors(
     FileInterceptor('avatar', {
-      storage: avatarStorage,
+      storage: memoryStorage(),
       fileFilter: imageFilter,
-      limits: { fileSize: 5 * 1024 * 1024 },
+      limits: { fileSize: 2 * 1024 * 1024 }, // 2 MB — достатньо для аватара
     }),
   )
   async uploadAvatar(
@@ -72,16 +61,15 @@ export class UsersController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     if (!file) throw new BadRequestException('No file uploaded');
-    const avatarUrl = `/uploads/avatars/${file.filename}`;
-    return this.usersService.updateAvatar(user.id, avatarUrl);
+    return this.usersService.updateAvatar(user.id, toDataUrl(file));
   }
 
   @Post('me/cover')
   @UseInterceptors(
     FileInterceptor('cover', {
-      storage: coverStorage,
+      storage: memoryStorage(),
       fileFilter: imageFilter,
-      limits: { fileSize: 10 * 1024 * 1024 },
+      limits: { fileSize: 3 * 1024 * 1024 }, // 3 MB — cover, теж у БД
     }),
   )
   async uploadCover(
@@ -89,8 +77,7 @@ export class UsersController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     if (!file) throw new BadRequestException('No file uploaded');
-    const coverUrl = `/uploads/profile-covers/${file.filename}`;
-    return this.usersService.updateCover(user.id, coverUrl);
+    return this.usersService.updateCover(user.id, toDataUrl(file));
   }
 
   @Get('lookup')

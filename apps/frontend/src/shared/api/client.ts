@@ -1,5 +1,6 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import { useAuthStore } from '../store/auth.store';
+import { loadRefreshToken, saveRefreshToken } from './auth.api';
 
 const baseUrl = import.meta.env.VITE_API_URL || '';
 const cleanUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
@@ -61,7 +62,12 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const { data } = await api.post<{ accessToken: string }>('/auth/refresh');
+        const stored = loadRefreshToken();
+        const { data } = await api.post<{ accessToken: string; refreshToken?: string }>(
+          '/auth/refresh',
+          stored ? { refreshToken: stored } : {},
+        );
+        if (data.refreshToken) saveRefreshToken(data.refreshToken);
         const newToken = data.accessToken;
         useAuthStore.getState().setToken(newToken);
         processQueue(null, newToken);
