@@ -8,7 +8,7 @@ import { Calendar as BigCalendar, dateFnsLocalizer, type Event as RBCEvent } fro
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { uk, enUS, ru, type Locale } from 'date-fns/locale';
 import { PageHeader } from '../shared/ui';
-import { useRooms } from '../shared/api/rooms.hooks';
+import { useRooms, useArchiveRoom, useToggleRoomPublic } from '../shared/api/rooms.hooks';
 import { useMapPoints } from '../shared/api/map.hooks';
 import { useMediaQuery } from '../shared/lib/useMediaQuery';
 import type { MapPoint } from '../shared/api/map.api';
@@ -162,6 +162,8 @@ function EventsListView() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: rooms, isLoading } = useRooms();
+  const archive = useArchiveRoom();
+  const togglePublic = useToggleRoomPublic();
 
   if (isLoading) {
     return (
@@ -176,7 +178,14 @@ function EventsListView() {
     <div className="h-full overflow-y-auto">
       <div className="max-w-5xl mx-auto w-full px-4 md:px-6 py-4 grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
         {rooms.map((room) => (
-          <RoomCard key={room.id} room={room} onOpen={(id) => navigate(`/rooms/${id}`)} compact />
+          <RoomCard
+            key={room.id}
+            room={room}
+            onOpen={(id) => navigate(`/rooms/${id}`)}
+            compact
+            onDelete={() => archive.mutate(room.id)}
+            onTogglePublic={() => togglePublic.mutate({ roomId: room.id, isPublic: !room.isPublic })}
+          />
         ))}
       </div>
     </div>

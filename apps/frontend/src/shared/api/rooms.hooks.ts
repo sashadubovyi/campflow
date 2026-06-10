@@ -127,3 +127,15 @@ export function useUploadRoomCover(roomId: string) {
     },
   });
 }
+
+export function useToggleRoomPublic() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ roomId, isPublic }: { roomId: string; isPublic: boolean }) =>
+      roomsApi.update(roomId, { isPublic }),
+    onSuccess: (_updated, { roomId }) => {
+      qc.invalidateQueries({ queryKey: ['rooms'] });
+      qc.invalidateQueries({ queryKey: ['room', roomId] });
+    },
+  });
+}

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Send, Reply, X } from 'lucide-react';
+import { Send, Reply, X, MoreHorizontal, Star, Trash2, CornerUpLeft } from 'lucide-react';
 import { useDmGetOrCreate, useDmMessages, useSendDm } from '../shared/api/dm.hooks';
 import { Avatar } from '../shared/ui/Avatar';
 import { BackButton } from '../shared/ui';
@@ -23,6 +23,7 @@ type DmMessage = {
 };
 
 const SWIPE_REPLY_THRESHOLD = 55;
+const LONG_PRESS_MS = 550;
 
 function DmMessageBubble({
   message,
@@ -33,27 +34,55 @@ function DmMessageBubble({
   locale: string;
   onReply: (msg: DmMessage) => void;
 }) {
+  const { t } = useTranslation();
   const [swipeX, setSwipeX] = useState(0);
-  const gestureMode = useRef<'idle' | 'swipe' | 'scroll'>('idle');
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [openDown, setOpenDown] = useState(false);
+  const gestureMode = useRef<'idle' | 'swipe' | 'scroll' | 'longpress'>('idle');
   const touchOrigin = useRef({ x: 0, y: 0 });
   const triggered = useRef(false);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  function cancelLongPress() {
+    if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null; }
+  }
 
   function onTouchStart(e: React.TouchEvent) {
-    const t = e.touches[0];
-    if (!t) return;
-    touchOrigin.current = { x: t.clientX, y: t.clientY };
+    const touch = e.touches[0];
+    if (!touch) return;
+    touchOrigin.current = { x: touch.clientX, y: touch.clientY };
     gestureMode.current = 'idle';
     triggered.current = false;
+
+    longPressTimer.current = setTimeout(() => {
+      if (gestureMode.current === 'idle') {
+        gestureMode.current = 'longpress';
+        if (triggerRef.current) {
+          const rect = triggerRef.current.getBoundingClientRect();
+          setOpenDown(rect.top < 120);
+        }
+        setMenuOpen(true);
+        try { navigator.vibrate?.(15); } catch { /* ignore */ }
+      }
+    }, LONG_PRESS_MS);
   }
 
   function onTouchMove(e: React.TouchEvent) {
-    const t = e.touches[0];
-    if (!t) return;
-    const dx = t.clientX - touchOrigin.current.x;
-    const dy = Math.abs(t.clientY - touchOrigin.current.y);
+    const touch = e.touches[0];
+    if (!touch) return;
+    const dx = touch.clientX - touchOrigin.current.x;
+    const dy = Math.abs(touch.clientY - touchOrigin.current.y);
 
     if (gestureMode.current === 'idle' && (Math.abs(dx) > 6 || dy > 6)) {
-      gestureMode.current = Math.abs(dx) > dy && dx < 0 ? 'swipe' : 'scroll';
+      if (Math.abs(dx) > dy && dx < 0) {
+        gestureMode.current = 'swipe';
+        cancelLongPress();
+      } else {
+        gestureMode.current = 'scroll';
+        cancelLongPress();
+      }
     }
 
     if (gestureMode.current === 'swipe' && dx < 0) {
@@ -61,12 +90,13 @@ function DmMessageBubble({
       setSwipeX(raw);
       if (raw >= SWIPE_REPLY_THRESHOLD && !triggered.current) {
         triggered.current = true;
-        try { navigator.vibrate?.(30); } catch (_) { /* ignore */ }
+        try { navigator.vibrate?.(30); } catch { /* ignore */ }
       }
     }
   }
 
   function onTouchEnd() {
+    cancelLongPress();
     if (gestureMode.current === 'swipe' && swipeX >= SWIPE_REPLY_THRESHOLD) {
       onReply(message);
     }
@@ -74,49 +104,118 @@ function DmMessageBubble({
     gestureMode.current = 'idle';
   }
 
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handler(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [menuOpen]);
+
+  function handleToggleMenu() {
+    if (!menuOpen && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      setOpenDown(rect.top < 120);
+    }
+    setMenuOpen((v) => !v);
+  }
+
   const progress = Math.min(swipeX / SWIPE_REPLY_THRESHOLD, 1);
   const replyIconOpacity = progress;
   const replyIconColor = swipeX >= SWIPE_REPLY_THRESHOLD ? '#3b82f6' : '#9ca3af';
 
   return (
-    <div className="relative flex" style={{ justifyContent: message.isOwn ? 'flex-end' : 'flex-start' }}>
+    <div
+      className={`flex gap-2.5 group items-end ${message.isOwn ? 'flex-row-reverse' : ''}`}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      onContextMenu={(e) => { if (gestureMode.current === 'longpress') e.preventDefault(); }}
+    >
       {/* Reply icon behind bubble */}
-      <div
-        className="absolute top-1/2 -translate-y-1/2"
-        style={{
-          right: message.isOwn ? `calc(${swipeX}px + 4px)` : undefined,
-          left: message.isOwn ? undefined : `calc(${swipeX}px + 4px)`,
-          opacity: replyIconOpacity,
-          transition: swipeX === 0 ? 'opacity 0.15s' : 'none',
-          pointerEvents: 'none',
-        }}
-      >
-        <Reply size={18} color={replyIconColor} />
-      </div>
+      <div className="relative flex items-center">
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            [message.isOwn ? 'right' : 'left']: '100%',
+            opacity: replyIconOpacity,
+            transition: swipeX === 0 ? 'opacity 0.15s' : 'none',
+            pointerEvents: 'none',
+          }}
+        >
+          <Reply size={18} color={replyIconColor} />
+        </div>
 
-      <div
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-        style={{
-          transform: `translateX(${-swipeX}px)`,
-          transition: swipeX === 0 ? 'transform 0.2s ease' : 'none',
-          touchAction: 'pan-y',
-        }}
-        className={`max-w-[75%] px-3.5 py-2 text-sm rounded-2xl shadow-sm ${
-          message.isOwn
-            ? 'bg-gradient-to-br from-accent-400 to-accent-600 text-white rounded-tr-md'
-            : 'bg-white/75 backdrop-blur-sm text-neutral-900 rounded-tl-md'
-        }`}
-      >
-        <p className="leading-relaxed whitespace-pre-wrap">{message.content}</p>
-        <p
-          className={`text-[10px] mt-0.5 text-right ${
-            message.isOwn ? 'text-white/70' : 'text-neutral-400'
+        <div
+          style={{
+            transform: `translateX(${-swipeX}px)`,
+            transition: swipeX === 0 ? 'transform 0.2s ease' : 'none',
+            touchAction: 'pan-y',
+          }}
+          className={`max-w-[75%] px-3.5 py-2 text-sm rounded-2xl shadow-sm ${
+            message.isOwn
+              ? 'bg-gradient-to-br from-accent-400 to-accent-600 text-white rounded-tr-md'
+              : 'bg-white/75 backdrop-blur-sm text-neutral-900 rounded-tl-md'
           }`}
         >
-          {formatTime(message.createdAt, locale)}
-        </p>
+          <p className="leading-relaxed whitespace-pre-wrap">{message.content}</p>
+          <p className={`text-[10px] mt-0.5 text-right ${message.isOwn ? 'text-white/70' : 'text-neutral-400'}`}>
+            {formatTime(message.createdAt, locale)}
+          </p>
+        </div>
+      </div>
+
+      {/* Three-dot menu: desktop hover + mobile long-press */}
+      <div
+        ref={menuRef}
+        className={`self-end mb-1 relative transition-opacity ${
+          menuOpen ? 'flex opacity-100' : 'md:flex md:opacity-0 md:group-hover:opacity-100 hidden'
+        }`}
+      >
+        <button
+          ref={triggerRef}
+          onClick={handleToggleMenu}
+          className="w-7 h-7 flex items-center justify-center rounded-lg text-neutral-400 glass-icon transition-colors"
+          aria-label="Message options"
+        >
+          <MoreHorizontal size={15} />
+        </button>
+
+        {menuOpen && (
+          <div
+            className={`absolute ${openDown ? 'top-8' : 'bottom-8'} ${message.isOwn ? 'right-0' : 'left-0'} glass-surface rounded-2xl py-1 z-20 min-w-[160px]`}
+          >
+            <button
+              onClick={() => { onReply(message); setMenuOpen(false); }}
+              className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-neutral-700 hover:bg-white/50 transition-colors"
+            >
+              <CornerUpLeft size={14} className="text-neutral-400" />
+              {t('chat.reply', 'Відповісти')}
+            </button>
+            <button
+              onClick={() => setMenuOpen(false)}
+              className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-neutral-700 hover:bg-white/50 transition-colors"
+            >
+              <Star size={14} className="text-neutral-400" />
+              {t('chat.markImportant', 'Важливо')}
+            </button>
+            {message.isOwn && (
+              <>
+                <div className="mx-3 my-1 border-t border-neutral-100" />
+                <button
+                  onClick={() => setMenuOpen(false)}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors"
+                >
+                  <Trash2 size={14} />
+                  {t('chat.delete', 'Видалити')}
+                </button>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
