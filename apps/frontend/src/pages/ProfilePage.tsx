@@ -18,6 +18,7 @@ import {
   QrCode,
   Bell,
   Globe,
+  MessageSquare,
   type LucideIcon,
 } from 'lucide-react';
 import { ProfileQRModal } from './profile/ProfileQRModal';
@@ -27,6 +28,7 @@ import type { PublicProfile, MyProfile, Visibility } from '../shared/api/profile
 import { useAuth } from '../shared/store/useAuth';
 import { relativeTime } from '../shared/lib/relativeTime';
 import { cn, PageHeader, BackButton } from '../shared/ui';
+import { Skeleton } from '../shared/ui/Skeleton';
 import { Modal } from '../shared/ui/Modal';
 import { useAddContact, useRemoveContact } from '../shared/api/contacts.hooks';
 import { useBlockUser } from '../shared/api/blocks.hooks';
@@ -109,8 +111,29 @@ export function ProfilePage() {
   // isLoading=false і data=undefined, що раніше сприймалось як 404.
   if (!username || isLoading) {
     return (
-      <div className="h-full flex items-center justify-center text-neutral-400 animate-pulse">
-        {t('common.loading')}
+      <div className="h-full flex flex-col bg-neutral-50 overflow-hidden">
+        <div className="bg-white border-b border-neutral-100 shrink-0 h-14" />
+        <div className="flex-1 overflow-y-auto px-4 md:px-6 py-6 space-y-4">
+          <div className="bg-white rounded-card shadow-card p-6 space-y-4">
+            <div className="flex items-center gap-5">
+              <Skeleton className="w-[88px] h-[88px] rounded-full shrink-0" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-6 w-40" />
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-3 w-20" />
+              </div>
+            </div>
+            <Skeleton className="h-10 w-full rounded-xl" />
+          </div>
+          <div className="bg-white rounded-card shadow-card p-5 space-y-2">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+          </div>
+          <div className="bg-white rounded-card shadow-card p-5 space-y-2">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-1/2" />
+          </div>
+        </div>
       </div>
     );
   }
@@ -161,6 +184,7 @@ export function ProfilePage() {
           {!profile.isSelf && (
             <ContactButton
               profileId={profile.id}
+              profileUsername={profile.username}
               isContact={profile.isContact}
               isMutual={profile.isMutual}
             />
@@ -486,14 +510,17 @@ function PublicDetails({
 
 function ContactButton({
   profileId,
+  profileUsername,
   isContact,
   isMutual,
 }: {
   profileId: string;
+  profileUsername: string;
   isContact: boolean;
   isMutual: boolean;
 }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const add = useAddContact();
   const remove = useRemoveContact();
   const block = useBlockUser();
@@ -509,28 +536,38 @@ function ContactButton({
 
   return (
     <div className="mt-5 space-y-2">
-      {isContact ? (
-        <div className="flex gap-2">
-          <div className="flex-1 bg-neutral-100 text-neutral-600 font-semibold py-2.5 rounded-xl text-sm text-center">
-            {isMutual ? t('profile.mutualContacts') : t('profile.inContacts')}
-          </div>
+      <div className="flex gap-2">
+        {isContact ? (
+          <>
+            <div className="flex-1 bg-neutral-100 text-neutral-600 font-semibold py-2.5 rounded-xl text-sm text-center">
+              {isMutual ? t('profile.mutualContacts') : t('profile.inContacts')}
+            </div>
+            <button
+              onClick={() => remove.mutate(profileId)}
+              disabled={loading}
+              className="border border-neutral-200 text-red-500 hover:bg-red-50 font-semibold py-2.5 px-4 rounded-xl text-sm transition disabled:opacity-50"
+            >
+              {remove.isPending ? '…' : t('common.remove')}
+            </button>
+          </>
+        ) : (
           <button
-            onClick={() => remove.mutate(profileId)}
+            onClick={() => add.mutate(profileId)}
             disabled={loading}
-            className="border border-neutral-200 text-red-500 hover:bg-red-50 font-semibold py-2.5 px-4 rounded-xl text-sm transition disabled:opacity-50"
+            className="flex-1 bg-brand-gradient hover:bg-brand-gradient-hover text-white font-semibold py-2.5 rounded-xl text-sm transition disabled:opacity-50"
           >
-            {remove.isPending ? '…' : t('common.remove')}
+            {add.isPending ? t('profile.adding') : t('profile.addToContacts')}
           </button>
-        </div>
-      ) : (
+        )}
+        {/* Кнопка "Написати" — завжди доступна для чужого профілю */}
         <button
-          onClick={() => add.mutate(profileId)}
-          disabled={loading}
-          className="w-full bg-brand-gradient hover:bg-brand-gradient-hover text-white font-semibold py-2.5 rounded-xl text-sm transition disabled:opacity-50"
+          onClick={() => navigate(`/dm/${profileUsername}`)}
+          title={t('profile.sendMessage', 'Написати повідомлення')}
+          className="flex items-center justify-center w-11 rounded-xl border border-neutral-200 text-accent-600 hover:bg-accent-50 transition shrink-0"
         >
-          {add.isPending ? t('profile.adding') : t('profile.addToContacts')}
+          <MessageSquare size={18} />
         </button>
-      )}
+      </div>
       <button
         onClick={handleBlock}
         disabled={loading}

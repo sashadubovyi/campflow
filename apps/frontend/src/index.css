@@ -21,31 +21,35 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Тонкий скролбар для панелей */
-/* Leaflet tiles під модалками */
-/* НЕ override-ити .leaflet-marker-icon / .leaflet-marker-pane / .leaflet-marker-shadow —
-   це ламає DOM-маркери (divIcon) після Leaflet-анімації, маркери зникають через ~1 с */
-.leaflet-pane,
-.leaflet-tile,
-.leaflet-tile-pane,
-.leaflet-overlay-pane,
-.leaflet-shadow-pane,
-.leaflet-tooltip-pane,
-.leaflet-popup-pane {
-  z-index: auto !important;
+/* Leaflet: containment через isolation:isolate на батьківському div карти.
+   НЕ чіпаємо .leaflet-marker-pane, .leaflet-marker-icon, .leaflet-marker-shadow —
+   будь-який reset z-index на цих класах ламає divIcon після Leaflet-анімації
+   (маркери зникають через ~1 с через transition на opacity/transform у pane). */
+.leaflet-container {
+  z-index: 0;
 }
-.leaflet-map-pane {
+/* Тільки tile/overlay panes можна занулити — вони не впливають на маркери */
+.leaflet-tile-pane {
   z-index: 1 !important;
 }
+.leaflet-overlay-pane {
+  z-index: 2 !important;
+}
+/* Маркерний і shadow pane — зберігаємо дефолтні Leaflet z-indices */
+.leaflet-shadow-pane {
+  z-index: 499 !important;
+}
+.leaflet-marker-pane {
+  z-index: 600 !important;
+}
+.leaflet-tooltip-pane {
+  z-index: 650 !important;
+}
+.leaflet-popup-pane {
+  z-index: 700 !important;
+}
 .leaflet-control {
-  z-index: 2 !important;
-}
-.leaflet-top,
-.leaflet-bottom {
-  z-index: 2 !important;
-}
-.leaflet-container .leaflet-control-zoom {
-  z-index: 2 !important;
+  z-index: 800 !important;
 }
 
 @keyframes modal-in {
@@ -76,6 +80,18 @@ input[type="date"]::-webkit-datetime-edit {
 input[type="date"]::-webkit-calendar-picker-indicator {
   opacity: 0.4;
   cursor: pointer;
+}
+
+/* Mobile performance: апаратне прискорення для прокручуваних списків */
+.overflow-y-auto,
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Пришвидшення рендерингу повідомлень на мобільних */
+[class*="ChatPanel"] .message-bubble,
+.campflow-message-list > * {
+  contain: layout style;
 }
 
 .scrollbar-hide::-webkit-scrollbar {

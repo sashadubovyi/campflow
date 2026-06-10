@@ -10,7 +10,7 @@ interface Props {
   username: string;
 }
 
-const PROFILE_BASE_URL = 'https://andu.app/u';
+const PROFILE_BASE_URL = 'https://and-u.vercel.app/u';
 
 export function ProfileQRModal({ open, onClose, username }: Props) {
   const { t } = useTranslation();

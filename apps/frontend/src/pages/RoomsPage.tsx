@@ -5,6 +5,7 @@ import { Plus, KeyRound } from 'lucide-react';
 import { usePublicRooms } from '../shared/api/rooms.hooks';
 import { PublicRoomCard } from './feed/PublicRoomCard';
 import { PageHeader } from '../shared/ui';
+import { Skeleton } from '../shared/ui/Skeleton';
 import { CreateRoomModal } from './rooms/CreateRoomModal';
 import { JoinRoomModal } from './rooms/JoinRoomModal';
 
@@ -43,7 +44,19 @@ export function RoomsPage() {
       <div className="flex-1 overflow-y-auto">
         <main className="max-w-5xl mx-auto w-full px-4 md:px-6 py-4">
           {isLoading && (
-            <p className="text-neutral-400 animate-pulse text-center py-12">{t('common.loading')}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="bg-white rounded-card shadow-card p-5 space-y-3">
+                  <Skeleton className="h-5 w-3/4" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-1/2" />
+                  <div className="flex gap-2 pt-1">
+                    <Skeleton className="h-7 w-16 rounded-full" />
+                    <Skeleton className="h-7 w-16 rounded-full" />
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
           {isError && (
             <p className="text-danger-700 bg-danger-100 rounded-lg px-4 py-3 text-center">

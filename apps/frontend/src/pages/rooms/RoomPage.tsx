@@ -118,25 +118,26 @@ export function RoomPage() {
   if (isDesktop) {
     return (
       <div className="h-full flex flex-col bg-neutral-50 overflow-hidden">
-        {/* Хедер */}
-        <header className="bg-white border-b border-neutral-100 shrink-0 px-4 h-14 flex items-center">
+        {/* Хедер — h1 абсолютно позиціонований щоб не зсувався від кнопок */}
+        <header className="relative bg-white border-b border-neutral-100 shrink-0 px-4 h-14 flex items-center">
           <div className="flex items-center justify-start min-w-[2.5rem] shrink-0">
             <BackButton />
           </div>
-          <div className="flex-1 flex items-center justify-center gap-2 px-2 min-w-0">
+          {/* Title: absolute center, pointer-events-none щоб не блокувати кнопки */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none px-24 gap-2">
             {room.coverUrl && (
               <img
                 src={getMediaUrl(room.coverUrl)}
                 alt=""
-                className="w-8 h-8 rounded-lg object-cover shrink-0"
+                className="w-7 h-7 rounded-md object-cover shrink-0"
               />
             )}
             <h1 className="font-display text-lg font-bold text-neutral-900 truncate">
               {room.name}
             </h1>
-            {importantStar}
           </div>
-          <div className="flex items-center justify-end gap-1.5 shrink-0">
+          <div className="flex items-center justify-end gap-1.5 shrink-0 ml-auto">
+            {importantStar}
             {isAdmin && !isClosed && (
               <button
                 onClick={() => setShowEditModal(true)}
@@ -263,38 +264,41 @@ export function RoomPage() {
   /* ---------- MOBILE ---------- */
   return (
     <div className="h-full flex flex-col bg-neutral-50 overflow-hidden">
-      <header className="bg-white border-b border-neutral-100 shrink-0 px-2 h-14 flex items-center gap-1">
+      <header className="relative bg-white border-b border-neutral-100 shrink-0 px-2 h-14 flex items-center gap-1">
         <button
           onClick={() => (mobileView !== 'chat' ? setMobileView('chat') : navigate('/rooms'))}
-          className="p-2 text-neutral-500 hover:text-neutral-900 rounded-lg"
+          className="p-2 text-neutral-500 hover:text-neutral-900 rounded-lg shrink-0"
         >
           <ChevronLeft size={20} />
         </button>
-        <div className="flex-1 flex items-center justify-center gap-2 px-1 min-w-0">
+        {/* Абсолютно позиціонований заголовок — не зсувається від кнопок */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none px-20 gap-2">
           {room.coverUrl && (
             <img
               src={getMediaUrl(room.coverUrl)}
               alt=""
-              className="w-8 h-8 rounded-lg object-cover shrink-0"
+              className="w-7 h-7 rounded-md object-cover shrink-0"
             />
           )}
           <h1 className="font-display text-lg font-bold text-neutral-900 truncate">
             {room.name}
           </h1>
-          {importantStar}
         </div>
-        <button
-          onClick={() => setMobileView((v) => (v === 'members' ? 'chat' : 'members'))}
-          className={`p-2 rounded-lg transition ${mobileView === 'members' ? 'text-accent-600 bg-accent-50' : 'text-neutral-500 hover:text-accent-600'}`}
-        >
-          <Users size={20} />
-        </button>
-        <button
-          onClick={() => setMobileView((v) => (v === 'info' ? 'chat' : 'info'))}
-          className={`p-2 rounded-lg transition ${mobileView === 'info' ? 'text-accent-600 bg-accent-50' : 'text-neutral-500 hover:text-accent-600'}`}
-        >
-          <Info size={20} />
-        </button>
+        <div className="ml-auto flex items-center gap-0.5 shrink-0">
+          {importantStar}
+          <button
+            onClick={() => setMobileView((v) => (v === 'members' ? 'chat' : 'members'))}
+            className={`p-2 rounded-lg transition ${mobileView === 'members' ? 'text-accent-600 bg-accent-50' : 'text-neutral-500 hover:text-accent-600'}`}
+          >
+            <Users size={20} />
+          </button>
+          <button
+            onClick={() => setMobileView((v) => (v === 'info' ? 'chat' : 'info'))}
+            className={`p-2 rounded-lg transition ${mobileView === 'info' ? 'text-accent-600 bg-accent-50' : 'text-neutral-500 hover:text-accent-600'}`}
+          >
+            <Info size={20} />
+          </button>
+        </div>
       </header>
 
       <div className="flex-1 min-h-0 overflow-hidden relative">
