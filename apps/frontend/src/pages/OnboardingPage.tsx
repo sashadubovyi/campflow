@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -340,24 +340,26 @@ export function OnboardingPage() {
 
   // Pre-fill with existing data (from OAuth profile or registration phone)
   const [prefilled, setPrefilled] = useState(false);
-  if (existingProfile && !prefilled) {
-    setPrefilled(true);
-    setForm((prev) => ({
-      ...prev,
-      city: existingProfile.city ?? '',
-      hobbies: existingProfile.hobbies ?? [],
-      hobbiesCustom: existingProfile.hobbiesCustom ?? '',
-      birthDate: existingProfile.birthDate ? existingProfile.birthDate.slice(0, 10) : '',
-      gender: existingProfile.gender ?? '',
-      bio: existingProfile.bio ?? '',
-      instagram: existingProfile.instagram ?? '',
-      telegram: existingProfile.telegram ?? '',
-      whatsapp: existingProfile.whatsapp ?? '',
-      facebook: existingProfile.facebook ?? '',
-      threads: existingProfile.threads ?? '',
-      phone: existingProfile.phone ?? '',
-    }));
-  }
+  useEffect(() => {
+    if (existingProfile && !prefilled) {
+      setPrefilled(true);
+      setForm((prev) => ({
+        ...prev,
+        city: existingProfile.city ?? '',
+        hobbies: existingProfile.hobbies ?? [],
+        hobbiesCustom: existingProfile.hobbiesCustom ?? '',
+        birthDate: existingProfile.birthDate ? existingProfile.birthDate.slice(0, 10) : '',
+        gender: existingProfile.gender ?? '',
+        bio: existingProfile.bio ?? '',
+        instagram: existingProfile.instagram ?? '',
+        telegram: existingProfile.telegram ?? '',
+        whatsapp: existingProfile.whatsapp ?? '',
+        facebook: existingProfile.facebook ?? '',
+        threads: existingProfile.threads ?? '',
+        phone: existingProfile.phone ?? '',
+      }));
+    }
+  }, [existingProfile, prefilled]);
 
   function set<K extends keyof FormState>(field: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [field]: value }));
