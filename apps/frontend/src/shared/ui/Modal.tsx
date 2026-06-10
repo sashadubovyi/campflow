@@ -1,5 +1,7 @@
 import { useEffect, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from './cn';
 
 interface Props {
@@ -12,6 +14,8 @@ interface Props {
 }
 
 const sizes = { sm: 'max-w-sm', md: 'max-w-md', lg: 'max-w-lg' } as const;
+
+const spring = { type: 'spring', stiffness: 480, damping: 36 } as const;
 
 export function Modal({
   open,
@@ -28,33 +32,44 @@ export function Modal({
     return () => window.removeEventListener('keydown', onKey);
   }, [open, onClose]);
 
-  if (!open) return null;
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-start md:items-center justify-center overflow-y-auto px-4 py-6 bg-neutral-900/40 backdrop-blur-sm backdrop-animate"
-      onClick={closeOnBackdrop ? onClose : undefined}
-    >
-      <div
-        className={cn(
-          'w-full bg-white rounded-card-lg shadow-card-lg my-auto modal-animate',
-          sizes[size],
-        )}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {title && (
-          <div className="flex items-center justify-between px-6 pt-5 pb-3">
-            <h2 className="text-lg font-semibold text-neutral-900">{title}</h2>
-            <button
-              onClick={onClose}
-              className="p-1.5 rounded-lg text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 transition"
-            >
-              <X size={18} />
-            </button>
-          </div>
-        )}
-        <div className={cn('px-6 pb-6', !title && 'pt-6')}>{children}</div>
-      </div>
-    </div>
+  return createPortal(
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.18 }}
+          className="fixed inset-0 z-50 flex items-start md:items-center justify-center overflow-y-auto px-4 py-6 bg-neutral-900/40 backdrop-blur-sm"
+          onClick={closeOnBackdrop ? onClose : undefined}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 18 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 10 }}
+            transition={spring}
+            className={cn(
+              'w-full bg-white rounded-card-lg shadow-card-lg my-auto',
+              sizes[size],
+            )}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {title && (
+              <div className="flex items-center justify-between px-6 pt-5 pb-3">
+                <h2 className="text-lg font-semibold text-neutral-900">{title}</h2>
+                <button
+                  onClick={onClose}
+                  className="p-1.5 rounded-lg text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 transition"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            )}
+            <div className={cn('px-6 pb-6', !title && 'pt-6')}>{children}</div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>,
+    document.body,
   );
 }
