@@ -98,7 +98,7 @@ export function ProfileQRModal({ open, onClose, username }: Props) {
         <div className="grid grid-cols-2 gap-2 w-full">
           <button
             onClick={handleShare}
-            className="flex items-center justify-center gap-1.5 bg-brand-gradient hover:bg-brand-gradient-hover text-white font-semibold py-2.5 rounded-xl transition text-sm"
+            className="flex items-center justify-center gap-1.5 btn-glass-blue text-white font-semibold py-2.5 rounded-xl transition text-sm"
           >
             <Share2 size={15} />
             {t('qr.share', 'Поділитись')}

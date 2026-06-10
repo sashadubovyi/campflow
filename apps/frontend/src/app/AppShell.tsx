@@ -6,12 +6,12 @@ import { MobileTabBar } from './MobileTabBar';
 import { CreateRoomModal } from '../pages/rooms/CreateRoomModal';
 import { JoinRoomModal } from '../pages/rooms/JoinRoomModal';
 
-const pageTransition = {
-  initial: { opacity: 0, y: 8 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -4 },
-  transition: { duration: 0.18, ease: [0.25, 0.1, 0.25, 1] as const },
+const pageVariants = {
+  initial: { opacity: 0, scale: 0.98, filter: 'blur(3px)' },
+  animate: { opacity: 1, scale: 1, filter: 'blur(0px)' },
+  exit: { opacity: 0, scale: 1.01, filter: 'blur(2px)' },
 };
+const pageSpring = { type: 'spring' as const, stiffness: 380, damping: 30 };
 
 export function AppShell() {
   const navigate = useNavigate();
@@ -29,7 +29,11 @@ export function AppShell() {
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={location.pathname}
-            {...pageTransition}
+            variants={pageVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={pageSpring}
             className="h-full"
           >
             <Outlet />
@@ -37,24 +41,30 @@ export function AppShell() {
         </AnimatePresence>
       </main>
       <MobileTabBar />
-      {showCreate && (
-        <CreateRoomModal
-          onClose={() => setShowCreate(false)}
-          onCreated={(roomId) => {
-            setShowCreate(false);
-            navigate(`/rooms/${roomId}`);
-          }}
-        />
-      )}
-      {showJoin && (
-        <JoinRoomModal
-          onClose={() => setShowJoin(false)}
-          onJoined={(id) => {
-            setShowJoin(false);
-            navigate(`/rooms/${id}`);
-          }}
-        />
-      )}
+      <AnimatePresence>
+        {showCreate && (
+          <CreateRoomModal
+            key="create-modal"
+            onClose={() => setShowCreate(false)}
+            onCreated={(roomId) => {
+              setShowCreate(false);
+              navigate(`/rooms/${roomId}`);
+            }}
+          />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showJoin && (
+          <JoinRoomModal
+            key="join-modal"
+            onClose={() => setShowJoin(false)}
+            onJoined={(id) => {
+              setShowJoin(false);
+              navigate(`/rooms/${id}`);
+            }}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

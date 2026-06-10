@@ -88,7 +88,7 @@ export function RoomEventModal({ open, onClose, room }: Props) {
             onClose();
             navigate(`/rooms/${room.id}`);
           }}
-          className="w-full flex items-center justify-center gap-2 bg-brand-gradient hover:bg-brand-gradient-hover text-white font-semibold py-3 rounded-xl transition text-sm"
+          className="w-full flex items-center justify-center gap-2 btn-glass-blue text-white font-semibold py-3 rounded-xl transition text-sm"
         >
           {t('events.openRoom', 'Перейти в кімнату')}
           <ArrowRight size={16} />

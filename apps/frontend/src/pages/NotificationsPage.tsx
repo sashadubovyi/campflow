@@ -167,7 +167,7 @@ function InviteCard({
               <button
                 onClick={handleAccept}
                 disabled={loading}
-                className="bg-brand-gradient hover:bg-brand-gradient-hover disabled:opacity-50 text-white text-xs font-semibold px-4 py-1.5 rounded-lg transition"
+                className="btn-glass-blue disabled:opacity-50 text-white text-xs font-semibold px-4 py-1.5 rounded-lg transition"
               >
                 {accept.isPending ? t('notifications.accepting') : t('notifications.accept')}
               </button>
@@ -267,7 +267,7 @@ function JoinRequestCard({
               <button
                 onClick={handleAccept}
                 disabled={loading}
-                className="bg-brand-gradient hover:bg-brand-gradient-hover disabled:opacity-50 text-white text-xs font-semibold px-4 py-1.5 rounded-lg transition"
+                className="btn-glass-blue disabled:opacity-50 text-white text-xs font-semibold px-4 py-1.5 rounded-lg transition"
               >
                 {accept.isPending ? t('notifications.accepting') : t('notifications.accept')}
               </button>

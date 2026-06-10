@@ -33,7 +33,7 @@ export function RoomsPage() {
           <button
             onClick={() => { setShowJoin(false); setShowCreate(true); }}
             title={t('common.create')}
-            className="flex items-center gap-1.5 bg-brand-gradient hover:bg-brand-gradient-hover text-white rounded-xl px-3 h-9 text-sm font-semibold transition"
+            className="flex items-center gap-1.5 btn-glass-blue text-white rounded-xl px-3 h-9 text-sm font-semibold transition"
           >
             <Plus size={16} />
             <span className="hidden md:inline">{t('common.create')}</span>
@@ -76,7 +76,7 @@ export function RoomsPage() {
               </p>
               <button
                 onClick={() => setShowCreate(true)}
-                className="inline-flex items-center gap-1.5 bg-brand-gradient hover:bg-brand-gradient-hover text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition"
+                className="inline-flex items-center gap-1.5 btn-glass-blue text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition"
               >
                 <Plus size={16} />
                 {t('rooms.newRoom', 'Створити кімнату')}

@@ -128,7 +128,7 @@ export function RegisterPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-brand-gradient hover:bg-brand-gradient-hover disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition"
+              className="w-full btn-glass-blue disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition"
             >
               {isSubmitting ? t('common.loading') : t('auth.register')}
             </button>

@@ -182,7 +182,7 @@ export function DirectChatPage() {
 
   return (
     <div className="h-full flex flex-col bg-neutral-50 font-body">
-      <header className="bg-white/65 backdrop-blur-2xl border-b border-white/40 shrink-0 px-2 md:px-4 h-12 flex items-center gap-2">
+      <header className="glass-header shadow-[0_0.5px_0_rgba(0,0,0,0.06)] shrink-0 px-2 md:px-4 h-12 flex items-center gap-2">
         <BackButton />
         <button
           onClick={() => navigate(`/u/${chat.peer.username}`)}
@@ -248,7 +248,7 @@ export function DirectChatPage() {
           <button
             onClick={handleSend}
             disabled={!text.trim() || send.isPending}
-            className="w-11 h-11 shrink-0 flex items-center justify-center rounded-xl bg-brand-gradient hover:bg-brand-gradient-hover text-white disabled:opacity-40 transition"
+            className="w-11 h-11 shrink-0 flex items-center justify-center rounded-xl btn-glass-blue"
             aria-label={t('chat.send') ?? 'Send'}
           >
             <Send size={18} />

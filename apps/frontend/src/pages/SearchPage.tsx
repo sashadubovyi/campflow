@@ -51,7 +51,7 @@ export function SearchPage() {
         left={<BackButton />}
       />
 
-      <div className="bg-white/65 backdrop-blur-2xl border-b border-white/40 px-4 md:px-6 pt-3 pb-2 sticky top-0 z-10">
+      <div className="glass-header shadow-[0_0.5px_0_rgba(0,0,0,0.06)] px-4 md:px-6 pt-3 pb-2 sticky top-0 z-10">
         <div className="max-w-2xl mx-auto w-full">
           <div className="flex items-center gap-2 bg-neutral-50 rounded-xl px-3 h-11 border border-neutral-100 focus-within:border-accent-500 transition">
             <Search size={16} className="text-neutral-400 shrink-0" />
@@ -147,7 +147,7 @@ export function SearchPage() {
                     <button
                       onClick={(e) => handleAdd(u.id, e)}
                       disabled={addContact.isPending}
-                      className="flex items-center justify-center gap-1 px-2.5 h-8 rounded-lg bg-brand-gradient hover:bg-brand-gradient-hover text-white text-[11px] font-semibold transition disabled:opacity-60"
+                      className="flex items-center justify-center gap-1 px-2.5 h-8 rounded-lg btn-glass-blue text-white text-[11px] font-semibold transition disabled:opacity-60"
                     >
                       {addContact.isPending && addContact.variables === u.id ? (
                         <Loader2 size={13} className="animate-spin" />

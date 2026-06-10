@@ -188,7 +188,7 @@ export function ChatPanel({ roomId, roomName: _roomName, importantOnly = false, 
           <button
             onClick={handleSend}
             disabled={!text.trim()}
-            className="w-11 h-11 shrink-0 flex items-center justify-center rounded-xl bg-brand-gradient hover:bg-brand-gradient-hover text-white disabled:opacity-40 disabled:hover:bg-brand-gradient-hover transition"
+            className="w-11 h-11 shrink-0 flex items-center justify-center rounded-xl btn-glass-blue"
             aria-label={t('chat.send') ?? 'Send'}
           >
             <Send size={18} />

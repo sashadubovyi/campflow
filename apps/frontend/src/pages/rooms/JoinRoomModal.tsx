@@ -1,5 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
 import { useJoinRoom } from '../../shared/api/rooms.hooks';
 
 interface Props {
@@ -26,11 +27,19 @@ export function JoinRoomModal({ onClose, onJoined }: Props) {
   }
 
   return (
-    <div
-      className="fixed inset-0 bg-neutral-900/40 flex items-center justify-center px-4 z-50"
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.18 }}
+      className="fixed inset-0 bg-neutral-900/40 flex items-center justify-center px-4 z-50 backdrop-blur-sm"
       onClick={onClose}
     >
-      <div
+      <motion.div
+        initial={{ opacity: 0, scale: 0.92, y: 28, filter: 'blur(8px)' }}
+        animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
+        exit={{ opacity: 0, scale: 0.95, y: 16, filter: 'blur(6px)' }}
+        transition={{ type: 'spring', stiffness: 380, damping: 28 }}
         className="glass-surface rounded-2xl shadow-2xl w-full max-w-md p-6 font-body"
         onClick={(e) => e.stopPropagation()}
       >
@@ -79,7 +88,7 @@ export function JoinRoomModal({ onClose, onJoined }: Props) {
             </button>
           </div>
         </form>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

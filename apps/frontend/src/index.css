@@ -17,9 +17,49 @@
            hover:bg-gemini-active-hover hover:border-accent-200/30 hover:text-accent-600
            transition-all duration-200;
   }
-  /* Frosted glass surface (modals, headers, panels) */
+  /* Frosted glass surface (modals, panels) */
   .glass-surface {
-    @apply bg-white/70 backdrop-blur-2xl border border-white/50;
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: saturate(180%) blur(24px);
+    -webkit-backdrop-filter: saturate(180%) blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+  }
+  /* iOS gradient blur header — matches page bg, fades to transparent at bottom edge */
+  .glass-header {
+    background: linear-gradient(to bottom, rgba(247, 248, 250, 0.92) 0%, rgba(247, 248, 250, 0.74) 100%);
+    backdrop-filter: saturate(180%) blur(24px);
+    -webkit-backdrop-filter: saturate(180%) blur(24px);
+  }
+  /* iOS gradient blur sidebar nav */
+  .glass-nav {
+    background: linear-gradient(to right, rgba(247, 248, 250, 0.93) 0%, rgba(247, 248, 250, 0.75) 100%);
+    backdrop-filter: saturate(180%) blur(24px);
+    -webkit-backdrop-filter: saturate(180%) blur(24px);
+  }
+  /* iOS gradient blur bottom tab bar */
+  .glass-tabbar {
+    background: linear-gradient(to top, rgba(247, 248, 250, 0.96) 0%, rgba(247, 248, 250, 0.72) 100%);
+    backdrop-filter: saturate(180%) blur(24px);
+    -webkit-backdrop-filter: saturate(180%) blur(24px);
+  }
+  /* Liquid glass blue primary button */
+  .btn-glass-blue {
+    background: rgba(45, 111, 248, 0.82);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 4px 20px rgba(45, 111, 248, 0.42);
+    border: 1px solid rgba(89, 141, 255, 0.36);
+    color: white;
+    font-weight: 600;
+    transition: all 0.2s ease;
+  }
+  .btn-glass-blue:hover {
+    background: rgba(26, 86, 224, 0.90);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 6px 26px rgba(45, 111, 248, 0.52);
+  }
+  .btn-glass-blue:disabled {
+    opacity: 0.55;
+    pointer-events: none;
   }
 }
 

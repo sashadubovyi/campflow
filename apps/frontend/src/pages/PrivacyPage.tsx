@@ -9,7 +9,7 @@ export function PrivacyPage() {
   return (
     <div className="min-h-screen bg-neutral-50 font-body">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-white/65 backdrop-blur-2xl border-b border-white/40 h-12 flex items-center px-4 gap-3">
+      <header className="sticky top-0 z-10 glass-header shadow-[0_0.5px_0_rgba(0,0,0,0.06)] h-12 flex items-center px-4 gap-3">
         <button
           onClick={() => navigate(-1)}
           className="flex items-center justify-center w-9 h-9 glass-icon"

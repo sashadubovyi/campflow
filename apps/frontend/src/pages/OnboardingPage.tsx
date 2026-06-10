@@ -734,7 +734,7 @@ export function OnboardingPage() {
           transition={{ type: 'spring', stiffness: 500, damping: 30 }}
           onClick={isLast ? handleFinish : () => go(step + 1)}
           disabled={isBusy || usernameStatus === 'taken'}
-          className="w-full h-12 bg-brand-gradient hover:bg-brand-gradient-hover disabled:opacity-60 text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition"
+          className="w-full h-12 btn-glass-blue disabled:opacity-60 text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition"
         >
           {isBusy ? (
             <Loader2 size={20} className="animate-spin" />

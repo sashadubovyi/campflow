@@ -51,7 +51,7 @@ export function JoinByLinkPage() {
             <p className="text-neutral-700 mb-4">{error}</p>
             <button
               onClick={() => navigate('/rooms')}
-              className="bg-brand-gradient hover:bg-brand-gradient-hover text-white font-semibold px-5 py-2.5 rounded-xl transition"
+              className="btn-glass-blue text-white font-semibold px-5 py-2.5 rounded-xl transition"
             >
               {t('rooms.title')}
             </button>

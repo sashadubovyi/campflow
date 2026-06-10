@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import {
   Mail,
   Phone,
@@ -28,7 +29,7 @@ import { useProfile, useMyProfile } from '../shared/api/profile.hooks';
 import type { PublicProfile, MyProfile, Visibility } from '../shared/api/profile.api';
 import { useAuth } from '../shared/store/useAuth';
 import { relativeTime } from '../shared/lib/relativeTime';
-import { cn, PageHeader, BackButton } from '../shared/ui';
+import { cn, BackButton } from '../shared/ui';
 import { Skeleton } from '../shared/ui/Skeleton';
 import { Modal } from '../shared/ui/Modal';
 import { useAddContact, useRemoveContact } from '../shared/api/contacts.hooks';
@@ -102,29 +103,26 @@ export function ProfilePage() {
   const [showQr, setShowQr] = useState(false);
   const { data: unread } = useUnreadCount();
 
+  // Scroll-based collapsing header (Telegram iOS style)
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const { scrollY } = useScroll({ container: scrollRef });
+  const headerBgOpacity = useTransform(scrollY, [40, 120], [0, 1]);
+  const titleOpacity = useTransform(scrollY, [80, 160], [0, 1]);
+
   async function handleLogout() {
     await logout();
     navigate('/login');
   }
 
-  // Поки немає username у URL або запит ще не стартував — показуємо loading,
-  // а не «Користувача не знайдено»: useQuery з enabled:false дає
-  // isLoading=false і data=undefined, що раніше сприймалось як 404.
   if (!username || isLoading) {
     return (
       <div className="h-full flex flex-col bg-neutral-50 overflow-hidden">
-        <div className="bg-white/65 backdrop-blur-2xl border-b border-white/40 shrink-0 h-12" />
+        <div className="glass-header shadow-[0_0.5px_0_rgba(0,0,0,0.06)] shrink-0 h-12" />
         <div className="flex-1 overflow-y-auto px-4 md:px-6 py-6 space-y-4">
-          <div className="bg-white rounded-card shadow-card p-6 space-y-4">
-            <div className="flex items-center gap-5">
-              <Skeleton className="w-[88px] h-[88px] rounded-full shrink-0" />
-              <div className="flex-1 space-y-2">
-                <Skeleton className="h-6 w-40" />
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-3 w-20" />
-              </div>
-            </div>
-            <Skeleton className="h-10 w-full rounded-xl" />
+          <div className="flex flex-col items-center pt-4 pb-6 space-y-3">
+            <Skeleton className="w-24 h-24 rounded-full" />
+            <Skeleton className="h-6 w-40" />
+            <Skeleton className="h-4 w-24" />
           </div>
           <div className="bg-white rounded-card shadow-card p-5 space-y-2">
             <Skeleton className="h-4 w-full" />
@@ -145,7 +143,7 @@ export function ProfilePage() {
         <p className="text-lg font-semibold text-neutral-900">{t('profile.notFound')}</p>
         <button
           onClick={() => navigate('/rooms')}
-          className="bg-brand-gradient hover:bg-brand-gradient-hover text-white font-semibold px-5 py-2.5 rounded-xl transition"
+          className="btn-glass-blue font-semibold px-5 py-2.5 rounded-xl"
         >
           {t('common.back')}
         </button>
@@ -157,104 +155,135 @@ export function ProfilePage() {
 
   return (
     <div className="h-full flex flex-col bg-neutral-50 overflow-hidden">
-      <PageHeader
-        title={profile.isSelf ? t('nav.profile') : profile.fullName}
-        left={profile.isSelf ? undefined : <BackButton />}
-      />
-      <div className="flex-1 overflow-y-auto">
-      <main className="px-4 md:px-6 py-6 space-y-4">
-        {/* Header card */}
-        <section className="bg-white rounded-card shadow-card p-6">
-          <div className="flex items-center gap-5">
-            <RingAvatar fullName={profile.fullName} avatarUrl={profile.avatarUrl} />
-            <div className="flex-1 min-w-0">
-              <h1 className="text-2xl font-bold text-neutral-900 truncate">{profile.fullName}</h1>
-              <p className="text-neutral-400 text-sm">@{profile.username}</p>
-              <p className="text-xs mt-2">
-                {profile.isOnline ? (
-                  <span className="text-success-700 font-medium">{t('profile.online')}</span>
-                ) : (
-                  <span className="text-neutral-400">
-                    {t('profile.wasOnline', { time: relativeTime(profile.lastSeenAt) })}
-                  </span>
-                )}
-              </p>
-            </div>
-          </div>
+      {/* Collapsing header — always visible, background fades in on scroll */}
+      <header className="shrink-0 relative z-10 h-12 flex items-center px-2 md:px-4">
+        <motion.div
+          className="absolute inset-0 glass-header shadow-[0_0.5px_0_rgba(0,0,0,0.06)] pointer-events-none"
+          style={{ opacity: headerBgOpacity }}
+        />
+        {/* Left slot */}
+        <div className="relative z-10 w-10 flex items-center">
+          {!profile.isSelf && <BackButton />}
+        </div>
+        {/* Animated title */}
+        <motion.h1
+          style={{ opacity: titleOpacity }}
+          className="relative z-10 flex-1 text-center font-display text-base font-bold text-neutral-900 truncate px-2"
+        >
+          {profile.fullName}
+        </motion.h1>
+        {/* Right slot */}
+        <div className="relative z-10 w-10 flex items-center justify-end">
+          {profile.isSelf && (
+            <button
+              onClick={() => navigate('/settings/profile')}
+              className="glass-icon w-9 h-9 flex items-center justify-center rounded-xl"
+            >
+              <Pencil size={18} />
+            </button>
+          )}
+        </div>
+      </header>
 
+      {/* Scrollable content */}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto">
+        {/* Hero — avatar scrolls naturally away, triggering header animation */}
+        <div className="flex flex-col items-center px-6 pt-8 pb-4">
+          <RingAvatar fullName={profile.fullName} avatarUrl={profile.avatarUrl} size={96} />
+          <h1 className="mt-4 font-display text-2xl font-bold text-neutral-900 text-center">
+            {profile.fullName}
+          </h1>
+          <p className="text-neutral-500 text-sm mt-1">@{profile.username}</p>
+          <p className="text-xs mt-2">
+            {profile.isOnline ? (
+              <span className="text-success-700 font-medium">{t('profile.online')}</span>
+            ) : (
+              <span className="text-neutral-400">
+                {t('profile.wasOnline', { time: relativeTime(profile.lastSeenAt) })}
+              </span>
+            )}
+          </p>
+        </div>
+
+        <main className="px-4 md:px-6 pb-6 space-y-4">
+          {/* ContactButton for other users */}
           {!profile.isSelf && (
-            <ContactButton
-              profileId={profile.id}
-              profileUsername={profile.username}
-              isContact={profile.isContact}
-              isMutual={profile.isMutual}
-              isBlockedByMe={profile.isBlockedByMe}
-            />
+            <section className="bg-white rounded-card shadow-card p-4">
+              <ContactButton
+                profileId={profile.id}
+                profileUsername={profile.username}
+                isContact={profile.isContact}
+                isMutual={profile.isMutual}
+                isBlockedByMe={profile.isBlockedByMe}
+              />
+            </section>
           )}
 
-          <ProfileStats profile={profile} />
-        </section>
+          {/* Stats */}
+          <section className="bg-white rounded-card shadow-card overflow-hidden">
+            <ProfileStats profile={profile} />
+          </section>
 
-        {profile.isSelf ? (
-          <>
-            {/* Hub menu */}
-            <section className="bg-white rounded-card shadow-card overflow-hidden divide-y divide-neutral-100">
-              <MenuRow
-                icon={<Eye size={19} />}
-                label={t('profile.menu.viewPublic')}
-                onClick={() => setShowPreview(true)}
-              />
-              <MenuRow
-                icon={<QrCode size={19} />}
-                label={t('profile.menu.qr', 'QR код профілю')}
-                onClick={() => setShowQr(true)}
-              />
-              <MenuRow
-                icon={<Pencil size={19} />}
-                label={t('profile.menu.personal')}
-                onClick={() => navigate('/settings/profile')}
-              />
-              <MenuRow
-                icon={<Users size={19} />}
-                label={t('profile.menu.contacts')}
-                onClick={() => navigate('/contacts')}
-              />
-              <MenuRow
-                icon={<Bell size={19} />}
-                label={t('profile.menu.notifications', 'Сповіщення')}
-                onClick={() => navigate('/notifications')}
-                badge={unread}
-              />
-              <MenuRow
-                icon={<Globe size={19} />}
-                label={t('profile.menu.language', 'Мова')}
-                onClick={() => navigate('/settings/language')}
-                hint={t(`language.${myProfile?.locale ?? 'uk'}`) as string}
-              />
-              <MenuRow
-                icon={<ShieldCheck size={19} />}
-                label={t('profile.menu.privacy')}
-                onClick={() => navigate('/settings/blocked')}
-              />
-            </section>
+          {profile.isSelf ? (
+            <>
+              {/* Hub menu */}
+              <section className="bg-white rounded-card shadow-card overflow-hidden divide-y divide-neutral-100">
+                <MenuRow
+                  icon={<Eye size={19} />}
+                  label={t('profile.menu.viewPublic')}
+                  onClick={() => setShowPreview(true)}
+                />
+                <MenuRow
+                  icon={<QrCode size={19} />}
+                  label={t('profile.menu.qr', 'QR код профілю')}
+                  onClick={() => setShowQr(true)}
+                />
+                <MenuRow
+                  icon={<Pencil size={19} />}
+                  label={t('profile.menu.personal')}
+                  onClick={() => navigate('/settings/profile')}
+                />
+                <MenuRow
+                  icon={<Users size={19} />}
+                  label={t('profile.menu.contacts')}
+                  onClick={() => navigate('/contacts')}
+                />
+                <MenuRow
+                  icon={<Bell size={19} />}
+                  label={t('profile.menu.notifications', 'Сповіщення')}
+                  onClick={() => navigate('/notifications')}
+                  badge={unread}
+                />
+                <MenuRow
+                  icon={<Globe size={19} />}
+                  label={t('profile.menu.language', 'Мова')}
+                  onClick={() => navigate('/settings/language')}
+                  hint={t(`language.${myProfile?.locale ?? 'uk'}`) as string}
+                />
+                <MenuRow
+                  icon={<ShieldCheck size={19} />}
+                  label={t('profile.menu.privacy')}
+                  onClick={() => navigate('/settings/blocked')}
+                />
+              </section>
 
-            {/* Logout */}
-            <section className="bg-white rounded-card shadow-card overflow-hidden">
-              <MenuRow
-                icon={<LogOut size={19} />}
-                label={t('profile.menu.logout')}
-                onClick={handleLogout}
-                danger
-              />
-            </section>
-          </>
-        ) : (
-          <PublicDetails profile={profile} age={age} />
-        )}
-      </main>
+              {/* Logout */}
+              <section className="bg-white rounded-card shadow-card overflow-hidden">
+                <MenuRow
+                  icon={<LogOut size={19} />}
+                  label={t('profile.menu.logout')}
+                  onClick={handleLogout}
+                  danger
+                />
+              </section>
+            </>
+          ) : (
+            <PublicDetails profile={profile} age={age} />
+          )}
+        </main>
       </div>
 
-      {/* Модалка публічного профілю — приховуємо поля з visibility != 'public' */}
+      {/* Public preview modal */}
       <Modal
         open={showPreview && profile.isSelf}
         onClose={() => setShowPreview(false)}
@@ -272,7 +301,7 @@ export function ProfilePage() {
           <PublicDetails profile={maskAsPublic(profile, myProfile)} age={age} />
           <button
             onClick={() => { setShowPreview(false); navigate('/settings/profile'); }}
-            className="w-full bg-brand-gradient hover:bg-brand-gradient-hover text-white font-semibold py-3 rounded-xl transition text-sm"
+            className="w-full btn-glass-blue py-3 rounded-xl text-sm"
           >
             {t('profile.menu.personal')}
           </button>
@@ -297,7 +326,7 @@ function ProfileStats({ profile }: { profile: PublicProfile }) {
   );
 
   return (
-    <div className="mt-5 pt-5 border-t border-neutral-100 grid grid-cols-3 gap-3">
+    <div className="grid grid-cols-3 gap-3 px-5 py-4">
       <div className="text-center">
         <p className="text-xl font-bold text-neutral-900">{profile.stats.sharedRooms}</p>
         <p className="text-[10px] text-neutral-400 uppercase tracking-wider mt-0.5">
@@ -539,24 +568,21 @@ function ContactButton({
     window.history.back();
   }
 
-  // Якщо ми заблокували цього юзера — показуємо тільки кнопку розблокування.
   if (isBlockedByMe) {
     return (
-      <div className="mt-5">
-        <button
-          onClick={() => unblock.mutate(profileId)}
-          disabled={unblock.isPending}
-          className="w-full flex items-center justify-center gap-2 border border-yellow-300 text-yellow-600 hover:bg-yellow-50 font-semibold py-2.5 rounded-xl text-sm transition disabled:opacity-50"
-        >
-          <LockOpen size={16} />
-          {unblock.isPending ? '…' : t('profile.unblock', 'Розблокувати')}
-        </button>
-      </div>
+      <button
+        onClick={() => unblock.mutate(profileId)}
+        disabled={unblock.isPending}
+        className="w-full flex items-center justify-center gap-2 border border-yellow-300 text-yellow-600 hover:bg-yellow-50 font-semibold py-2.5 rounded-xl text-sm transition disabled:opacity-50"
+      >
+        <LockOpen size={16} />
+        {unblock.isPending ? '…' : t('profile.unblock', 'Розблокувати')}
+      </button>
     );
   }
 
   return (
-    <div className="mt-5 space-y-2">
+    <div className="space-y-2">
       <div className="flex gap-2">
         {isContact ? (
           <>
@@ -575,12 +601,11 @@ function ContactButton({
           <button
             onClick={() => add.mutate(profileId)}
             disabled={loading}
-            className="flex-1 bg-brand-gradient hover:bg-brand-gradient-hover text-white font-semibold py-2.5 rounded-xl text-sm transition disabled:opacity-50"
+            className="flex-1 btn-glass-blue py-2.5 rounded-xl text-sm disabled:opacity-50"
           >
             {add.isPending ? t('profile.adding') : t('profile.addToContacts')}
           </button>
         )}
-        {/* DM — доступна для незаблокованих */}
         <button
           onClick={() => navigate(`/dm/${profileUsername}`)}
           title={t('profile.sendMessage', 'Написати повідомлення')}
