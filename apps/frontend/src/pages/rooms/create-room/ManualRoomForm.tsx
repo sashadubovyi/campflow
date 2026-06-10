@@ -115,7 +115,7 @@ export function ManualRoomForm({ onClose, onCreated }: Props) {
         <button
           type="submit"
           disabled={createRoom.isPending}
-          className="flex-1 bg-brand-gradient hover:bg-brand-gradient-hover disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition"
+          className="flex-1 btn-glass-blue disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition"
         >
           {createRoom.isPending ? t('common.creating') : t('common.create')}
         </button>

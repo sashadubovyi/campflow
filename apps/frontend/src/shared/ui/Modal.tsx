@@ -15,7 +15,7 @@ interface Props {
 
 const sizes = { sm: 'max-w-sm', md: 'max-w-md', lg: 'max-w-lg' } as const;
 
-const spring = { type: 'spring', stiffness: 480, damping: 36 } as const;
+const spring = { type: 'spring', stiffness: 380, damping: 28 } as const;
 
 export function Modal({
   open,
@@ -49,9 +49,9 @@ export function Modal({
           onClick={closeOnBackdrop ? onClose : undefined}
         >
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 18 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: 10 }}
+            initial={{ opacity: 0, scale: 0.92, y: 28, filter: 'blur(8px)' }}
+            animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, scale: 0.95, y: 16, filter: 'blur(6px)' }}
             transition={spring}
             className={cn(
               'w-full glass-surface rounded-card-lg shadow-card-lg my-auto',

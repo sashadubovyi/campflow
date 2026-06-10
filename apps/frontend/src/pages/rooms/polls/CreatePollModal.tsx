@@ -359,7 +359,7 @@ export function CreatePollModal({ roomId, onClose }: Props) {
                 type="button"
                 onClick={handleAiGenerate}
                 disabled={generateChecklist.isPending || aiDescription.trim().length < 5}
-                className="w-full bg-brand-gradient hover:bg-brand-gradient-hover disabled:opacity-50 text-white font-semibold py-2 rounded-lg text-sm transition"
+                className="w-full btn-glass-blue disabled:opacity-50 text-white font-semibold py-2 rounded-lg text-sm transition"
               >
                 {generateChecklist.isPending ? t('polls.ai.generating') : t('polls.ai.generate')}
               </button>
@@ -437,7 +437,7 @@ export function CreatePollModal({ roomId, onClose }: Props) {
                     <button
                       type="button"
                       onClick={confirmLocationDraft}
-                      className="bg-brand-gradient hover:bg-brand-gradient-hover text-white font-semibold px-4 rounded-lg text-sm transition"
+                      className="btn-glass-blue text-white font-semibold px-4 rounded-lg text-sm transition"
                     >
                       {t('polls.addPoint')}
                     </button>
@@ -487,7 +487,7 @@ export function CreatePollModal({ roomId, onClose }: Props) {
             <button
               type="submit"
               disabled={isLoading}
-              className="flex-1 bg-brand-gradient hover:bg-brand-gradient-hover disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition"
+              className="flex-1 btn-glass-blue disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition"
             >
               {isLoading ? t('common.creating') : t('common.create')}
             </button>

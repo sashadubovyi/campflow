@@ -12,8 +12,7 @@ interface Props extends HTMLMotionProps<'button'> {
 }
 
 const variants: Record<Variant, string> = {
-  primary:
-    'bg-brand-gradient text-white hover:bg-brand-gradient-hover active:bg-brand-gradient-hover',
+  primary: 'btn-glass-blue',
   secondary:
     'bg-transparent text-neutral-700 border border-neutral-200/70 hover:bg-gemini-active-hover hover:border-accent-200/40 hover:text-accent-700 transition-all duration-200',
   ghost:

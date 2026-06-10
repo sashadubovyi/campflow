@@ -136,7 +136,7 @@ export function MapPicker({ onPick, initialCenter = [50.4501, 30.5234], height =
           type="button"
           onClick={handleSearch}
           disabled={searching || !addressInput.trim()}
-          className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-brand-gradient hover:bg-brand-gradient-hover text-white text-sm font-semibold transition disabled:opacity-50 shrink-0"
+          className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl btn-glass-blue text-white text-sm font-semibold transition disabled:opacity-50 shrink-0"
         >
           {searching ? <Loader2 size={15} className="animate-spin" /> : <Search size={15} />}
         </button>

@@ -119,7 +119,7 @@ export function RoomPage() {
     return (
       <div className="h-full flex flex-col bg-neutral-50 overflow-hidden">
         {/* Хедер — h1 абсолютно позиціонований щоб не зсувався від кнопок */}
-        <header className="relative bg-white/65 backdrop-blur-2xl border-b border-white/40 shrink-0 px-4 h-12 flex items-center">
+        <header className="relative glass-header shadow-[0_0.5px_0_rgba(0,0,0,0.06)] shrink-0 px-4 h-12 flex items-center">
           <div className="flex items-center justify-start min-w-[2.5rem] shrink-0">
             <BackButton />
           </div>
@@ -264,7 +264,7 @@ export function RoomPage() {
   /* ---------- MOBILE ---------- */
   return (
     <div className="h-full flex flex-col bg-neutral-50 overflow-hidden">
-      <header className="relative bg-white/65 backdrop-blur-2xl border-b border-white/40 shrink-0 px-2 h-12 flex items-center gap-1">
+      <header className="relative glass-header shadow-[0_0.5px_0_rgba(0,0,0,0.06)] shrink-0 px-2 h-12 flex items-center gap-1">
         <button
           onClick={() => (mobileView !== 'chat' ? setMobileView('chat') : navigate('/rooms'))}
           className="p-2 text-neutral-500 hover:text-neutral-900 rounded-lg shrink-0"

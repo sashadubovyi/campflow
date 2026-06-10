@@ -53,7 +53,7 @@ export function DesktopNav({ onCreateRoom, onJoinRoom }: Props) {
 
   return (
     <>
-      <nav className="hidden md:flex w-[10vw] min-w-[72px] max-w-[110px] shrink-0 flex-col items-center py-4 bg-white/65 backdrop-blur-2xl border-r border-white/40">
+      <nav className="hidden md:flex w-[10vw] min-w-[72px] max-w-[110px] shrink-0 flex-col items-center py-4 glass-nav shadow-[0.5px_0_0_rgba(0,0,0,0.05)]">
         {/* ── ВГОРУ: профіль + дії ───────────────────── */}
         <div className="flex flex-col items-center gap-1">
           {user?.username && (
@@ -80,7 +80,7 @@ export function DesktopNav({ onCreateRoom, onJoinRoom }: Props) {
           <button
             onClick={onCreateRoom}
             title={t('rooms.newRoom') as string}
-            className="w-11 h-11 rounded-xl bg-brand-gradient hover:bg-brand-gradient-hover text-white flex items-center justify-center transition-colors shadow-fab"
+            className="w-11 h-11 rounded-xl btn-glass-blue text-white flex items-center justify-center transition-colors shadow-fab"
           >
             <Plus size={22} />
           </button>

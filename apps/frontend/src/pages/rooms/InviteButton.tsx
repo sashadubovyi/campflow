@@ -245,7 +245,7 @@ function InviteByUsername({ roomId, onDone }: { roomId: string; onDone: () => vo
       <button
         onClick={handleSend}
         disabled={!check?.allowed || create.isPending}
-        className="w-full bg-brand-gradient hover:bg-brand-gradient-hover disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-xl transition text-sm"
+        className="w-full btn-glass-blue disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-xl transition text-sm"
       >
         {create.isPending ? t('common.sending') : t('invites.send')}
       </button>
@@ -301,7 +301,7 @@ function InviteByLink({
 
       <button
         onClick={onClose}
-        className="w-full bg-brand-gradient hover:bg-brand-gradient-hover text-white font-semibold py-2.5 rounded-xl transition"
+        className="w-full btn-glass-blue text-white font-semibold py-2.5 rounded-xl transition"
       >
         {t('common.done')}
       </button>

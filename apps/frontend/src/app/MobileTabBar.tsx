@@ -50,7 +50,7 @@ export function MobileTabBar() {
     location.pathname === profilePath || location.pathname === `/u/${user?.username}`;
 
   return (
-    <nav className="flex md:hidden fixed bottom-0 inset-x-0 z-40 h-14 bg-white/65 backdrop-blur-2xl border-t border-white/40 pb-[env(safe-area-inset-bottom)]">
+    <nav className="flex md:hidden fixed bottom-0 inset-x-0 z-40 h-14 glass-tabbar shadow-[0_-0.5px_0_rgba(0,0,0,0.06)] pb-[env(safe-area-inset-bottom)]">
       {NAV_TABS.map(({ to, Icon, label }) => {
         const isActive = location.pathname === to || location.pathname.startsWith(to + '/');
         return (

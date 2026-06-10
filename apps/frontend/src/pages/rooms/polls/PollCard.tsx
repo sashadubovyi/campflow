@@ -373,7 +373,7 @@ function AdminActions({ poll }: { poll: PollDetails }) {
               <button
                 type="button"
                 onClick={() => setPickingWinner(true)}
-                className="flex-1 text-xs bg-brand-gradient hover:bg-brand-gradient-hover text-white font-semibold py-1.5 rounded-lg transition"
+                className="flex-1 text-xs btn-glass-blue text-white font-semibold py-1.5 rounded-lg transition"
               >
                 {t('polls.approve')}
               </button>
@@ -413,7 +413,7 @@ function AdminActions({ poll }: { poll: PollDetails }) {
                   type="button"
                   onClick={handleApprove}
                   disabled={selectedIds.size === 0 || approve.isPending}
-                  className="flex-1 text-xs bg-brand-gradient hover:bg-brand-gradient-hover disabled:opacity-50 text-white font-semibold py-1.5 rounded-lg transition"
+                  className="flex-1 text-xs btn-glass-blue disabled:opacity-50 text-white font-semibold py-1.5 rounded-lg transition"
                 >
                   {t('polls.approveAction')}
                 </button>
