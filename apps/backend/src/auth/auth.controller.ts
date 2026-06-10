@@ -38,7 +38,7 @@ export class AuthController {
   ) {
     const result = await this.authService.register(dto, this.getMeta(req));
     this.setRefreshCookie(res, result.refreshToken);
-    return { user: result.user, accessToken: result.accessToken };
+    return { user: result.user, accessToken: result.accessToken, refreshToken: result.refreshToken };
   }
 
   @Public()
@@ -51,20 +51,24 @@ export class AuthController {
   ) {
     const result = await this.authService.login(dto, this.getMeta(req));
     this.setRefreshCookie(res, result.refreshToken);
-    return { user: result.user, accessToken: result.accessToken };
+    return { user: result.user, accessToken: result.accessToken, refreshToken: result.refreshToken };
   }
 
   @Public()
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    const token = req.cookies?.[REFRESH_COOKIE];
+    // Приймаємо токен із cookie (desktop) АБО із тіла запиту (mobile Safari,
+    // де cross-site httpOnly cookies блокуються ITP).
+    const token =
+      (req.cookies?.[REFRESH_COOKIE] as string | undefined) ??
+      (req.body as Record<string, string> | undefined)?.refreshToken;
     if (!token) {
       throw new UnauthorizedException('No refresh token');
     }
     const tokens = await this.authService.refresh(token, this.getMeta(req));
     this.setRefreshCookie(res, tokens.refreshToken);
-    return { accessToken: tokens.accessToken };
+    return { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
   }
 
   @Public()
@@ -79,7 +83,7 @@ export class AuthController {
     const { userId } = await this.oauth.findOrCreateUserFromOAuth('google', claims, dto.fullName);
     const result = await this.authService.loginUserById(userId, this.getMeta(req));
     this.setRefreshCookie(res, result.refreshToken);
-    return { user: result.user, accessToken: result.accessToken };
+    return { user: result.user, accessToken: result.accessToken, refreshToken: result.refreshToken };
   }
 
   @Public()
@@ -94,7 +98,7 @@ export class AuthController {
     const { userId } = await this.oauth.findOrCreateUserFromOAuth('apple', claims, dto.fullName);
     const result = await this.authService.loginUserById(userId, this.getMeta(req));
     this.setRefreshCookie(res, result.refreshToken);
-    return { user: result.user, accessToken: result.accessToken };
+    return { user: result.user, accessToken: result.accessToken, refreshToken: result.refreshToken };
   }
 
   /** Facebook використовує не id_token, а access_token. DTO.idToken = FB access token. */
@@ -110,7 +114,7 @@ export class AuthController {
     const { userId } = await this.oauth.findOrCreateUserFromOAuth('facebook', claims, dto.fullName);
     const result = await this.authService.loginUserById(userId, this.getMeta(req));
     this.setRefreshCookie(res, result.refreshToken);
-    return { user: result.user, accessToken: result.accessToken };
+    return { user: result.user, accessToken: result.accessToken, refreshToken: result.refreshToken };
   }
 
   @Post('logout')

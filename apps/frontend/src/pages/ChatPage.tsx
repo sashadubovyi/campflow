@@ -7,57 +7,139 @@ import { Avatar } from '../shared/ui/Avatar';
 import { PageHeader } from '../shared/ui';
 import { relativeTime } from '../shared/lib/relativeTime';
 
+const SWIPE_THRESHOLD = 72; // px для автоматичного розкриття кнопки
+const DELETE_BTN_WIDTH = 72;
+
+function SwipeableChat({
+  chat,
+  onOpen,
+  onDelete,
+}: {
+  chat: { id: string; peer: { fullName: string; avatarUrl: string | null; username: string; isOnline: boolean; lastSeenAt: string }; lastMessage: { id: string; content: string; createdAt: string; isOwn: boolean } | null; lastMessageAt: string };
+  onOpen: () => void;
+  onDelete: () => void;
+}) {
+  const { t } = useTranslation();
+  const [offsetX, setOffsetX] = useState(0); // 0..DELETE_BTN_WIDTH
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+  const isHoriz = useRef<boolean | null>(null);
+
+  function onTouchStart(e: React.TouchEvent) {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    isHoriz.current = null;
+  }
+
+  function onTouchMove(e: React.TouchEvent) {
+    const dx = e.touches[0].clientX - touchStartX.current;
+    const dy = Math.abs(e.touches[0].clientY - touchStartY.current);
+
+    if (isHoriz.current === null && (Math.abs(dx) > 4 || dy > 4)) {
+      isHoriz.current = Math.abs(dx) > dy;
+    }
+
+    if (isHoriz.current && dx < 0) {
+      const raw = Math.min(-dx + offsetX, DELETE_BTN_WIDTH);
+      setOffsetX(raw);
+    } else if (isHoriz.current && dx > 0) {
+      setOffsetX(Math.max(offsetX - dx, 0));
+    }
+  }
+
+  function onTouchEnd() {
+    if (!isHoriz.current) return;
+    const snap = offsetX >= SWIPE_THRESHOLD ? DELETE_BTN_WIDTH : 0;
+    setOffsetX(snap);
+  }
+
+  function handleMainClick() {
+    if (offsetX > 0) {
+      setOffsetX(0);
+      return;
+    }
+    onOpen();
+  }
+
+  return (
+    <div className="relative overflow-hidden">
+      {/* Delete button (фіксований праворуч) */}
+      <div
+        style={{ width: DELETE_BTN_WIDTH }}
+        className="absolute right-0 top-0 bottom-0 flex items-center justify-center bg-red-500"
+      >
+        <button
+          onClick={onDelete}
+          className="w-full h-full flex flex-col items-center justify-center gap-0.5 text-white active:bg-red-600 transition"
+        >
+          <Trash2 size={18} />
+          <span className="text-[10px] font-semibold">{t('dm.deleteChat', 'Видалити')}</span>
+        </button>
+      </div>
+
+      {/* Основний вміст (ковзає ліворуч) */}
+      <div
+        style={{
+          transform: `translateX(-${offsetX}px)`,
+          transition: isHoriz.current ? 'none' : 'transform 0.2s ease',
+        }}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        onClick={handleMainClick}
+        className="bg-white cursor-pointer"
+      >
+        <div className="w-full flex items-center gap-3 p-4 hover:bg-neutral-50 transition text-left">
+          <Avatar
+            fullName={chat.peer.fullName}
+            avatarUrl={chat.peer.avatarUrl}
+            size={44}
+            isOnline={chat.peer.isOnline}
+            showStatus
+          />
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center justify-between gap-2">
+              <p className="font-medium text-neutral-900 truncate">{chat.peer.fullName}</p>
+              <span className="text-[10px] text-neutral-400 shrink-0">
+                {relativeTime(chat.lastMessageAt)}
+              </span>
+            </div>
+            <p className="text-xs text-neutral-500 truncate mt-0.5">
+              {chat.lastMessage ? (
+                <>
+                  {chat.lastMessage.isOwn && (
+                    <span className="text-neutral-400">{t('dm.you', 'Ви')}: </span>
+                  )}
+                  {chat.lastMessage.content}
+                </>
+              ) : (
+                <span className="text-neutral-400 italic">
+                  {t('dm.noMessages', 'Ще немає повідомлень')}
+                </span>
+              )}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function ChatPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: chats, isLoading } = useDmChats();
   const deleteChat = useDeleteDmChat();
 
-  const [menuChatId, setMenuChatId] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
-  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const touchStart = useRef<{ x: number; y: number } | null>(null);
-
-  function startLongPress(chatId: string, e: React.TouchEvent) {
-    const t = e.touches[0];
-    if (!t) return;
-    touchStart.current = { x: t.clientX, y: t.clientY };
-    longPressTimer.current = setTimeout(() => {
-      setMenuChatId(chatId);
-      if ('vibrate' in navigator) {
-        try { navigator.vibrate?.(15); } catch { /* ignore */ }
-      }
-    }, 550);
-  }
-
-  function moveLongPress(e: React.TouchEvent) {
-    const touch = e.touches[0];
-    if (!touch || !touchStart.current) return;
-    const dx = Math.abs(touch.clientX - touchStart.current.x);
-    const dy = Math.abs(touch.clientY - touchStart.current.y);
-    if (dx > 10 || dy > 10) cancelLongPress();
-  }
-
-  function cancelLongPress() {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
-      longPressTimer.current = null;
-    }
-  }
-
-  function closeMenu() {
-    setMenuChatId(null);
+  async function handleDelete(chatId: string) {
+    await deleteChat.mutateAsync(chatId);
     setDeleteConfirmId(null);
   }
 
-  async function handleDeleteChat(chatId: string) {
-    await deleteChat.mutateAsync(chatId);
-    closeMenu();
-  }
-
   return (
-    <div className="h-full flex flex-col bg-neutral-50 font-body" onClick={menuChatId ? closeMenu : undefined}>
+    <div className="h-full flex flex-col bg-neutral-50 font-body">
       <PageHeader
         title={<span className="font-display">{t('nav.titles.chats')}</span>}
         right={
@@ -82,9 +164,7 @@ export function ChatPage() {
         {!isLoading && (!chats || chats.length === 0) && (
           <div className="flex flex-col items-center justify-center gap-3 text-neutral-400 text-center py-16">
             <MessageCircle size={42} strokeWidth={1.5} />
-            <p className="text-sm">
-              {t('dm.emptyTitle', 'Поки немає особистих чатів')}
-            </p>
+            <p className="text-sm">{t('dm.emptyTitle', 'Поки немає особистих чатів')}</p>
             <button
               onClick={() => navigate('/contacts')}
               className="text-accent-600 text-sm font-medium hover:underline"
@@ -95,94 +175,37 @@ export function ChatPage() {
         )}
 
         {chats && chats.length > 0 && (
-          <ul className="bg-white rounded-2xl border border-neutral-100 shadow-sm divide-y divide-neutral-100 overflow-hidden">
-            {chats.map((c) => (
-              <li key={c.id} className="relative">
-                <button
-                  onClick={(e) => {
-                    if (menuChatId === c.id) { e.stopPropagation(); closeMenu(); return; }
-                    navigate(`/dm/${c.peer.username}`);
-                  }}
-                  onTouchStart={(e) => startLongPress(c.id, e)}
-                  onTouchMove={moveLongPress}
-                  onTouchEnd={cancelLongPress}
-                  onTouchCancel={cancelLongPress}
-                  className="w-full flex items-center gap-3 p-4 hover:bg-neutral-50 transition text-left"
-                >
-                  <Avatar
-                    fullName={c.peer.fullName}
-                    avatarUrl={c.peer.avatarUrl}
-                    size={44}
-                    isOnline={c.peer.isOnline}
-                    showStatus
-                  />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="font-medium text-neutral-900 truncate">
-                        {c.peer.fullName}
-                      </p>
-                      <span className="text-[10px] text-neutral-400 shrink-0">
-                        {relativeTime(c.lastMessageAt)}
-                      </span>
-                    </div>
-                    <p className="text-xs text-neutral-500 truncate mt-0.5">
-                      {c.lastMessage ? (
-                        <>
-                          {c.lastMessage.isOwn && (
-                            <span className="text-neutral-400">{t('dm.you', 'Ви')}: </span>
-                          )}
-                          {c.lastMessage.content}
-                        </>
-                      ) : (
-                        <span className="text-neutral-400 italic">
-                          {t('dm.noMessages', 'Ще немає повідомлень')}
-                        </span>
-                      )}
-                    </p>
-                  </div>
-                </button>
-
-                {/* Context menu after long-press */}
-                {menuChatId === c.id && (
-                  <div
-                    className="absolute right-3 top-1/2 -translate-y-1/2 z-30 bg-white rounded-xl shadow-card-lg border border-neutral-100 py-1 min-w-[160px]"
-                    onClick={(e) => e.stopPropagation()}
+          <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm divide-y divide-neutral-100 overflow-hidden">
+            {chats.map((c) =>
+              deleteConfirmId === c.id ? (
+                <div key={c.id} className="flex items-center gap-2 px-4 py-3 bg-red-50">
+                  <p className="flex-1 text-sm text-red-700 font-medium">
+                    {t('dm.deleteChatConfirm', 'Видалити цей чат?')}
+                  </p>
+                  <button
+                    onClick={() => handleDelete(c.id)}
+                    disabled={deleteChat.isPending}
+                    className="text-xs bg-red-500 text-white rounded-lg px-3 py-1.5 hover:bg-red-600 transition disabled:opacity-50"
                   >
-                    {deleteConfirmId !== c.id ? (
-                      <button
-                        onClick={() => setDeleteConfirmId(c.id)}
-                        className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-red-500 hover:bg-red-50 transition"
-                      >
-                        <Trash2 size={14} />
-                        {t('dm.deleteChat', 'Видалити чат')}
-                      </button>
-                    ) : (
-                      <div className="px-3 py-2">
-                        <p className="text-xs text-neutral-500 mb-2">
-                          {t('dm.deleteChatConfirm', 'Видалити весь чат?')}
-                        </p>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleDeleteChat(c.id)}
-                            disabled={deleteChat.isPending}
-                            className="flex-1 text-xs bg-red-500 text-white rounded-lg py-1.5 hover:bg-red-600 transition disabled:opacity-50"
-                          >
-                            {deleteChat.isPending ? '…' : t('common.yes', 'Так')}
-                          </button>
-                          <button
-                            onClick={closeMenu}
-                            className="flex-1 text-xs bg-neutral-100 text-neutral-600 rounded-lg py-1.5 hover:bg-neutral-200 transition"
-                          >
-                            {t('common.no', 'Ні')}
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
+                    {deleteChat.isPending ? '…' : t('common.yes', 'Так')}
+                  </button>
+                  <button
+                    onClick={() => setDeleteConfirmId(null)}
+                    className="text-xs bg-neutral-200 text-neutral-700 rounded-lg px-3 py-1.5 hover:bg-neutral-300 transition"
+                  >
+                    {t('common.no', 'Ні')}
+                  </button>
+                </div>
+              ) : (
+                <SwipeableChat
+                  key={c.id}
+                  chat={c}
+                  onOpen={() => navigate(`/dm/${c.peer.username}`)}
+                  onDelete={() => setDeleteConfirmId(c.id)}
+                />
+              ),
+            )}
+          </div>
         )}
       </main>
     </div>

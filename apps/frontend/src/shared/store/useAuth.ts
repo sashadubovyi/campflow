@@ -51,8 +51,14 @@ export function useAuth() {
       useAuthStore.getState().setToken(accessToken);
       const me = await authApi.me();
       setUser(me);
-    } catch {
-      clear();
+    } catch (err) {
+      // Очищуємо сесію тільки при явній відмові від сервера (401/403).
+      // Мережеві помилки або таймаути не повинні виганяти користувача —
+      // особливо на мобільних де cookie/мережа можуть бути тимчасово недоступні.
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      if (status === 401 || status === 403) {
+        clear();
+      }
     } finally {
       setInitialized(true);
     }
