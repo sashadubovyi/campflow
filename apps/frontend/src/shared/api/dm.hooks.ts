@@ -27,6 +27,16 @@ export function useDmMessages(chatId: string) {
   });
 }
 
+export function useDeleteDmChat() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (chatId: string) => dmApi.deleteChat(chatId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['dm', 'chats'] });
+    },
+  });
+}
+
 export function useSendDm(chatId: string) {
   const qc = useQueryClient();
   return useMutation({

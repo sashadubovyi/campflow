@@ -130,6 +130,12 @@ export class DmService {
     }));
   }
 
+  async deleteChat(userId: string, chatId: string) {
+    await this.assertMember(userId, chatId);
+    await this.prisma.directMessage.deleteMany({ where: { chatId } });
+    await this.prisma.directChat.delete({ where: { id: chatId } });
+  }
+
   async sendMessage(userId: string, chatId: string, content: string) {
     const trimmed = content.trim();
     if (!trimmed) throw new BadRequestException('Empty message');

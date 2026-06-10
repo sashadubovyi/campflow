@@ -214,10 +214,14 @@ export class UsersService {
       where: { username: username.toLowerCase() },
     });
     if (!user) throw new NotFoundException('User not found');
-    // Заблоковані не бачать один одного
+    // Якщо viewedUser заблокував viewer'а — viewer не може бачити профіль.
+    // Але якщо viewer заблокував viewedUser — viewer може переглянути профіль
+    // і розблокувати.
+    let isBlockedByMe = false;
     if (user.id !== viewerId) {
-      const blocked = await this.blocks.isBlockedEitherWay(viewerId, user.id);
-      if (blocked) throw new NotFoundException('User not found');
+      const blockedMe = await this.blocks.isBlocked(user.id, viewerId);
+      if (blockedMe) throw new NotFoundException('User not found');
+      isBlockedByMe = await this.blocks.isBlocked(viewerId, user.id);
     }
 
     // Чи viewer є в контактах user'а? (для Блоку 9 — поки завжди false)
@@ -287,6 +291,7 @@ export class UsersService {
       isSelf: user.id === viewerId,
       isContact,
       isMutual,
+      isBlockedByMe,
 
       // Статистика (Хвиля D)
       createdAt: user.createdAt,

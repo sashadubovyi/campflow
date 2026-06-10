@@ -19,6 +19,7 @@ import {
   Bell,
   Globe,
   MessageSquare,
+  LockOpen,
   type LucideIcon,
 } from 'lucide-react';
 import { ProfileQRModal } from './profile/ProfileQRModal';
@@ -31,7 +32,7 @@ import { cn, PageHeader, BackButton } from '../shared/ui';
 import { Skeleton } from '../shared/ui/Skeleton';
 import { Modal } from '../shared/ui/Modal';
 import { useAddContact, useRemoveContact } from '../shared/api/contacts.hooks';
-import { useBlockUser } from '../shared/api/blocks.hooks';
+import { useBlockUser, useUnblockUser } from '../shared/api/blocks.hooks';
 import { getMediaUrl } from '../shared/lib/getMediaUrl';
 
 function initials(name: string): string {
@@ -187,6 +188,7 @@ export function ProfilePage() {
               profileUsername={profile.username}
               isContact={profile.isContact}
               isMutual={profile.isMutual}
+              isBlockedByMe={profile.isBlockedByMe}
             />
           )}
 
@@ -513,18 +515,21 @@ function ContactButton({
   profileUsername,
   isContact,
   isMutual,
+  isBlockedByMe,
 }: {
   profileId: string;
   profileUsername: string;
   isContact: boolean;
   isMutual: boolean;
+  isBlockedByMe?: boolean;
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const add = useAddContact();
   const remove = useRemoveContact();
   const block = useBlockUser();
-  const loading = add.isPending || remove.isPending || block.isPending;
+  const unblock = useUnblockUser();
+  const loading = add.isPending || remove.isPending || block.isPending || unblock.isPending;
 
   async function handleBlock() {
     const reason = prompt(t('profile.blockReason'));
@@ -532,6 +537,22 @@ function ContactButton({
     await block.mutateAsync({ userId: profileId, reason: reason.trim() || undefined });
     alert(t('profile.blocked'));
     window.history.back();
+  }
+
+  // Якщо ми заблокували цього юзера — показуємо тільки кнопку розблокування.
+  if (isBlockedByMe) {
+    return (
+      <div className="mt-5">
+        <button
+          onClick={() => unblock.mutate(profileId)}
+          disabled={unblock.isPending}
+          className="w-full flex items-center justify-center gap-2 border border-yellow-300 text-yellow-600 hover:bg-yellow-50 font-semibold py-2.5 rounded-xl text-sm transition disabled:opacity-50"
+        >
+          <LockOpen size={16} />
+          {unblock.isPending ? '…' : t('profile.unblock', 'Розблокувати')}
+        </button>
+      </div>
+    );
   }
 
   return (
@@ -559,7 +580,7 @@ function ContactButton({
             {add.isPending ? t('profile.adding') : t('profile.addToContacts')}
           </button>
         )}
-        {/* Кнопка "Написати" — завжди доступна для чужого профілю */}
+        {/* DM — доступна для незаблокованих */}
         <button
           onClick={() => navigate(`/dm/${profileUsername}`)}
           title={t('profile.sendMessage', 'Написати повідомлення')}

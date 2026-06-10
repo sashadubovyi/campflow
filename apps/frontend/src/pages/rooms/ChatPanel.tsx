@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Send, MessageCircle, MoreHorizontal, Trash2, Star, RefreshCw, CornerUpLeft, X } from 'lucide-react';
 import { useRoomChat } from '../../shared/api/useRoomChat';
 import { useAuth } from '../../shared/store/useAuth';
 import { Avatar } from '../../shared/ui/Avatar';
 import { Skeleton } from '../../shared/ui/Skeleton';
+import { useBlockedUsers } from '../../shared/api/blocks.hooks';
 import type { Message } from '../../shared/api/chat.api';
 
 interface Props {
@@ -27,11 +28,17 @@ export function ChatPanel({ roomId, roomName: _roomName, importantOnly = false, 
   const { user } = useAuth();
   const { messages, isLoading, typingUsers, sendMessage, deleteMessage, toggleImportant, emitTyping } =
     useRoomChat(roomId);
+  const { data: blockedUsers } = useBlockedUsers();
   const [text, setText] = useState('');
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const blockedIds = useMemo(
+    () => new Set((blockedUsers ?? []).map((b) => b.user.id)),
+    [blockedUsers],
+  );
 
   function startReplyTo(m: Message) {
     setReplyingTo(m);
@@ -49,7 +56,8 @@ export function ChatPanel({ roomId, roomName: _roomName, importantOnly = false, 
     onHasImportantChange?.(hasImportant);
   }, [hasImportant, onHasImportantChange]);
 
-  const visibleMessages = importantOnly ? messages.filter((m) => m.isImportant) : messages;
+  const visibleMessages = (importantOnly ? messages.filter((m) => m.isImportant) : messages)
+    .filter((m) => m.type === 'system' || !blockedIds.has(m.authorId ?? ''));
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setText(e.target.value);

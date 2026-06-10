@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import type { User } from '../api/types';
 
 interface AuthState {
@@ -12,13 +13,21 @@ interface AuthState {
   setInitialized: (value: boolean) => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  accessToken: null,
-  isInitialized: false,
-  setAuth: (user, accessToken) => set({ user, accessToken }),
-  setUser: (user) => set({ user }),
-  setToken: (accessToken) => set({ accessToken }),
-  clear: () => set({ user: null, accessToken: null }),
-  setInitialized: (value) => set({ isInitialized: value }),
-}));
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      accessToken: null,
+      isInitialized: false,
+      setAuth: (user, accessToken) => set({ user, accessToken }),
+      setUser: (user) => set({ user }),
+      setToken: (accessToken) => set({ accessToken }),
+      clear: () => set({ user: null, accessToken: null }),
+      setInitialized: (value) => set({ isInitialized: value }),
+    }),
+    {
+      name: 'au-session',
+      partialize: (state) => ({ user: state.user }),
+    },
+  ),
+);

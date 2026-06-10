@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -44,6 +45,15 @@ export class DmController {
     @Param('chatId', new ParseUUIDPipe()) chatId: string,
   ) {
     return this.dm.getMessages(user.id, chatId);
+  }
+
+  @Delete(':chatId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  deleteChat(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('chatId', new ParseUUIDPipe()) chatId: string,
+  ) {
+    return this.dm.deleteChat(user.id, chatId);
   }
 
   @Post(':chatId/messages')

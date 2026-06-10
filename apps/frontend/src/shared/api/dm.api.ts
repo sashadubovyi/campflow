@@ -55,4 +55,7 @@ export const dmApi = {
     const { data } = await api.post<DmMessage>(`/dm/${chatId}/messages`, { content });
     return data;
   },
+  async deleteChat(chatId: string): Promise<void> {
+    await api.delete(`/dm/${chatId}`);
+  },
 };
