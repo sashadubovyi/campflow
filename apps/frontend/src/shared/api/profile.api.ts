@@ -88,7 +88,7 @@ export interface MyProfile {
 }
 
 export type UpdateProfilePayload = Partial<
-  Omit<MyProfile, 'id' | 'username' | 'email' | 'avatarUrl' | 'createdAt'>
+  Omit<MyProfile, 'id' | 'email' | 'avatarUrl' | 'createdAt'>
 >;
 
 export const profileApi = {
@@ -131,6 +131,13 @@ export const profileApi = {
     form.append('cover', file);
     const { data } = await api.post<{ coverUrl: string }>('/users/me/cover', form, {
       headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return data;
+  },
+
+  async checkUsername(username: string): Promise<{ available: boolean }> {
+    const { data } = await api.get<{ available: boolean }>('/users/check-username', {
+      params: { username },
     });
     return data;
   },

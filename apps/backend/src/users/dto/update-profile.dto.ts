@@ -4,6 +4,7 @@ import {
   IsEnum,
   IsOptional,
   IsString,
+  Matches,
   MaxLength,
   MinLength,
 } from 'class-validator';
@@ -13,6 +14,10 @@ const GENDER = ['male', 'female', 'unspecified'] as const;
 const INVITE_POLICY = ['all', 'contacts', 'none'] as const;
 
 export class UpdateProfileDto {
+  @IsOptional() @IsString() @MinLength(3) @MaxLength(20)
+  @Matches(/^[a-z0-9_]+$/, { message: 'Username must be lowercase letters, digits or underscores' })
+  username?: string;
+
   @IsOptional() @IsString() @MinLength(2) @MaxLength(120) fullName?: string;
   @IsOptional() @IsString() @MaxLength(32) phone?: string | null;
   @IsOptional() @IsEnum(['uk', 'en', 'ru']) locale?: 'uk' | 'en' | 'ru';
