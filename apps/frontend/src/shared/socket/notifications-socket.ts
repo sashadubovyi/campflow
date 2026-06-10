@@ -6,16 +6,15 @@ let socket: Socket | null = null;
 export function getNotificationsSocket(): Socket {
   if (socket) return socket;
 
-  const token = useAuthStore.getState().accessToken;
   const baseUrl = import.meta.env.VITE_API_URL || '';
   const cleanUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
 
-  // Передаем полный URL бэкенда + неймспейс (/notifications)
   socket = io(`${cleanUrl}/notifications`, {
     path: '/socket.io',
-    auth: { token },
+    // auth callback is called fresh on every (re)connect attempt
+    auth: (cb) => cb({ token: useAuthStore.getState().accessToken }),
     transports: ['websocket'],
-    autoConnect: true,
+    autoConnect: false, // connect manually once we have a token
   });
 
   return socket;

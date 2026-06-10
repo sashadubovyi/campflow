@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { notificationsApi, type NotificationItem } from './notifications.api';
 import { getNotificationsSocket } from '../socket/notifications-socket';
+import { useAuthStore } from '../store/auth.store';
 
 export function useNotifications() {
   return useQuery({
@@ -25,12 +26,20 @@ export function useUnreadCount() {
  */
 export function useNotificationsSubscription() {
   const qc = useQueryClient();
+  const accessToken = useAuthStore((s) => s.accessToken);
 
   useEffect(() => {
     const socket = getNotificationsSocket();
 
+    if (accessToken) {
+      // auth callback will supply the fresh token on connect/reconnect
+      if (!socket.connected) socket.connect();
+    } else {
+      socket.disconnect();
+      return;
+    }
+
     function onNew(notification: NotificationItem) {
-      // Оновлюємо лічильник і список
       qc.setQueryData<number>(['notifications', 'unread-count'], (prev = 0) => prev + 1);
       qc.setQueryData<NotificationItem[]>(['notifications'], (prev = []) => [
         notification,
@@ -44,7 +53,7 @@ export function useNotificationsSubscription() {
     return () => {
       socket.off('notification:new', onNew);
     };
-  }, [qc]);
+  }, [qc, accessToken]);
 }
 
 export function useMarkRead() {
