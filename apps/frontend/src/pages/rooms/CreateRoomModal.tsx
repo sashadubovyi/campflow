@@ -44,7 +44,7 @@ export function CreateRoomModal({ onClose, onCreated }: Props) {
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 font-body max-h-[90vh] overflow-y-auto scrollbar-hide modal-animate"
+        className="glass-surface rounded-2xl shadow-2xl w-full max-w-md p-6 font-body max-h-[90vh] overflow-y-auto scrollbar-hide modal-animate"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="font-display text-xl font-bold text-neutral-900 mb-4">
@@ -52,7 +52,7 @@ export function CreateRoomModal({ onClose, onCreated }: Props) {
         </h2>
 
         {/* Перемикач режиму */}
-        <div className="flex gap-2 mb-5 bg-neutral-100 p-1 rounded-xl">
+        <div className="flex gap-2 mb-5 bg-neutral-100/60 backdrop-blur-sm p-1 rounded-xl">
           <button
             type="button"
             onClick={() => switchMode('manual')}

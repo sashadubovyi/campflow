@@ -48,7 +48,7 @@ export function AiRoomInput({ onClose, onDraft }: Props) {
         <button
           type="button"
           onClick={onClose}
-          className="flex-1 border border-neutral-100 text-neutral-700 font-semibold py-2.5 rounded-xl hover:bg-neutral-50 transition"
+          className="flex-1 glass-btn py-2.5"
         >
           {t('common.cancel')}
         </button>

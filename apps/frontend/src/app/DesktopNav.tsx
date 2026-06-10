@@ -53,7 +53,7 @@ export function DesktopNav({ onCreateRoom, onJoinRoom }: Props) {
 
   return (
     <>
-      <nav className="hidden md:flex w-[10vw] min-w-[72px] max-w-[110px] shrink-0 flex-col items-center py-4 bg-white/75 backdrop-blur-xl border-r border-neutral-100/50">
+      <nav className="hidden md:flex w-[10vw] min-w-[72px] max-w-[110px] shrink-0 flex-col items-center py-4 bg-white/65 backdrop-blur-2xl border-r border-white/40">
         {/* ── ВГОРУ: профіль + дії ───────────────────── */}
         <div className="flex flex-col items-center gap-1">
           {user?.username && (

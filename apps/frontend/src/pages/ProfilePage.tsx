@@ -113,7 +113,7 @@ export function ProfilePage() {
   if (!username || isLoading) {
     return (
       <div className="h-full flex flex-col bg-neutral-50 overflow-hidden">
-        <div className="bg-white border-b border-neutral-100 shrink-0 h-12" />
+        <div className="bg-white/65 backdrop-blur-2xl border-b border-white/40 shrink-0 h-12" />
         <div className="flex-1 overflow-y-auto px-4 md:px-6 py-6 space-y-4">
           <div className="bg-white rounded-card shadow-card p-6 space-y-4">
             <div className="flex items-center gap-5">

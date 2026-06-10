@@ -427,7 +427,7 @@ function MessageBubble({
         <button
           ref={triggerRef}
           onClick={handleToggleMenu}
-          className="w-7 h-7 flex items-center justify-center rounded-lg text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 transition-colors"
+          className="w-7 h-7 flex items-center justify-center rounded-lg text-neutral-400 glass-icon transition-colors"
           aria-label="Message options"
         >
           <MoreHorizontal size={15} />

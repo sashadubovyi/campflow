@@ -44,8 +44,8 @@ export function InviteButton({ roomId, inviteCode, iconOnly = false }: Props) {
         aria-label={t('rooms.invite')}
         className={
           iconOnly
-            ? 'w-full flex items-center justify-center py-2 rounded-xl bg-accent-50 text-accent-500 hover:bg-accent-100 transition'
-            : 'w-full flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl transition bg-accent-50 text-accent-500 shadow-card hover:bg-accent-100 hover:shadow-card-lg text-sm font-semibold'
+            ? 'w-full flex items-center justify-center py-2 rounded-xl bg-gemini-active border border-accent-200/40 text-accent-600 hover:bg-gemini-active-hover transition-all duration-200'
+            : 'w-full flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-gemini-active border border-accent-200/40 text-accent-600 hover:bg-gemini-active-hover transition-all duration-200 shadow-card text-sm font-semibold'
         }
       >
         <Ampersand size={16} />
@@ -58,7 +58,7 @@ export function InviteButton({ roomId, inviteCode, iconOnly = false }: Props) {
           onClick={handleClose}
         >
           <div
-            className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 font-body"
+            className="glass-surface rounded-2xl shadow-2xl w-full max-w-md p-6 font-body"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="font-display text-xl font-bold text-neutral-900 mb-1">
@@ -278,7 +278,7 @@ function InviteByLink({
         </div>
         <button
           onClick={() => onCopy(inviteCode, 'code')}
-          className="px-4 rounded-xl border border-neutral-100 text-neutral-700 font-semibold hover:bg-neutral-50 transition text-sm"
+          className="px-4 rounded-xl glass-btn text-sm"
         >
           {copied === 'code' ? t('common.copied') : t('common.copy')}
         </button>
@@ -293,7 +293,7 @@ function InviteByLink({
         </div>
         <button
           onClick={() => onCopy(inviteLink, 'link')}
-          className="px-4 rounded-xl border border-neutral-100 text-neutral-700 font-semibold hover:bg-neutral-50 transition text-sm"
+          className="px-4 rounded-xl glass-btn text-sm"
         >
           {copied === 'link' ? t('common.copied') : t('common.copy')}
         </button>

@@ -27,7 +27,7 @@ export function CloseRoomModal({ roomId, roomName, onClose, onClosed }: Props) {
       onClick={closeRoom.isPending ? undefined : onClose}
     >
       <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 font-body"
+        className="glass-surface rounded-2xl shadow-2xl w-full max-w-md p-6 font-body"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="font-display text-xl font-bold text-neutral-900 mb-2">
@@ -55,7 +55,7 @@ export function CloseRoomModal({ roomId, roomName, onClose, onClosed }: Props) {
             type="button"
             onClick={onClose}
             disabled={closeRoom.isPending}
-            className="flex-1 border border-neutral-100 text-neutral-700 font-semibold py-2.5 rounded-xl hover:bg-neutral-50 disabled:opacity-60 transition"
+            className="flex-1 glass-btn py-2.5 disabled:opacity-60"
           >
             {t('common.cancel')}
           </button>

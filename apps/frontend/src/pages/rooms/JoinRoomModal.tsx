@@ -31,7 +31,7 @@ export function JoinRoomModal({ onClose, onJoined }: Props) {
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 font-body"
+        className="glass-surface rounded-2xl shadow-2xl w-full max-w-md p-6 font-body"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="font-display text-xl font-bold text-neutral-900 mb-4">
@@ -66,7 +66,7 @@ export function JoinRoomModal({ onClose, onJoined }: Props) {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 border border-neutral-100 text-neutral-700 font-semibold py-2.5 rounded-xl hover:bg-neutral-50 transition"
+              className="flex-1 glass-btn py-2.5"
             >
               {t('common.cancel')}
             </button>

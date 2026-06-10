@@ -14,9 +14,11 @@ interface Props extends HTMLMotionProps<'button'> {
 const variants: Record<Variant, string> = {
   primary:
     'bg-brand-gradient text-white hover:bg-brand-gradient-hover active:bg-brand-gradient-hover',
-  secondary: 'bg-white text-neutral-700 border border-neutral-200 hover:bg-neutral-50',
-  ghost: 'bg-transparent text-neutral-600 hover:bg-neutral-100',
-  danger: 'bg-danger-500 text-white hover:bg-danger-700',
+  secondary:
+    'bg-transparent text-neutral-700 border border-neutral-200/70 hover:bg-gemini-active-hover hover:border-accent-200/40 hover:text-accent-700 transition-all duration-200',
+  ghost:
+    'bg-transparent text-neutral-600 border border-transparent hover:bg-gemini-active-hover hover:border-accent-200/30 hover:text-accent-600 transition-all duration-200',
+  danger: 'bg-danger-gradient text-white hover:bg-danger-gradient-hover',
 };
 
 const sizes: Record<Size, string> = {

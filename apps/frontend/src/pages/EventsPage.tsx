@@ -333,7 +333,7 @@ export function EventsPage() {
       </button>
       <button
         onClick={() => setShowJoin(true)}
-        className="w-8 h-8 flex items-center justify-center rounded-xl text-neutral-400 hover:bg-neutral-100 transition"
+        className="w-8 h-8 flex items-center justify-center rounded-xl glass-icon"
         title={t('rooms.joinByCode')}
       >
         <KeyRound size={16} />
