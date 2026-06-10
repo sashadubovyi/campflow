@@ -1,16 +1,17 @@
-import type { ReactNode, ButtonHTMLAttributes } from 'react';
+import { motion, type HTMLMotionProps } from 'framer-motion';
 import { cn } from './cn';
 
-interface GradientButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  children: ReactNode;
+interface GradientButtonProps extends HTMLMotionProps<'button'> {
   loading?: boolean;
 }
 
 export function GradientButton({ children, loading, className, disabled, ...props }: GradientButtonProps) {
   return (
-    <button
+    <motion.button
       {...props}
       disabled={disabled || loading}
+      whileTap={disabled || loading ? undefined : { scale: 0.97 }}
+      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
       className={cn(
         'relative inline-flex items-center justify-center gap-2',
         'px-5 py-2.5 rounded-xl font-semibold text-sm',
@@ -39,6 +40,6 @@ export function GradientButton({ children, loading, className, disabled, ...prop
           <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" style={{ WebkitTextFillColor: 'initial' }} />
         ) : children}
       </span>
-    </button>
+    </motion.button>
   );
 }

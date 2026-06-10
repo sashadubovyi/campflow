@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { Users, Calendar } from 'lucide-react';
+import { Users } from 'lucide-react';
+import { motion } from 'framer-motion';
 import type { RoomListItem } from '../../shared/api/rooms.api';
 import { Avatar } from '../../shared/ui';
 import { getMediaUrl } from '../../shared/lib/getMediaUrl';
@@ -15,9 +16,12 @@ export function RoomCard({ room, onOpen, compact = false }: RoomCardProps) {
   const { i18n } = useTranslation();
 
   return (
-    <button
+    <motion.button
       onClick={() => onOpen(room.id)}
-      className="text-left w-full bg-white rounded-card shadow-card hover:shadow-card-lg transition-all duration-200 overflow-hidden group"
+      whileHover={{ y: -3, boxShadow: '0 8px 32px rgba(16,21,33,0.10), 0 16px 48px rgba(16,21,33,0.07)' }}
+      whileTap={{ scale: 0.985 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+      className="text-left w-full bg-white rounded-card shadow-card overflow-hidden group"
     >
       {/* Рядок адміна */}
       <div className={`flex items-center gap-2.5 px-3 pt-3 pb-2 ${room.status === 'closed' ? 'bg-rose-100' : ''}`}>
@@ -47,13 +51,9 @@ export function RoomCard({ room, onOpen, compact = false }: RoomCardProps) {
         <img
           src={room.coverUrl ? getMediaUrl(room.coverUrl) : '/room-cover-placeholder.jpeg'}
           alt={room.name}
-          className={`w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300 ${room.status === 'closed' ? 'grayscale' : ''}`}
+          className={`w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500 ease-out ${room.status === 'closed' ? 'grayscale' : ''}`}
         />
-
-        {/* Темний градієнт знизу */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-
-        {/* Мета: дата + учасники */}
         <div className="absolute bottom-0 left-0 right-0 px-3 pb-2 pt-6 flex items-end justify-between">
           <span className="text-white/70 text-xs">
             {relativeTime(room.createdAt)}
@@ -64,6 +64,6 @@ export function RoomCard({ room, onOpen, compact = false }: RoomCardProps) {
           </span>
         </div>
       </div>
-    </button>
+    </motion.button>
   );
 }
