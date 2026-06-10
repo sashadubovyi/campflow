@@ -47,6 +47,7 @@ export interface PublicProfile {
   isSelf: boolean;
   isContact: boolean;
   isMutual: boolean;
+  isBlockedByMe?: boolean;
   createdAt: string;
   stats: {
     sharedRooms: number;

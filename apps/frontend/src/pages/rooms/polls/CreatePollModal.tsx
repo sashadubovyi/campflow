@@ -211,11 +211,11 @@ export function CreatePollModal({ roomId, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 bg-neutral-900/40 flex items-center justify-center px-4 z-[200] backdrop-animate"
+      className="fixed inset-0 bg-neutral-900/40 flex items-start justify-center overflow-y-auto px-4 py-6 z-[200] backdrop-animate"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 font-body max-h-[90vh] overflow-y-auto scrollbar-hide modal-animate"
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 font-body my-auto modal-animate"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="font-display text-xl font-bold text-neutral-900 mb-4">

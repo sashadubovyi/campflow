@@ -339,13 +339,9 @@ export function RoomPage() {
                 <X size={16} />
               </button>
             </div>
-            <div className="grid grid-cols-3 gap-1 bg-neutral-100 mx-2 mb-2 p-1 rounded-xl">
-              <InviteButton
-                roomId={room.id}
-                inviteCode={room.inviteCode}
-                iconOnly
-              />
-              {isAdmin && !isClosed && (
+            {isAdmin && !isClosed ? (
+              <div className="grid grid-cols-3 gap-1 bg-neutral-100 mx-2 mb-2 p-1 rounded-xl">
+                <InviteButton roomId={room.id} inviteCode={room.inviteCode} iconOnly />
                 <button
                   onClick={() => { setMobileView('chat'); setShowEditModal(true); }}
                   className="flex items-center justify-center py-2 rounded-xl text-neutral-500 hover:bg-white transition"
@@ -354,8 +350,6 @@ export function RoomPage() {
                 >
                   <Pencil size={16} />
                 </button>
-              )}
-              {isAdmin && !isClosed && (
                 <button
                   onClick={() => { setInfoOpen(false); setShowCloseModal(true); }}
                   title={t('polls.ai.closeRoom')}
@@ -364,8 +358,12 @@ export function RoomPage() {
                 >
                   <X size={16} />
                 </button>
-              )}
-            </div>
+              </div>
+            ) : (
+              <div className="flex mx-2 mb-2">
+                <InviteButton roomId={room.id} inviteCode={room.inviteCode} />
+              </div>
+            )}
             {isAdmin && isClosed && (
               <div className="px-2 pb-2">
                 {!showDeleteConfirm ? (

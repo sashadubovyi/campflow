@@ -4,7 +4,6 @@ import { RouterProvider } from 'react-router-dom';
 import { router } from './app/router';
 import { useAuth } from './shared/store/useAuth';
 import { useNotificationsSubscription } from './shared/api/notifications.hooks';
-import { BrandLoader } from './shared/ui/BrandLoader';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -16,7 +15,7 @@ const queryClient = new QueryClient({
 });
 
 function AppContent() {
-  const { bootstrap, isInitialized } = useAuth();
+  const { bootstrap } = useAuth();
 
   useNotificationsSubscription();
 
@@ -24,10 +23,6 @@ function AppContent() {
     bootstrap();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  if (!isInitialized) {
-    return <BrandLoader fullscreen />;
-  }
 
   return <RouterProvider router={router} />;
 }

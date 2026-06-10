@@ -6,16 +6,17 @@ import { BrandLoader } from '../shared/ui/BrandLoader';
 export function ProtectedRoute({ children }: { children: ReactNode }) {
   const { isAuthenticated, isInitialized } = useAuth();
 
-  // Чекаємо завершення bootstrap (відновлення сесії через cookie).
-  // App.tsx показує BrandLoader поки isInitialized=false, але ця перевірка
-  // гарантує коректну поведінку якщо ProtectedRoute рендериться окремо.
-  if (!isInitialized) {
+  // Поки bootstrap ще не завершився і немає збереженого юзера (localStorage пустий)
+  // — показуємо сплеш-екран, щоб не флікати на /login передчасно.
+  if (!isInitialized && !isAuthenticated) {
     return <BrandLoader fullscreen />;
   }
 
-  if (!isAuthenticated) {
+  // Bootstrap завершився і юзер не авторизований — редиректимо.
+  if (isInitialized && !isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
+  // Юзер є в localStorage (optimistic) або вже пройшов bootstrap успішно.
   return <>{children}</>;
 }
