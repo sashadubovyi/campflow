@@ -419,6 +419,23 @@
     "next": "Далі",
     "finish": "Розпочати",
     "step": "{{current}} з {{total}}",
+    "identity": {
+      "title": "Тут все правильно?",
+      "subtitle": "Перевір та відредагуй свій профіль",
+      "firstName": "Ім'я",
+      "lastName": "Прізвище",
+      "username": "Username",
+      "usernamePlaceholder": "ivan_petrenko",
+      "usernameTaken": "Username вже зайнятий",
+      "usernameAvailable": "Username вільний",
+      "usernameInvalid": "3–20 символів: літери, цифри та _"
+    },
+    "avatar": {
+      "title": "Фото профілю",
+      "subtitle": "Необов'язково — можна додати пізніше",
+      "upload": "Завантажити фото",
+      "change": "Змінити фото"
+    },
     "city": {
       "title": "В якому місті ти живеш?",
       "placeholder": "Наприклад, Київ"

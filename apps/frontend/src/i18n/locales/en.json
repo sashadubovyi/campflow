@@ -419,6 +419,23 @@
     "next": "Next",
     "finish": "Get started",
     "step": "{{current}} of {{total}}",
+    "identity": {
+      "title": "Does this look right?",
+      "subtitle": "Review and edit your profile",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "username": "Username",
+      "usernamePlaceholder": "ivan_petrenko",
+      "usernameTaken": "Username is already taken",
+      "usernameAvailable": "Username is available",
+      "usernameInvalid": "3–20 characters: letters, digits and _"
+    },
+    "avatar": {
+      "title": "Profile photo",
+      "subtitle": "Optional — you can add it later",
+      "upload": "Upload photo",
+      "change": "Change photo"
+    },
     "city": {
       "title": "What city do you live in?",
       "placeholder": "e.g. Kyiv"

@@ -52,35 +52,51 @@ export class UsersService {
     };
   }
 
-  async updateProfile(userId: string, dto: UpdateProfileDto) {
-    const user = await this.prisma.user.update({
-      where: { id: userId },
-      data: {
-        fullName: dto.fullName,
-        phone: dto.phone,
-        locale: dto.locale,
-        bio: dto.bio,
-        city: dto.city,
-        birthDate: dto.birthDate ? new Date(dto.birthDate) : dto.birthDate,
-        gender: dto.gender,
-        hobbies: dto.hobbies,
-        hobbiesCustom: dto.hobbiesCustom,
-        telegram: dto.telegram,
-        whatsapp: dto.whatsapp,
-        instagram: dto.instagram,
-        facebook: dto.facebook,
-        threads: dto.threads,
-        emailVisibility: dto.emailVisibility,
-        phoneVisibility: dto.phoneVisibility,
-        telegramVisibility: dto.telegramVisibility,
-        whatsappVisibility: dto.whatsappVisibility,
-        instagramVisibility: dto.instagramVisibility,
-        facebookVisibility: dto.facebookVisibility,
-        threadsVisibility: dto.threadsVisibility,
-        inviteFrom: dto.inviteFrom,
-      },
+  async checkUsername(username: string, currentUserId: string): Promise<{ available: boolean }> {
+    const found = await this.prisma.user.findUnique({
+      where: { username: username.toLowerCase() },
+      select: { id: true },
     });
-    return this.getProfile(user.id);
+    return { available: !found || found.id === currentUserId };
+  }
+
+  async updateProfile(userId: string, dto: UpdateProfileDto) {
+    try {
+      const user = await this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          username: dto.username ? dto.username.toLowerCase() : undefined,
+          fullName: dto.fullName,
+          phone: dto.phone,
+          locale: dto.locale,
+          bio: dto.bio,
+          city: dto.city,
+          birthDate: dto.birthDate ? new Date(dto.birthDate) : dto.birthDate,
+          gender: dto.gender,
+          hobbies: dto.hobbies,
+          hobbiesCustom: dto.hobbiesCustom,
+          telegram: dto.telegram,
+          whatsapp: dto.whatsapp,
+          instagram: dto.instagram,
+          facebook: dto.facebook,
+          threads: dto.threads,
+          emailVisibility: dto.emailVisibility,
+          phoneVisibility: dto.phoneVisibility,
+          telegramVisibility: dto.telegramVisibility,
+          whatsappVisibility: dto.whatsappVisibility,
+          instagramVisibility: dto.instagramVisibility,
+          facebookVisibility: dto.facebookVisibility,
+          threadsVisibility: dto.threadsVisibility,
+          inviteFrom: dto.inviteFrom,
+        },
+      });
+      return this.getProfile(user.id);
+    } catch (err: unknown) {
+      if ((err as { code?: string })?.code === 'P2002') {
+        throw new BadRequestException('Username already taken');
+      }
+      throw err;
+    }
   }
 
   async updateAvatar(userId: string, avatarUrl: string) {

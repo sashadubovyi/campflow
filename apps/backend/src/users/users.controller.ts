@@ -94,6 +94,11 @@ export class UsersController {
     return this.usersService.searchUsers(q ?? '', by, viewer.id);
   }
 
+  @Get('check-username')
+  checkUsername(@Query('username') username: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.usersService.checkUsername(username ?? '', user.id);
+  }
+
   @Get(':username')
   getPublicProfile(@Param('username') username: string, @CurrentUser() viewer: AuthenticatedUser) {
     return this.usersService.getPublicProfile(username, viewer.id);

@@ -419,6 +419,23 @@
     "next": "Далее",
     "finish": "Начать",
     "step": "{{current}} из {{total}}",
+    "identity": {
+      "title": "Всё верно?",
+      "subtitle": "Проверь и отредактируй свой профиль",
+      "firstName": "Имя",
+      "lastName": "Фамилия",
+      "username": "Username",
+      "usernamePlaceholder": "ivan_petrenko",
+      "usernameTaken": "Username уже занят",
+      "usernameAvailable": "Username свободен",
+      "usernameInvalid": "3–20 символов: буквы, цифры и _"
+    },
+    "avatar": {
+      "title": "Фото профиля",
+      "subtitle": "Необязательно — можно добавить позже",
+      "upload": "Загрузить фото",
+      "change": "Изменить фото"
+    },
     "city": {
       "title": "В каком городе ты живёшь?",
       "placeholder": "Например, Киев"
