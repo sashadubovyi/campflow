@@ -23,14 +23,14 @@ export function GradientButton({ children, loading, className, disabled, ...prop
         className,
       )}
       style={{
-        background: 'linear-gradient(rgba(255,255,255,0.7), rgba(255,255,255,0.7)) padding-box, linear-gradient(135deg, #2dd4bf, #818cf8, #c084fc) border-box',
+        background: 'linear-gradient(rgba(255,255,255,0.70), rgba(255,255,255,0.70)) padding-box, linear-gradient(135deg, #818cf8, #c084fc, #f472b6, #818cf8) border-box',
         borderColor: 'transparent',
         ...props.style,
       }}
     >
       <span
         style={{
-          background: 'linear-gradient(135deg, #2dd4bf, #818cf8, #c084fc)',
+          background: 'linear-gradient(135deg, #6366f1, #a855f7, #ec4899)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           backgroundClip: 'text',

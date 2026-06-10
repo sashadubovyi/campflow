@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Sparkles } from 'lucide-react';
+import { Bot } from 'lucide-react';
 import { useAiRoomDraft } from '../../../shared/api/ai-rooms.hooks';
 import type { RoomDraft } from '../../../shared/api/ai-rooms.api';
-import { GradientButton } from '../../../shared/ui/GradientButton';
+import { GlassButton } from '../../../shared/ui/GlassButton';
 
 interface Props {
   onClose: () => void;
@@ -53,15 +53,16 @@ export function AiRoomInput({ onClose, onDraft }: Props) {
           {t('common.cancel')}
         </button>
         <div className="flex-1">
-          <GradientButton
+          <GlassButton
+            variant="ai"
             onClick={handleGenerate}
             loading={aiDraft.isPending}
             disabled={prompt.trim().length < 10}
             className="w-full py-2.5"
           >
-            <Sparkles size={16} />
+            <Bot size={16} />
             {aiDraft.isPending ? t('rooms.aiGenerating') : t('rooms.aiGenerate')}
-          </GradientButton>
+          </GlassButton>
         </div>
       </div>
     </div>

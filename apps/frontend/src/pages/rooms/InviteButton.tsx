@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { invitesApi, type CanInviteResult } from '../../shared/api/invites.api';
 import { useCreateInvite } from '../../shared/api/invites.hooks';
@@ -52,13 +53,13 @@ export function InviteButton({ roomId, inviteCode, iconOnly = false }: Props) {
         {!iconOnly && <span className="text-xs font-semibold">{t('rooms.invite')}</span>}
       </button>
 
-      {open && (
+      {open && createPortal(
         <div
-          className="fixed inset-0 bg-neutral-900/40 flex items-center justify-center px-4 z-50"
+          className="fixed inset-0 bg-neutral-900/40 backdrop-blur-sm flex items-center justify-center px-4 z-[200]"
           onClick={handleClose}
         >
           <div
-            className="glass-surface rounded-2xl shadow-2xl w-full max-w-md p-6 font-body"
+            className="glass-surface rounded-card-lg shadow-glass-panel w-full max-w-md p-6 font-body"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="font-display text-xl font-bold text-neutral-900 mb-1">
@@ -66,12 +67,12 @@ export function InviteButton({ roomId, inviteCode, iconOnly = false }: Props) {
             </h2>
             <p className="text-sm text-neutral-700 mb-4">{t('invites.shareHint')}</p>
 
-            <div className="flex gap-1 mb-5 bg-neutral-50 p-1 rounded-xl">
+            <div className="flex gap-1 mb-5 bg-white/35 border border-white/50 backdrop-blur-md p-1 rounded-2xl">
               <button
                 onClick={() => setTab('username')}
-                className={`flex-1 flex items-center justify-center gap-1.5 text-sm font-semibold py-2 rounded-lg transition ${
+                className={`flex-1 flex items-center justify-center gap-1.5 text-sm font-semibold py-2 rounded-xl transition ${
                   tab === 'username'
-                    ? 'bg-white text-neutral-900 shadow-sm'
+                    ? 'bg-white/85 border border-white/90 text-neutral-900 shadow-sm'
                     : 'text-neutral-700 hover:text-neutral-900'
                 }`}
               >
@@ -80,9 +81,9 @@ export function InviteButton({ roomId, inviteCode, iconOnly = false }: Props) {
               </button>
               <button
                 onClick={() => setTab('link')}
-                className={`flex-1 flex items-center justify-center gap-1.5 text-sm font-semibold py-2 rounded-lg transition ${
+                className={`flex-1 flex items-center justify-center gap-1.5 text-sm font-semibold py-2 rounded-xl transition ${
                   tab === 'link'
-                    ? 'bg-white text-neutral-900 shadow-sm'
+                    ? 'bg-white/85 border border-white/90 text-neutral-900 shadow-sm'
                     : 'text-neutral-700 hover:text-neutral-900'
                 }`}
               >
@@ -103,7 +104,8 @@ export function InviteButton({ roomId, inviteCode, iconOnly = false }: Props) {
               />
             )}
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );

@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next';
-import { Sparkles } from 'lucide-react';
+import { Bot, Calendar } from 'lucide-react';
 import type { RoomDraft } from '../../../shared/api/ai-rooms.api';
 import { useAiRoomCommit } from '../../../shared/api/ai-rooms.hooks';
-import { GradientButton } from '../../../shared/ui/GradientButton';
+import { GlassButton } from '../../../shared/ui/GlassButton';
 import { PollPreviewCard } from './PollPreviewCard';
 
 interface Props {
@@ -30,7 +30,7 @@ export function AiRoomPreview({ draft, onBack, onCreated }: Props) {
           <p className="text-sm text-neutral-500 mt-1">{draft.room.description}</p>
         )}
         {draft.room.eventDate && (
-          <p className="text-xs text-accent-600 mt-1.5 font-medium">📅 {draft.room.eventDate}</p>
+          <p className="text-xs text-accent-600 mt-1.5 font-medium flex items-center gap-1"><Calendar size={11} />{draft.room.eventDate}</p>
         )}
       </div>
 
@@ -65,14 +65,15 @@ export function AiRoomPreview({ draft, onBack, onCreated }: Props) {
           {t('common.back')}
         </button>
         <div className="flex-1">
-          <GradientButton
+          <GlassButton
+            variant="ai"
             onClick={handleCommit}
             loading={commit.isPending}
             className="w-full py-2.5"
           >
-            <Sparkles size={16} />
+            <Bot size={16} />
             {t('rooms.aiCreate')}
-          </GradientButton>
+          </GlassButton>
         </div>
       </div>
     </div>
