@@ -26,14 +26,18 @@ function SwipeableChat({
   const isHoriz = useRef<boolean | null>(null);
 
   function onTouchStart(e: React.TouchEvent) {
-    touchStartX.current = e.touches[0].clientX;
-    touchStartY.current = e.touches[0].clientY;
+    const t = e.touches[0];
+    if (!t) return;
+    touchStartX.current = t.clientX;
+    touchStartY.current = t.clientY;
     isHoriz.current = null;
   }
 
   function onTouchMove(e: React.TouchEvent) {
-    const dx = e.touches[0].clientX - touchStartX.current;
-    const dy = Math.abs(e.touches[0].clientY - touchStartY.current);
+    const t = e.touches[0];
+    if (!t) return;
+    const dx = t.clientX - touchStartX.current;
+    const dy = Math.abs(t.clientY - touchStartY.current);
 
     if (isHoriz.current === null && (Math.abs(dx) > 4 || dy > 4)) {
       isHoriz.current = Math.abs(dx) > dy;

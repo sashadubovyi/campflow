@@ -39,14 +39,18 @@ function DmMessageBubble({
   const triggered = useRef(false);
 
   function onTouchStart(e: React.TouchEvent) {
-    touchOrigin.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    const t = e.touches[0];
+    if (!t) return;
+    touchOrigin.current = { x: t.clientX, y: t.clientY };
     gestureMode.current = 'idle';
     triggered.current = false;
   }
 
   function onTouchMove(e: React.TouchEvent) {
-    const dx = e.touches[0].clientX - touchOrigin.current.x;
-    const dy = Math.abs(e.touches[0].clientY - touchOrigin.current.y);
+    const t = e.touches[0];
+    if (!t) return;
+    const dx = t.clientX - touchOrigin.current.x;
+    const dy = Math.abs(t.clientY - touchOrigin.current.y);
 
     if (gestureMode.current === 'idle' && (Math.abs(dx) > 6 || dy > 6)) {
       gestureMode.current = Math.abs(dx) > dy && dx < 0 ? 'swipe' : 'scroll';
