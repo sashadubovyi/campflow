@@ -36,7 +36,7 @@ export function RegisterPage() {
         password: values.password,
         phone: values.phone || undefined,
       });
-      navigate('/rooms');
+      navigate('/onboarding');
     } catch (err) {
       const axiosErr = err as AxiosError<ApiError>;
       const msg = axiosErr.response?.data?.message;

@@ -166,6 +166,8 @@ export function ProfileSettingsPage() {
       whatsappVisibility: form.whatsappVisibility,
       instagramVisibility: form.instagramVisibility,
       facebookVisibility: form.facebookVisibility,
+      threads: form.threads,
+      threadsVisibility: form.threadsVisibility,
       inviteFrom: form.inviteFrom,
     });
     setForm(updated);
@@ -360,6 +362,15 @@ export function ProfileSettingsPage() {
             placeholder="username"
             visibility={form.facebookVisibility}
             onVisibilityChange={(v) => set('facebookVisibility', v)}
+          />
+          <ContactRow
+            label="Threads"
+            icon={MessageCircle}
+            value={form.threads ?? ''}
+            onChange={(v) => set('threads', v || null)}
+            placeholder="@username"
+            visibility={form.threadsVisibility}
+            onVisibilityChange={(v) => set('threadsVisibility', v)}
           />
         </Section>
 

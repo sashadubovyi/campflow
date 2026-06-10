@@ -39,12 +39,14 @@ export class UsersService {
       whatsapp: user.whatsapp,
       instagram: user.instagram,
       facebook: user.facebook,
+      threads: user.threads,
       emailVisibility: user.emailVisibility,
       phoneVisibility: user.phoneVisibility,
       telegramVisibility: user.telegramVisibility,
       whatsappVisibility: user.whatsappVisibility,
       instagramVisibility: user.instagramVisibility,
       facebookVisibility: user.facebookVisibility,
+      threadsVisibility: user.threadsVisibility,
       inviteFrom: user.inviteFrom,
       createdAt: user.createdAt,
     };
@@ -67,12 +69,14 @@ export class UsersService {
         whatsapp: dto.whatsapp,
         instagram: dto.instagram,
         facebook: dto.facebook,
+        threads: dto.threads,
         emailVisibility: dto.emailVisibility,
         phoneVisibility: dto.phoneVisibility,
         telegramVisibility: dto.telegramVisibility,
         whatsappVisibility: dto.whatsappVisibility,
         instagramVisibility: dto.instagramVisibility,
         facebookVisibility: dto.facebookVisibility,
+        threadsVisibility: dto.threadsVisibility,
         inviteFrom: dto.inviteFrom,
       },
     });
@@ -286,6 +290,7 @@ export class UsersService {
       whatsapp: canSee(user.whatsappVisibility) ? user.whatsapp : null,
       instagram: canSee(user.instagramVisibility) ? user.instagram : null,
       facebook: canSee(user.facebookVisibility) ? user.facebook : null,
+      threads: canSee(user.threadsVisibility) ? user.threads : null,
 
       // UI-зручність
       isSelf: user.id === viewerId,

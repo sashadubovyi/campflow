@@ -44,6 +44,7 @@ export interface PublicProfile {
   whatsapp: string | null;
   instagram: string | null;
   facebook: string | null;
+  threads: string | null;
   isSelf: boolean;
   isContact: boolean;
   isMutual: boolean;
@@ -74,12 +75,14 @@ export interface MyProfile {
   whatsapp: string | null;
   instagram: string | null;
   facebook: string | null;
+  threads: string | null;
   emailVisibility: Visibility;
   phoneVisibility: Visibility;
   telegramVisibility: Visibility;
   whatsappVisibility: Visibility;
   instagramVisibility: Visibility;
   facebookVisibility: Visibility;
+  threadsVisibility: Visibility;
   inviteFrom: InvitePolicy;
   createdAt: string;
 }

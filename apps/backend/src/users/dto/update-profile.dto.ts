@@ -30,6 +30,7 @@ export class UpdateProfileDto {
   @IsOptional() @IsString() @MaxLength(32) whatsapp?: string | null;
   @IsOptional() @IsString() @MaxLength(64) instagram?: string | null;
   @IsOptional() @IsString() @MaxLength(64) facebook?: string | null;
+  @IsOptional() @IsString() @MaxLength(64) threads?: string | null;
 
   // Видимість контактних полів
   @IsOptional() @IsEnum(VISIBILITY) emailVisibility?: (typeof VISIBILITY)[number];
@@ -38,6 +39,7 @@ export class UpdateProfileDto {
   @IsOptional() @IsEnum(VISIBILITY) whatsappVisibility?: (typeof VISIBILITY)[number];
   @IsOptional() @IsEnum(VISIBILITY) instagramVisibility?: (typeof VISIBILITY)[number];
   @IsOptional() @IsEnum(VISIBILITY) facebookVisibility?: (typeof VISIBILITY)[number];
+  @IsOptional() @IsEnum(VISIBILITY) threadsVisibility?: (typeof VISIBILITY)[number];
 
   // Хто може запрошувати в кімнати
   @IsOptional() @IsEnum(INVITE_POLICY) inviteFrom?: (typeof INVITE_POLICY)[number];

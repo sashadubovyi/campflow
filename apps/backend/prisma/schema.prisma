@@ -40,6 +40,7 @@ model User {
   whatsapp        String?  @db.VarChar(32)
   instagram       String?  @db.VarChar(64)
   facebook        String?  @db.VarChar(64)
+  threads         String?  @db.VarChar(64)
 
   // Приватність контактних полів (за замовчуванням — приховано)
   emailVisibility     FieldVisibility @default(hidden) @map("email_visibility")
@@ -48,6 +49,7 @@ model User {
   whatsappVisibility  FieldVisibility @default(hidden) @map("whatsapp_visibility")
   instagramVisibility FieldVisibility @default(hidden) @map("instagram_visibility")
   facebookVisibility  FieldVisibility @default(hidden) @map("facebook_visibility")
+  threadsVisibility   FieldVisibility @default(hidden) @map("threads_visibility")
 
   // Налаштування приватності запрошень (для Блоку 11)
   inviteFrom      InvitePolicy @default(all) @map("invite_from")

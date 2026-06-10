@@ -18,6 +18,7 @@ import { MapPage } from '../pages/MapPage';
 import { EventsPage } from '../pages/EventsPage';
 import { SearchPage } from '../pages/SearchPage';
 import { LanguagePage } from '../pages/LanguagePage';
+import { OnboardingPage } from '../pages/OnboardingPage';
 
 export const router: ReturnType<typeof createBrowserRouter> = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -44,6 +45,7 @@ export const router: ReturnType<typeof createBrowserRouter> = createBrowserRoute
       { path: '/events', element: <EventsPage /> },
       { path: '/search', element: <SearchPage /> },
       { path: '/settings/language', element: <LanguagePage /> },
+      { path: '/onboarding', element: <OnboardingPage /> },
     ],
   },
   { path: '/', element: <Navigate to="/rooms" replace /> },
