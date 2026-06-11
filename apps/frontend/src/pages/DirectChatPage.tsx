@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Send, Reply, X, MoreHorizontal, Star, Trash2, CornerUpLeft } from 'lucide-react';
-import { m } from 'framer-motion';
 import { useDmGetOrCreate, useDmMessages, useSendDm } from '../shared/api/dm.hooks';
 import { Avatar } from '../shared/ui/Avatar';
 import { BackButton } from '../shared/ui';
@@ -290,22 +289,6 @@ export function DirectChatPage() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef  = useRef<HTMLInputElement>(null);
 
-  // ── Double-lock loading guard ─────────────────────────────────────────────────
-  // Lock 1: minimum skeleton display time (prevents flash on fast/cached loads)
-  const [isAnimationPlaying, setIsAnimationPlaying] = useState(true);
-  // Lock 2: true until the DM chat query resolves
-  const [isDataLoading, setIsDataLoading] = useState(true);
-
-  useEffect(() => {
-    setIsAnimationPlaying(true);
-    setIsDataLoading(true);
-    const timer = setTimeout(() => setIsAnimationPlaying(false), 500);
-    return () => clearTimeout(timer);
-  }, [username]);
-
-  useEffect(() => {
-    if (!isLoading) setIsDataLoading(false);
-  }, [isLoading, username]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -335,11 +318,7 @@ export function DirectChatPage() {
     }
   }
 
-  // Phase 1: skeleton timer still running
-  if (!username || isAnimationPlaying) return <DmChatSkeleton />;
-
-  // Phase 2: timer done, waiting for data
-  if (isDataLoading) return <DmChatSkeleton />;
+  if (!username || isLoading) return <DmChatSkeleton />;
 
   if (isError || !chat) {
     return (
@@ -353,12 +332,7 @@ export function DirectChatPage() {
   }
 
   return (
-    <m.div
-      className="h-full flex flex-col font-body"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.1, ease: 'easeOut' }}
-    >
+    <div className="h-full flex flex-col font-body">
       <header className="glass-header shadow-[0_0.5px_0_rgba(0,0,0,0.06)] shrink-0 px-2 md:px-4 h-12 flex items-center gap-2">
         <BackButton />
         {/* Tap on peer info → open profile modal (not navigate away) */}
@@ -444,6 +418,6 @@ export function DirectChatPage() {
         open={showProfile}
         onClose={() => setShowProfile(false)}
       />
-    </m.div>
+    </div>
   );
 }

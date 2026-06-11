@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft, Users, Info, ChevronDown, ChevronUp, X, Trash2, Pencil, Star } from 'lucide-react';
-import { AnimatePresence, m } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { useRoom } from '../../shared/api/rooms.hooks';
 import { useAuth } from '../../shared/store/useAuth';
@@ -79,28 +79,7 @@ export function RoomPage() {
   const [hasImportant, setHasImportant] = useState(false);
   const archiveRoom = useArchiveRoom();
 
-  // ── Double-lock loading guard ─────────────────────────────────────────────────
-  // Lock 1: minimum skeleton display time (prevents flash on fast/cached loads)
-  const [isAnimationPlaying, setIsAnimationPlaying] = useState(true);
-  // Lock 2: true until the room query resolves
-  const [isDataLoading, setIsDataLoading] = useState(true);
-
-  useEffect(() => {
-    setIsAnimationPlaying(true);
-    setIsDataLoading(true);
-    const timer = setTimeout(() => setIsAnimationPlaying(false), 500);
-    return () => clearTimeout(timer);
-  }, [id]);
-
-  useEffect(() => {
-    if (!isLoading) setIsDataLoading(false);
-  }, [isLoading, id]);
-
-  // Phase 1: skeleton timer still running
-  if (isAnimationPlaying) return <RoomPageSkeleton />;
-
-  // Phase 2: timer done, waiting for data
-  if (isDataLoading) return <RoomPageSkeleton />;
+  if (isLoading) return <RoomPageSkeleton />;
 
   if (isError || !room) {
     return (
@@ -276,12 +255,7 @@ export function RoomPage() {
   /* ---------- DESKTOP ---------- */
   if (isDesktop) {
     return (
-      <m.div
-        className="h-full flex flex-col overflow-hidden"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.1, ease: 'easeOut' }}
-      >
+      <div className="h-full flex flex-col overflow-hidden">
         <header className="relative glass-header shadow-[0_0.5px_0_rgba(0,0,0,0.06)] shrink-0 px-4 h-12 flex items-center">
           <div className="flex items-center justify-start min-w-[2.5rem] shrink-0">
             <BackButton />
@@ -384,18 +358,13 @@ export function RoomPage() {
           {infoMeta}
         </Modal>
         {deleteConfirmModal}
-      </m.div>
+      </div>
     );
   }
 
   /* ---------- MOBILE ---------- */
   return (
-    <m.div
-      className="h-full flex flex-col overflow-hidden"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.1, ease: 'easeOut' }}
-    >
+    <div className="h-full flex flex-col overflow-hidden">
       <header className="relative glass-header shadow-[0_0.5px_0_rgba(0,0,0,0.06)] shrink-0 px-2 h-12 flex items-center gap-1">
         <button
           onClick={() => navigate('/rooms')}
@@ -457,6 +426,6 @@ export function RoomPage() {
       {modal}
       <AnimatePresence>{showEditModal && <EditRoomModal room={room} onClose={() => setShowEditModal(false)} />}</AnimatePresence>
       {deleteConfirmModal}
-    </m.div>
+    </div>
   );
 }
