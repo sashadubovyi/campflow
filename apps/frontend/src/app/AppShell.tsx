@@ -1,17 +1,13 @@
 import { useState } from 'react';
-import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { AnimatePresence, m } from 'framer-motion';
+import { Outlet, useNavigate } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 import { DesktopNav } from './DesktopNav';
 import { MobileTabBar } from './MobileTabBar';
 import { CreateRoomModal } from '../pages/rooms/CreateRoomModal';
 import { JoinRoomModal } from '../pages/rooms/JoinRoomModal';
 
-const enterTransition = { duration: 0.56, ease: 'easeOut' } as const;
-const exitTransition  = { duration: 0.30, ease: 'easeIn'  } as const;
-
 export function AppShell() {
   const navigate = useNavigate();
-  const location = useLocation();
   const [showCreate, setShowCreate] = useState(false);
   const [showJoin, setShowJoin] = useState(false);
 
@@ -22,18 +18,7 @@ export function AppShell() {
         onJoinRoom={() => { setShowCreate(false); setShowJoin(true); }}
       />
       <main className="flex-1 min-w-0 overflow-hidden pb-14 md:pb-0 relative">
-        <AnimatePresence mode="wait">
-          <m.div
-            key={location.pathname}
-            initial={{ opacity: 0, filter: 'blur(10px)' }}
-            animate={{ opacity: 1, filter: 'blur(0px)', transition: enterTransition }}
-            exit={{ opacity: 0, filter: 'blur(10px)', transition: exitTransition }}
-            className="h-full"
-            style={{ willChange: 'filter, opacity' }}
-          >
-            <Outlet />
-          </m.div>
-        </AnimatePresence>
+        <Outlet />
       </main>
       <MobileTabBar />
       <AnimatePresence>
