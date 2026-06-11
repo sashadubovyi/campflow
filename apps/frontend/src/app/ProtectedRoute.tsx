@@ -1,22 +1,20 @@
 import { Navigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { useAuth } from '../shared/store/useAuth';
-import { BrandLoader } from '../shared/ui/BrandLoader';
 
 export function ProtectedRoute({ children }: { children: ReactNode }) {
   const { isAuthenticated, isInitialized } = useAuth();
 
-  // Поки bootstrap ще не завершився і немає збереженого юзера (localStorage пустий)
-  // — показуємо сплеш-екран, щоб не флікати на /login передчасно.
+  // While bootstrap is still running, return nothing — AppPreloader overlay covers the screen.
   if (!isInitialized && !isAuthenticated) {
-    return <BrandLoader fullscreen />;
+    return null;
   }
 
-  // Bootstrap завершився і юзер не авторизований — редиректимо.
+  // Bootstrap finished, no session — redirect to login.
   if (isInitialized && !isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  // Юзер є в localStorage (optimistic) або вже пройшов bootstrap успішно.
+  // Authenticated (either via persisted user or completed bootstrap).
   return <>{children}</>;
 }
