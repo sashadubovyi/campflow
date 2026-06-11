@@ -5,6 +5,7 @@ import { router } from './app/router';
 import { useAuth } from './shared/store/useAuth';
 import { useNotificationsSubscription } from './shared/api/notifications.hooks';
 import { queryClient } from './shared/api/queryClient';
+import { AppPreloader } from './shared/ui/AppPreloader';
 
 function AppContent() {
   const { bootstrap } = useAuth();
@@ -16,7 +17,11 @@ function AppContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return <RouterProvider router={router} />;
+  return (
+    <AppPreloader>
+      <RouterProvider router={router} />
+    </AppPreloader>
+  );
 }
 
 export function App() {
