@@ -10,13 +10,22 @@ import { CreateMultiPollDto } from './dto/create-multi-poll.dto';
 import { CreateLocationPollDto } from './dto/create-location-poll.dto';
 import { AddLocationOptionDto } from './dto/add-location-option.dto';
 import { RoomsService } from '../rooms/rooms.service';
+import { PollsGateway } from './polls.gateway';
 
 @Injectable()
 export class PollsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly roomsService: RoomsService,
+    private readonly pollsGateway: PollsGateway,
   ) {}
+
+  private async postSystemMessage(roomId: string, content: string) {
+    const msg = await this.prisma.message.create({
+      data: { roomId, type: 'system', content },
+    });
+    this.pollsGateway.broadcastSystemMessage(roomId, msg);
+  }
 
   private async assertMember(userId: string, roomId: string) {
     const member = await this.prisma.roomMember.findUnique({
@@ -34,24 +43,28 @@ export class PollsService {
   async createSingleChoice(userId: string, dto: CreatePollDto) {
     await this.assertMember(userId, dto.roomId);
 
-    const poll = await this.prisma.poll.create({
-      data: {
-        roomId: dto.roomId,
-        authorId: userId,
-        type: 'single_choice',
-        title: dto.title,
-        description: dto.description,
-        options: {
-          create: dto.options.map((o, idx) => ({
-            label: o.label,
-            position: idx,
-          })),
+    const [poll, user] = await Promise.all([
+      this.prisma.poll.create({
+        data: {
+          roomId: dto.roomId,
+          authorId: userId,
+          type: 'single_choice',
+          title: dto.title,
+          description: dto.description,
+          options: {
+            create: dto.options.map((o, idx) => ({
+              label: o.label,
+              position: idx,
+            })),
+          },
         },
-      },
-      include: { options: { orderBy: { position: 'asc' } } },
-    });
+        include: { options: { orderBy: { position: 'asc' } } },
+      }),
+      this.prisma.user.findUnique({ where: { id: userId }, select: { fullName: true } }),
+    ]);
 
     await this.roomsService.touchActivity(dto.roomId);
+    await this.postSystemMessage(dto.roomId, `${user?.fullName ?? 'Користувач'} створив(-ла) опитування «${dto.title}»`);
 
     return this.getPollResults(userId, poll.id);
   }
@@ -187,24 +200,28 @@ export class PollsService {
   async createMultiChoice(userId: string, dto: CreateMultiPollDto) {
     await this.assertMember(userId, dto.roomId);
 
-    const poll = await this.prisma.poll.create({
-      data: {
-        roomId: dto.roomId,
-        authorId: userId,
-        type: 'multi_choice',
-        title: dto.title,
-        description: dto.description,
-        allowAssign: dto.allowAssign ?? false,
-        options: {
-          create: dto.options.map((o, idx) => ({
-            label: o.label,
-            position: idx,
-          })),
+    const [poll, user] = await Promise.all([
+      this.prisma.poll.create({
+        data: {
+          roomId: dto.roomId,
+          authorId: userId,
+          type: 'multi_choice',
+          title: dto.title,
+          description: dto.description,
+          allowAssign: dto.allowAssign ?? false,
+          options: {
+            create: dto.options.map((o, idx) => ({
+              label: o.label,
+              position: idx,
+            })),
+          },
         },
-      },
-    });
+      }),
+      this.prisma.user.findUnique({ where: { id: userId }, select: { fullName: true } }),
+    ]);
 
     await this.roomsService.touchActivity(dto.roomId);
+    await this.postSystemMessage(dto.roomId, `${user?.fullName ?? 'Користувач'} створив(-ла) опитування «${dto.title}»`);
 
     return this.getPollResults(userId, poll.id);
   }
@@ -276,26 +293,30 @@ export class PollsService {
   async createLocationPoll(userId: string, dto: CreateLocationPollDto) {
     await this.assertMember(userId, dto.roomId);
 
-    const poll = await this.prisma.poll.create({
-      data: {
-        roomId: dto.roomId,
-        authorId: userId,
-        type: 'location',
-        title: dto.title,
-        description: dto.description,
-        options: {
-          create: dto.options.map((o, idx) => ({
-            label: o.label,
-            position: idx,
-            latitude: o.latitude,
-            longitude: o.longitude,
-            address: o.address,
-          })),
+    const [poll, user] = await Promise.all([
+      this.prisma.poll.create({
+        data: {
+          roomId: dto.roomId,
+          authorId: userId,
+          type: 'location',
+          title: dto.title,
+          description: dto.description,
+          options: {
+            create: dto.options.map((o, idx) => ({
+              label: o.label,
+              position: idx,
+              latitude: o.latitude,
+              longitude: o.longitude,
+              address: o.address,
+            })),
+          },
         },
-      },
-    });
+      }),
+      this.prisma.user.findUnique({ where: { id: userId }, select: { fullName: true } }),
+    ]);
 
     await this.roomsService.touchActivity(dto.roomId);
+    await this.postSystemMessage(dto.roomId, `${user?.fullName ?? 'Користувач'} створив(-ла) опитування «${dto.title}»`);
 
     return this.getPollResults(userId, poll.id);
   }

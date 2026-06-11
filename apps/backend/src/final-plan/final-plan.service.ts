@@ -1,9 +1,20 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { PollsGateway } from '../polls/polls.gateway';
 
 @Injectable()
 export class FinalPlanService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly pollsGateway: PollsGateway,
+  ) {}
+
+  private async postSystemMessage(roomId: string, content: string) {
+    const msg = await this.prisma.message.create({
+      data: { roomId, type: 'system', content },
+    });
+    this.pollsGateway.broadcastSystemMessage(roomId, msg);
+  }
 
   private async assertMember(userId: string, roomId: string) {
     const member = await this.prisma.roomMember.findUnique({
@@ -30,15 +41,18 @@ export class FinalPlanService {
   }
 
   async approvePoll(userId: string, pollId: string) {
-    const poll = await this.prisma.poll.findUnique({
-      where: { id: pollId },
-      include: {
-        options: {
-          include: { _count: { select: { votes: true } } },
-          orderBy: { position: 'asc' },
+    const [poll, admin] = await Promise.all([
+      this.prisma.poll.findUnique({
+        where: { id: pollId },
+        include: {
+          options: {
+            include: { _count: { select: { votes: true } } },
+            orderBy: { position: 'asc' },
+          },
         },
-      },
-    });
+      }),
+      this.prisma.user.findUnique({ where: { id: userId }, select: { fullName: true } }),
+    ]);
     if (!poll) throw new NotFoundException('Poll not found');
     await this.assertAdmin(userId, poll.roomId);
 
@@ -82,6 +96,11 @@ export class FinalPlanService {
         data: { status: 'approved', approvedAt: new Date(), closedAt: new Date() },
       });
     });
+
+    await this.postSystemMessage(
+      poll.roomId,
+      `${admin?.fullName ?? 'Адміністратор'} затвердив(-ла) «${poll.title}» до фінального плану`,
+    );
 
     return this.getRoomPlan(userId, poll.roomId);
   }

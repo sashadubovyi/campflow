@@ -16,4 +16,8 @@ export class PollsGateway {
   broadcastPollCreated(roomId: string, poll: unknown) {
     this.server.to(`room:${roomId}`).emit('poll:created', poll);
   }
+
+  broadcastSystemMessage(roomId: string, message: unknown) {
+    this.server.to(`room:${roomId}`).emit('message:new', message);
+  }
 }
