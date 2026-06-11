@@ -16,6 +16,7 @@ export function useAcceptInvite() {
       qc.invalidateQueries({ queryKey: ['invites'] });
       qc.invalidateQueries({ queryKey: ['rooms'] });
       qc.invalidateQueries({ queryKey: ['notifications'] });
+      qc.invalidateQueries({ queryKey: ['notifications', 'unread-count'] });
     },
   });
 }
@@ -27,6 +28,7 @@ export function useDeclineInvite() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['invites'] });
       qc.invalidateQueries({ queryKey: ['notifications'] });
+      qc.invalidateQueries({ queryKey: ['notifications', 'unread-count'] });
     },
   });
 }

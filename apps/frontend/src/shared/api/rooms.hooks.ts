@@ -61,6 +61,7 @@ export function useAcceptJoinRequest() {
     mutationFn: (notificationId: string) => roomsApi.acceptJoinRequest(notificationId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['notifications'] });
+      qc.invalidateQueries({ queryKey: ['notifications', 'unread-count'] });
       qc.invalidateQueries({ queryKey: ['rooms'] });
     },
   });
@@ -72,6 +73,7 @@ export function useRejectJoinRequest() {
     mutationFn: (notificationId: string) => roomsApi.rejectJoinRequest(notificationId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['notifications'] });
+      qc.invalidateQueries({ queryKey: ['notifications', 'unread-count'] });
     },
   });
 }

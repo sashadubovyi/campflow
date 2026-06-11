@@ -6,6 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { customAlphabet } from 'nanoid';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { AiCommitRoomDto } from './dto/ai-commit-room.dto';
@@ -357,7 +358,13 @@ export class RoomsService {
 
     await this.prisma.notification.update({
       where: { id: notificationId },
-      data: { readAt: new Date() },
+      data: {
+        readAt: new Date(),
+        payload: {
+          ...(notification.payload as Record<string, unknown>),
+          currentStatus: 'accepted',
+        } as Prisma.InputJsonValue,
+      },
     });
 
     // Сповістити заявника, що його прийняли
@@ -394,7 +401,13 @@ export class RoomsService {
 
     await this.prisma.notification.update({
       where: { id: notificationId },
-      data: { readAt: new Date() },
+      data: {
+        readAt: new Date(),
+        payload: {
+          ...(notification.payload as Record<string, unknown>),
+          currentStatus: 'rejected',
+        } as Prisma.InputJsonValue,
+      },
     });
 
     await this.notifications.create(requester.id, 'join_request_rejected', {

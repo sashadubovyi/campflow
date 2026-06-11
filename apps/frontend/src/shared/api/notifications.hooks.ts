@@ -62,6 +62,7 @@ export function useMarkRead() {
     mutationFn: (id: string) => notificationsApi.markRead(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['notifications'] });
+      qc.invalidateQueries({ queryKey: ['notifications', 'unread-count'] });
     },
   });
 }
@@ -72,6 +73,7 @@ export function useMarkAllRead() {
     mutationFn: () => notificationsApi.markAllRead(),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['notifications'] });
+      qc.invalidateQueries({ queryKey: ['notifications', 'unread-count'] });
     },
   });
 }

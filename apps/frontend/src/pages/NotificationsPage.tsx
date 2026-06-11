@@ -219,15 +219,16 @@ function JoinRequestCard({
     roomId: string;
     roomName: string;
     requester: { id: string; username: string; fullName: string; avatarUrl: string | null };
+    currentStatus?: 'accepted' | 'rejected';
   };
   const accept = useAcceptJoinRequest();
   const reject = useRejectJoinRequest();
-  const isDone = accept.isSuccess || reject.isSuccess;
   const status: 'pending' | 'accepted' | 'rejected' = accept.isSuccess
     ? 'accepted'
     : reject.isSuccess
       ? 'rejected'
-      : 'pending';
+      : (payload.currentStatus ?? 'pending');
+  const isDone = status !== 'pending';
 
   async function handleAccept() {
     onClick();
