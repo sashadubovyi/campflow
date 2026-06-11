@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { usePolls } from '../../shared/api/polls.hooks';
 import type { RoomMember } from '../../shared/api/rooms.api';
@@ -99,7 +100,7 @@ export function PollsPanel({ roomId, isAdmin, members, currentUserId }: Props) {
         {tab === 'plan' && <FinalPlanPanel roomId={roomId} />}
       </div>
 
-      {showCreate && <CreatePollModal roomId={roomId} onClose={() => setShowCreate(false)} />}
+      <AnimatePresence>{showCreate && <CreatePollModal roomId={roomId} onClose={() => setShowCreate(false)} />}</AnimatePresence>
     </aside>
   );
 }

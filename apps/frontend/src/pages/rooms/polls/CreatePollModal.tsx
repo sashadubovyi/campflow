@@ -1,4 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
+import { m } from 'framer-motion';
+
+const spring = { type: 'spring', duration: 0.15, bounce: 0.12 } as const;
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import {
@@ -210,12 +213,20 @@ export function CreatePollModal({ roomId, onClose }: Props) {
   };
 
   return (
-    <div
-      className="fixed inset-0 bg-neutral-900/40 flex items-start justify-center overflow-y-auto px-4 py-6 z-[200] backdrop-animate"
+    <m.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.06 }}
+      className="fixed inset-0 bg-neutral-900/40 flex items-start justify-center overflow-y-auto px-4 py-6 z-[200] backdrop-blur-sm"
       onClick={onClose}
     >
-      <div
-        className="glass-surface rounded-2xl shadow-2xl w-full max-w-lg p-6 font-body my-auto modal-animate"
+      <m.div
+        initial={{ opacity: 0, scale: 0.92, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+        transition={spring}
+        className="glass-surface rounded-2xl shadow-2xl w-full max-w-lg p-6 font-body my-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="font-display text-xl font-bold text-neutral-900 mb-4">
@@ -493,7 +504,7 @@ export function CreatePollModal({ roomId, onClose }: Props) {
             </button>
           </div>
         </form>
-      </div>
-    </div>
+      </m.div>
+    </m.div>
   );
 }

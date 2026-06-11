@@ -1,5 +1,8 @@
 import { useTranslation } from 'react-i18next';
+import { m } from 'framer-motion';
 import { useCloseRoom } from '../../shared/api/rooms.hooks';
+
+const spring = { type: 'spring', duration: 0.15, bounce: 0.12 } as const;
 
 interface Props {
   roomId: string;
@@ -22,11 +25,19 @@ export function CloseRoomModal({ roomId, roomName, onClose, onClosed }: Props) {
   }
 
   return (
-    <div
-      className="fixed inset-0 bg-neutral-900/40 flex items-center justify-center px-4 z-50"
+    <m.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.06 }}
+      className="fixed inset-0 bg-neutral-900/40 flex items-center justify-center px-4 z-50 backdrop-blur-sm"
       onClick={closeRoom.isPending ? undefined : onClose}
     >
-      <div
+      <m.div
+        initial={{ opacity: 0, scale: 0.92, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+        transition={spring}
         className="glass-surface rounded-2xl shadow-2xl w-full max-w-md p-6 font-body"
         onClick={(e) => e.stopPropagation()}
       >
@@ -68,7 +79,7 @@ export function CloseRoomModal({ roomId, roomName, onClose, onClosed }: Props) {
             {closeRoom.isPending ? t('polls.ai.summarizing') : t('polls.ai.closeRoomAction')}
           </button>
         </div>
-      </div>
-    </div>
+      </m.div>
+    </m.div>
   );
 }

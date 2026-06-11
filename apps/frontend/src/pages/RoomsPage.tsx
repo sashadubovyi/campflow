@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Plus, KeyRound } from 'lucide-react';
@@ -93,24 +94,28 @@ export function RoomsPage() {
         </main>
       </div>
 
-      {showCreate && (
-        <CreateRoomModal
-          onClose={() => setShowCreate(false)}
-          onCreated={(id) => {
-            setShowCreate(false);
-            navigate(`/rooms/${id}`);
-          }}
-        />
-      )}
-      {showJoin && (
-        <JoinRoomModal
-          onClose={() => setShowJoin(false)}
-          onJoined={(id) => {
-            setShowJoin(false);
-            navigate(`/rooms/${id}`);
-          }}
-        />
-      )}
+      <AnimatePresence>
+        {showCreate && (
+          <CreateRoomModal
+            onClose={() => setShowCreate(false)}
+            onCreated={(id) => {
+              setShowCreate(false);
+              navigate(`/rooms/${id}`);
+            }}
+          />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showJoin && (
+          <JoinRoomModal
+            onClose={() => setShowJoin(false)}
+            onJoined={(id) => {
+              setShowJoin(false);
+              navigate(`/rooms/${id}`);
+            }}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

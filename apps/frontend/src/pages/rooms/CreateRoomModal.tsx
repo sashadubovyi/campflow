@@ -44,15 +44,15 @@ export function CreateRoomModal({ onClose, onCreated }: Props) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.18 }}
+      transition={{ duration: 0.06 }}
       className="fixed inset-0 bg-neutral-900/40 flex items-center justify-center px-4 z-50 backdrop-blur-sm"
       onClick={onClose}
     >
       <m.div
-        initial={{ opacity: 0, scale: 0.92, y: 28, filter: 'blur(8px)' }}
-        animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
-        exit={{ opacity: 0, scale: 0.95, y: 16, filter: 'blur(6px)' }}
-        transition={{ type: 'spring', stiffness: 380, damping: 28 }}
+        initial={{ opacity: 0, scale: 0.92, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+        transition={{ type: 'spring', duration: 0.15, bounce: 0.12 }}
         className="glass-surface rounded-2xl shadow-2xl w-full max-w-md p-6 font-body max-h-[90vh] overflow-y-auto scrollbar-hide"
         onClick={(e) => e.stopPropagation()}
       >

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft, Users, Info, ChevronDown, ChevronUp, X, Trash2, Pencil, Star } from 'lucide-react';
-import { m } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { useRoom } from '../../shared/api/rooms.hooks';
 import { useAuth } from '../../shared/store/useAuth';
@@ -162,13 +162,17 @@ export function RoomPage() {
     </button>
   );
 
-  const modal = showCloseModal && (
-    <CloseRoomModal
-      roomId={room.id}
-      roomName={room.name}
-      onClose={() => setShowCloseModal(false)}
-      onClosed={() => navigate('/rooms')}
-    />
+  const modal = (
+    <AnimatePresence>
+      {showCloseModal && (
+        <CloseRoomModal
+          roomId={room.id}
+          roomName={room.name}
+          onClose={() => setShowCloseModal(false)}
+          onClosed={() => navigate('/rooms')}
+        />
+      )}
+    </AnimatePresence>
   );
 
   // Info modal meta: room name, description, admin actions
@@ -375,7 +379,7 @@ export function RoomPage() {
         </PanelGroup>
 
         {modal}
-        {showEditModal && <EditRoomModal room={room} onClose={() => setShowEditModal(false)} />}
+        <AnimatePresence>{showEditModal && <EditRoomModal room={room} onClose={() => setShowEditModal(false)} />}</AnimatePresence>
         <Modal open={infoOpen} onClose={() => setInfoOpen(false)} size="md">
           {infoMeta}
         </Modal>
@@ -451,7 +455,7 @@ export function RoomPage() {
       </Modal>
 
       {modal}
-      {showEditModal && <EditRoomModal room={room} onClose={() => setShowEditModal(false)} />}
+      <AnimatePresence>{showEditModal && <EditRoomModal room={room} onClose={() => setShowEditModal(false)} />}</AnimatePresence>
       {deleteConfirmModal}
     </m.div>
   );

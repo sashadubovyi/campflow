@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { LayoutList, Map as MapIcon, Calendar, Heart, Plus, KeyRound, ChevronDown } from 'lucide-react';
@@ -375,18 +376,22 @@ export function EventsPage() {
         room={selectedRoom}
       />
 
-      {showCreate && (
-        <CreateRoomModal
-          onClose={() => setShowCreate(false)}
-          onCreated={(id) => { setShowCreate(false); navigate(`/rooms/${id}`); }}
-        />
-      )}
-      {showJoin && (
-        <JoinRoomModal
-          onClose={() => setShowJoin(false)}
-          onJoined={(id) => { setShowJoin(false); navigate(`/rooms/${id}`); }}
-        />
-      )}
+      <AnimatePresence>
+        {showCreate && (
+          <CreateRoomModal
+            onClose={() => setShowCreate(false)}
+            onCreated={(id) => { setShowCreate(false); navigate(`/rooms/${id}`); }}
+          />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showJoin && (
+          <JoinRoomModal
+            onClose={() => setShowJoin(false)}
+            onJoined={(id) => { setShowJoin(false); navigate(`/rooms/${id}`); }}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { LogOut } from 'lucide-react';
+import { AnimatePresence, m } from 'framer-motion';
+
+const spring = { type: 'spring', duration: 0.15, bounce: 0.12 } as const;
 import type { RoomMember } from '../../shared/api/rooms.api';
 import { Avatar } from '../../shared/ui/Avatar';
 import { relativeTime } from '../../shared/lib/relativeTime';
@@ -119,22 +122,24 @@ export function MembersPanel({ roomId, members, currentUserId, isAdmin }: Props)
         </div>
       </aside>
 
-      {transferModalOpen && (
-        <TransferAdminModal
-          roomId={roomId}
-          members={members}
-          currentUserId={currentUserId}
-          onClose={() => setTransferModalOpen(false)}
-          onTransferred={async () => {
-            setTransferModalOpen(false);
-            const result = await leave.mutateAsync(roomId);
-            if (result.deleted) {
-              alert(t('rooms.empty'));
-            }
-            navigate('/rooms');
-          }}
-        />
-      )}
+      <AnimatePresence>
+        {transferModalOpen && (
+          <TransferAdminModal
+            roomId={roomId}
+            members={members}
+            currentUserId={currentUserId}
+            onClose={() => setTransferModalOpen(false)}
+            onTransferred={async () => {
+              setTransferModalOpen(false);
+              const result = await leave.mutateAsync(roomId);
+              if (result.deleted) {
+                alert(t('rooms.empty'));
+              }
+              navigate('/rooms');
+            }}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 }
@@ -250,11 +255,19 @@ function TransferAdminModal({
   }
 
   return (
-    <div
+    <m.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.06 }}
       className="fixed inset-0 bg-neutral-900/40 backdrop-blur-sm flex items-center justify-center px-4 z-50"
       onClick={onClose}
     >
-      <div
+      <m.div
+        initial={{ opacity: 0, scale: 0.92, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+        transition={spring}
         className="glass-surface rounded-2xl shadow-2xl w-full max-w-md p-6"
         onClick={(e) => e.stopPropagation()}
       >
@@ -306,7 +319,7 @@ function TransferAdminModal({
             {transfer.isPending ? t('rooms.transferring') : t('rooms.transferAndLeave')}
           </button>
         </div>
-      </div>
-    </div>
+      </m.div>
+    </m.div>
   );
 }
