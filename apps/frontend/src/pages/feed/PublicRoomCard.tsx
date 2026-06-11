@@ -70,6 +70,7 @@ export function PublicRoomCard({ room }: Props) {
           <img
             src={getMediaUrl(room.coverUrl)}
             alt=""
+            onError={(e) => { (e.target as HTMLImageElement).src = '/room-cover-placeholder.jpeg'; }}
             className="w-full h-full object-cover"
           />
         ) : (

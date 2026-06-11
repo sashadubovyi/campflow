@@ -162,6 +162,7 @@ export function RoomPage() {
           <img
             src={getMediaUrl(room.coverUrl)}
             alt=""
+            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             className="w-12 h-12 rounded-xl object-cover shrink-0"
           />
         )}
@@ -272,6 +273,7 @@ export function RoomPage() {
                   <img
                     src={getMediaUrl(room.coverUrl)}
                     alt=""
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                     className="w-6 h-6 rounded-md object-cover shrink-0"
                   />
                 )}

@@ -104,6 +104,7 @@ export function RoomCard({ room, onOpen, compact = false, onDelete, onTogglePubl
           <img
             src={room.coverUrl ? getMediaUrl(room.coverUrl) : '/room-cover-placeholder.jpeg'}
             alt={room.name}
+            onError={(e) => { (e.target as HTMLImageElement).src = '/room-cover-placeholder.jpeg'; }}
             className={`w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500 ease-out ${room.status === 'closed' ? 'grayscale' : ''}`}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
