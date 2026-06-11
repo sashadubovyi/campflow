@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Send, MessageCircle, MoreHorizontal, Trash2, Star, RefreshCw, CornerUpLeft, X } from 'lucide-react';
-import { useDrag } from '@use-gesture/react';
 import { useRoomChat } from '../../shared/api/useRoomChat';
 import { useAuth } from '../../shared/store/useAuth';
 import { Avatar } from '../../shared/ui/Avatar';
@@ -240,67 +239,71 @@ function MessageBubble({
   const triggerRef = useRef<HTMLButtonElement>(null);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressTriggered = useRef(false);
-  const triggered = useRef(false);
   const touchOrigin = useRef({ x: 0, y: 0 });
+  const gestureMode = useRef<'idle' | 'swipe' | 'longpress' | 'scroll'>('idle');
+  const triggered = useRef(false);
 
   function cancelLongPress() {
     if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null; }
   }
 
-  // Long-press via native touch events (independent of pointer-based useDrag)
   function handleTouchStart(e: React.TouchEvent) {
     if (message.type === 'system') return;
     const touch = e.touches[0];
     if (!touch) return;
     touchOrigin.current = { x: touch.clientX, y: touch.clientY };
+    gestureMode.current = 'idle';
     longPressTriggered.current = false;
+    triggered.current = false;
     longPressTimer.current = setTimeout(() => {
-      longPressTriggered.current = true;
-      if (triggerRef.current) {
-        const rect = triggerRef.current.getBoundingClientRect();
-        setOpenDown(rect.top < 120);
+      if (gestureMode.current === 'idle') {
+        longPressTriggered.current = true;
+        gestureMode.current = 'longpress';
+        if (triggerRef.current) {
+          const rect = triggerRef.current.getBoundingClientRect();
+          setOpenDown(rect.top < 120);
+        }
+        setMenuOpen(true);
+        try { navigator.vibrate?.(15); } catch { /* ignore */ }
       }
-      setMenuOpen(true);
-      try { navigator.vibrate?.(15); } catch { /* ignore */ }
     }, 550);
   }
 
   function handleTouchMove(e: React.TouchEvent) {
     const touch = e.touches[0];
     if (!touch) return;
-    const adx = Math.abs(touch.clientX - touchOrigin.current.x);
+    const dx = touch.clientX - touchOrigin.current.x;
+    const adx = Math.abs(dx);
     const ady = Math.abs(touch.clientY - touchOrigin.current.y);
-    if (adx > 5 || ady > 5) cancelLongPress();
-  }
 
-  function handleTouchEnd() {
-    cancelLongPress();
-  }
-
-  // Right-swipe to reply via @use-gesture/react — touch only, axis:x lets vertical scroll pass through
-  const bind = useDrag(
-    ({ movement: [mx], last }) => {
-      if (message.type === 'system' || !isTouchDevice()) return;
+    if (gestureMode.current === 'idle' && (adx > 5 || ady > 5)) {
       cancelLongPress();
-      const x = Math.max(0, Math.min(mx, SWIPE_REPLY_THRESHOLD + 20));
+      // Right swipe → reply (consistent with DirectChatPage)
+      if (adx > ady && dx > 0) {
+        gestureMode.current = 'swipe';
+      } else {
+        gestureMode.current = 'scroll';
+      }
+    }
+
+    if (gestureMode.current === 'swipe' && dx > 0) {
+      const x = Math.min(dx, SWIPE_REPLY_THRESHOLD + 20);
       setSwipeX(x);
       if (x >= SWIPE_REPLY_THRESHOLD && !triggered.current) {
         triggered.current = true;
         try { navigator.vibrate?.(15); } catch { /* ignore */ }
       }
-      if (last) {
-        if (x >= SWIPE_REPLY_THRESHOLD) onReply();
-        triggered.current = false;
-        setSwipeX(0);
-      }
-    },
-    {
-      axis: 'x',
-      pointer: { touch: true },
-      filterTaps: true,
-      bounds: { left: 0, right: SWIPE_REPLY_THRESHOLD + 20 },
-    },
-  );
+    }
+  }
+
+  function handleTouchEnd() {
+    cancelLongPress();
+    if (gestureMode.current === 'swipe' && swipeX >= SWIPE_REPLY_THRESHOLD) {
+      onReply();
+    }
+    setSwipeX(0);
+    gestureMode.current = 'idle';
+  }
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -367,7 +370,6 @@ function MessageBubble({
       onTouchEnd={handleTouchEnd}
       onTouchCancel={handleTouchEnd}
       onContextMenu={(e) => { if (longPressTriggered.current) e.preventDefault(); }}
-      {...bind()}
     >
       {!isOwn && (showAvatar
         ? <Avatar fullName={message.author?.fullName ?? '?'} avatarUrl={message.author?.avatarUrl} size={32} />

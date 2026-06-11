@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Send, Reply, X, MoreHorizontal, Star, Trash2, CornerUpLeft } from 'lucide-react';
-import { useDrag } from '@use-gesture/react';
 import { useDmGetOrCreate, useDmMessages, useSendDm } from '../shared/api/dm.hooks';
 import { Avatar } from '../shared/ui/Avatar';
 import { BackButton } from '../shared/ui';
+import { UserProfileModal } from '../shared/ui/UserProfileModal';
 import { isTouchDevice } from '../shared/lib/isTouchDevice';
 
 function formatTime(iso: string, locale: string): string {
@@ -40,73 +40,74 @@ function DmMessageBubble({
   const [swipeX, setSwipeX] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [openDown, setOpenDown] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const menuRef    = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const touchOrigin    = useRef({ x: 0, y: 0 });
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressTriggered = useRef(false);
-  const triggered = useRef(false);
-  const touchOrigin = useRef({ x: 0, y: 0 });
+  const gestureMode = useRef<'idle' | 'swipe' | 'scroll' | 'longpress'>('idle');
+  const triggered   = useRef(false);
 
   function cancelLongPress() {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
-      longPressTimer.current = null;
-    }
+    if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null; }
   }
 
-  // Long-press via native touch events (independent of useDrag pointer events)
   function onTouchStart(e: React.TouchEvent) {
     const touch = e.touches[0];
     if (!touch) return;
     touchOrigin.current = { x: touch.clientX, y: touch.clientY };
+    gestureMode.current = 'idle';
     longPressTriggered.current = false;
+    triggered.current = false;
+
     longPressTimer.current = setTimeout(() => {
-      longPressTriggered.current = true;
-      if (triggerRef.current) {
-        const rect = triggerRef.current.getBoundingClientRect();
-        setOpenDown(rect.top < 120);
+      if (gestureMode.current === 'idle') {
+        gestureMode.current = 'longpress';
+        longPressTriggered.current = true;
+        if (triggerRef.current) {
+          const rect = triggerRef.current.getBoundingClientRect();
+          setOpenDown(rect.top < 120);
+        }
+        setMenuOpen(true);
+        try { navigator.vibrate?.(15); } catch { /* ignore */ }
       }
-      setMenuOpen(true);
-      try { navigator.vibrate?.(15); } catch { /* ignore */ }
     }, LONG_PRESS_MS);
   }
 
   function onTouchMove(e: React.TouchEvent) {
     const touch = e.touches[0];
     if (!touch) return;
-    const dx = Math.abs(touch.clientX - touchOrigin.current.x);
+    const dx = touch.clientX - touchOrigin.current.x;
     const dy = Math.abs(touch.clientY - touchOrigin.current.y);
-    if (dx > 5 || dy > 5) cancelLongPress();
+
+    if (gestureMode.current === 'idle' && (Math.abs(dx) > 6 || dy > 6)) {
+      cancelLongPress();
+      // Right swipe → reply
+      if (Math.abs(dx) > dy && dx > 0) {
+        gestureMode.current = 'swipe';
+      } else {
+        gestureMode.current = 'scroll';
+      }
+    }
+
+    if (gestureMode.current === 'swipe' && dx > 0) {
+      const raw = Math.min(dx, SWIPE_REPLY_THRESHOLD + 20);
+      setSwipeX(raw);
+      if (raw >= SWIPE_REPLY_THRESHOLD && !triggered.current) {
+        triggered.current = true;
+        try { navigator.vibrate?.(30); } catch { /* ignore */ }
+      }
+    }
   }
 
   function onTouchEnd() {
     cancelLongPress();
+    if (gestureMode.current === 'swipe' && swipeX >= SWIPE_REPLY_THRESHOLD) {
+      onReply(message);
+    }
+    setSwipeX(0);
+    gestureMode.current = 'idle';
   }
-
-  // Right-swipe to reply — touch only, axis locked to X so vertical scroll works normally
-  const bind = useDrag(
-    ({ movement: [mx], last }) => {
-      if (!isTouchDevice()) return;
-      cancelLongPress();
-      const x = Math.max(0, Math.min(mx, SWIPE_REPLY_THRESHOLD + 20));
-      setSwipeX(x);
-      if (x >= SWIPE_REPLY_THRESHOLD && !triggered.current) {
-        triggered.current = true;
-        try { navigator.vibrate?.(30); } catch { /* ignore */ }
-      }
-      if (last) {
-        if (x >= SWIPE_REPLY_THRESHOLD) onReply(message);
-        triggered.current = false;
-        setSwipeX(0);
-      }
-    },
-    {
-      axis: 'x',                     // lock to X; library sets touch-action: pan-y automatically
-      pointer: { touch: true },       // desktop mouse is unaffected
-      filterTaps: true,
-      bounds: { left: 0, right: SWIPE_REPLY_THRESHOLD + 20 },
-    },
-  );
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -126,7 +127,6 @@ function DmMessageBubble({
   }
 
   const progress = Math.min(swipeX / SWIPE_REPLY_THRESHOLD, 1);
-  const replyIconOpacity = progress;
   const replyIconColor = swipeX >= SWIPE_REPLY_THRESHOLD ? '#3b82f6' : '#9ca3af';
 
   return (
@@ -136,16 +136,15 @@ function DmMessageBubble({
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
       onContextMenu={(e) => { if (longPressTriggered.current) e.preventDefault(); }}
-      {...bind()}
     >
       {/* Reply icon + swipeable bubble */}
       <div className="relative flex items-center">
-        {/* Reply icon — own: left of bubble; others: right of bubble */}
+        {/* Reply icon: left of own bubbles, right of others' */}
         <div
           className="absolute pointer-events-none"
           style={{
             [message.isOwn ? 'right' : 'left']: '100%',
-            opacity: replyIconOpacity,
+            opacity: progress,
             transition: swipeX === 0 ? 'opacity 0.15s' : 'none',
             pointerEvents: 'none',
           }}
@@ -153,7 +152,7 @@ function DmMessageBubble({
           <Reply size={18} color={replyIconColor} />
         </div>
 
-        {/* Bubble slides RIGHT on swipe; springs back when released */}
+        {/* Bubble slides RIGHT on right swipe */}
         <div
           style={{
             transform: `translateX(${swipeX}px)`,
@@ -235,8 +234,9 @@ export function DirectChatPage() {
   const send = useSendDm(chat?.id ?? '');
   const [text, setText] = useState('');
   const [replyingTo, setReplyingTo] = useState<DmMessage | null>(null);
+  const [showProfile, setShowProfile] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef  = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -256,13 +256,10 @@ export function DirectChatPage() {
   }
 
   function handleKey(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
   }
 
-  // Dismiss keyboard on scroll (touch only)
+  // Dismiss keyboard when user starts scrolling (touch only)
   function handleChatScroll() {
     if (isTouchDevice() && document.activeElement === inputRef.current) {
       inputRef.current?.blur();
@@ -281,10 +278,7 @@ export function DirectChatPage() {
     return (
       <div className="h-full flex flex-col items-center justify-center gap-3 px-6 text-center text-neutral-500">
         <p className="text-sm">{t('dm.notFound', 'Не вдалося відкрити чат')}</p>
-        <button
-          onClick={() => navigate('/chat')}
-          className="text-accent-600 text-sm font-medium hover:underline"
-        >
+        <button onClick={() => navigate('/chat')} className="text-accent-600 text-sm font-medium hover:underline">
           {t('common.back')}
         </button>
       </div>
@@ -295,8 +289,9 @@ export function DirectChatPage() {
     <div className="h-full flex flex-col font-body">
       <header className="glass-header shadow-[0_0.5px_0_rgba(0,0,0,0.06)] shrink-0 px-2 md:px-4 h-12 flex items-center gap-2">
         <BackButton />
+        {/* Tap on peer info → open profile modal (not navigate away) */}
         <button
-          onClick={() => navigate(`/u/${chat.peer.username}`)}
+          onClick={() => setShowProfile(true)}
           className="flex items-center gap-2.5 flex-1 min-w-0 hover:bg-white/50 rounded-xl px-2 py-1 transition"
         >
           <Avatar
@@ -317,7 +312,7 @@ export function DirectChatPage() {
         </button>
       </header>
 
-      {/* Scroll area: dismiss keyboard when user starts scrolling */}
+      {/* Messages — scroll to dismiss keyboard on touch */}
       <div
         className="flex-1 overflow-y-auto px-4 md:px-6 py-4 space-y-2"
         onScroll={handleChatScroll}
@@ -328,12 +323,7 @@ export function DirectChatPage() {
           </p>
         )}
         {messages.map((m) => (
-          <DmMessageBubble
-            key={m.id}
-            message={m}
-            locale={i18n.language}
-            onReply={handleReply}
-          />
+          <DmMessageBubble key={m.id} message={m} locale={i18n.language} onReply={handleReply} />
         ))}
         <div ref={bottomRef} />
       </div>
@@ -343,10 +333,7 @@ export function DirectChatPage() {
           <div className="flex items-center gap-2 mb-2 px-3 py-1.5 bg-accent-50 rounded-xl border-l-2 border-accent-400">
             <Reply size={14} className="text-accent-500 shrink-0" />
             <p className="flex-1 text-xs text-neutral-600 truncate">{replyingTo.content}</p>
-            <button
-              onClick={() => setReplyingTo(null)}
-              className="shrink-0 text-neutral-400 hover:text-neutral-600 transition"
-            >
+            <button onClick={() => setReplyingTo(null)} className="shrink-0 text-neutral-400 hover:text-neutral-600 transition">
               <X size={14} />
             </button>
           </div>
@@ -370,6 +357,13 @@ export function DirectChatPage() {
           </button>
         </div>
       </div>
+
+      {/* Profile modal — opens instead of navigating to profile page */}
+      <UserProfileModal
+        username={chat.peer.username}
+        open={showProfile}
+        onClose={() => setShowProfile(false)}
+      />
     </div>
   );
 }
