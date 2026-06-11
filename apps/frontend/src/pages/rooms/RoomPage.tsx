@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft, Users, Info, ChevronDown, ChevronUp, X, Trash2, Pencil, Star } from 'lucide-react';
+import { m } from 'framer-motion';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { useRoom } from '../../shared/api/rooms.hooks';
 import { useAuth } from '../../shared/store/useAuth';
@@ -15,7 +16,50 @@ import { EditRoomModal } from './EditRoomModal';
 import { usePresence } from '../../shared/api/usePresence';
 import { useArchiveRoom } from '../../shared/api/rooms.hooks';
 import { BackButton, Modal } from '../../shared/ui';
+import { Skeleton } from '../../shared/ui/Skeleton';
 import { getMediaUrl } from '../../shared/lib/getMediaUrl';
+
+function RoomPageSkeleton() {
+  return (
+    <div className="h-full flex flex-col">
+      <div className="glass-header h-12 shrink-0 px-4 flex items-center gap-3">
+        <Skeleton className="w-8 h-8 rounded-xl" />
+        <div className="flex-1 flex justify-center">
+          <Skeleton className="h-5 w-40" />
+        </div>
+        <Skeleton className="w-8 h-8 rounded-xl" />
+      </div>
+      <div className="flex-1 px-4 py-4 space-y-3 overflow-hidden">
+        <div className="flex gap-2.5 items-end">
+          <Skeleton className="w-8 h-8 rounded-full shrink-0" />
+          <Skeleton className="h-10 rounded-2xl w-3/5" />
+        </div>
+        <div className="flex gap-2.5 items-end">
+          <Skeleton className="w-8 h-8 rounded-full shrink-0" />
+          <Skeleton className="h-14 rounded-2xl w-1/2" />
+        </div>
+        <div className="flex gap-2.5 items-end flex-row-reverse">
+          <Skeleton className="h-10 rounded-2xl w-2/5" />
+        </div>
+        <div className="flex gap-2.5 items-end">
+          <Skeleton className="w-8 h-8 rounded-full shrink-0" />
+          <Skeleton className="h-10 rounded-2xl w-3/4" />
+        </div>
+        <div className="flex gap-2.5 items-end flex-row-reverse">
+          <Skeleton className="h-12 rounded-2xl w-1/2" />
+        </div>
+        <div className="flex gap-2.5 items-end">
+          <Skeleton className="w-8 h-8 rounded-full shrink-0" />
+          <Skeleton className="h-10 rounded-2xl w-2/3" />
+        </div>
+      </div>
+      <div className="border-t border-white/30 bg-white/55 backdrop-blur-xl px-4 py-3 flex items-center gap-2 shrink-0">
+        <Skeleton className="flex-1 h-11 rounded-2xl" />
+        <Skeleton className="w-11 h-11 rounded-xl shrink-0" />
+      </div>
+    </div>
+  );
+}
 
 export function RoomPage() {
   const { t } = useTranslation();
@@ -35,13 +79,28 @@ export function RoomPage() {
   const [hasImportant, setHasImportant] = useState(false);
   const archiveRoom = useArchiveRoom();
 
-  if (isLoading) {
-    return (
-      <div className="h-full flex items-center justify-center text-neutral-400 animate-pulse">
-        {t('common.loading')}
-      </div>
-    );
-  }
+  // ── Double-lock loading guard ─────────────────────────────────────────────────
+  // Lock 1: minimum skeleton display time (prevents flash on fast/cached loads)
+  const [isAnimationPlaying, setIsAnimationPlaying] = useState(true);
+  // Lock 2: true until the room query resolves
+  const [isDataLoading, setIsDataLoading] = useState(true);
+
+  useEffect(() => {
+    setIsAnimationPlaying(true);
+    setIsDataLoading(true);
+    const timer = setTimeout(() => setIsAnimationPlaying(false), 500);
+    return () => clearTimeout(timer);
+  }, [id]);
+
+  useEffect(() => {
+    if (!isLoading) setIsDataLoading(false);
+  }, [isLoading, id]);
+
+  // Phase 1: skeleton timer still running
+  if (isAnimationPlaying) return <RoomPageSkeleton />;
+
+  // Phase 2: timer done, waiting for data
+  if (isDataLoading) return <RoomPageSkeleton />;
 
   if (isError || !room) {
     return (
@@ -213,7 +272,12 @@ export function RoomPage() {
   /* ---------- DESKTOP ---------- */
   if (isDesktop) {
     return (
-      <div className="h-full flex flex-col overflow-hidden">
+      <m.div
+        className="h-full flex flex-col overflow-hidden"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.1, ease: 'easeOut' }}
+      >
         <header className="relative glass-header shadow-[0_0.5px_0_rgba(0,0,0,0.06)] shrink-0 px-4 h-12 flex items-center">
           <div className="flex items-center justify-start min-w-[2.5rem] shrink-0">
             <BackButton />
@@ -316,13 +380,18 @@ export function RoomPage() {
           {infoMeta}
         </Modal>
         {deleteConfirmModal}
-      </div>
+      </m.div>
     );
   }
 
   /* ---------- MOBILE ---------- */
   return (
-    <div className="h-full flex flex-col overflow-hidden">
+    <m.div
+      className="h-full flex flex-col overflow-hidden"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.1, ease: 'easeOut' }}
+    >
       <header className="relative glass-header shadow-[0_0.5px_0_rgba(0,0,0,0.06)] shrink-0 px-2 h-12 flex items-center gap-1">
         <button
           onClick={() => navigate('/rooms')}
@@ -384,6 +453,6 @@ export function RoomPage() {
       {modal}
       {showEditModal && <EditRoomModal room={room} onClose={() => setShowEditModal(false)} />}
       {deleteConfirmModal}
-    </div>
+    </m.div>
   );
 }

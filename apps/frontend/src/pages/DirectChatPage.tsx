@@ -2,9 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Send, Reply, X, MoreHorizontal, Star, Trash2, CornerUpLeft } from 'lucide-react';
+import { m } from 'framer-motion';
 import { useDmGetOrCreate, useDmMessages, useSendDm } from '../shared/api/dm.hooks';
 import { Avatar } from '../shared/ui/Avatar';
 import { BackButton } from '../shared/ui';
+import { Skeleton } from '../shared/ui/Skeleton';
 import { UserProfileModal } from '../shared/ui/UserProfileModal';
 import { isTouchDevice } from '../shared/lib/isTouchDevice';
 
@@ -235,6 +237,45 @@ function DmMessageBubble({
   );
 }
 
+function DmChatSkeleton() {
+  return (
+    <div className="h-full flex flex-col font-body">
+      <div className="glass-header h-12 shrink-0 px-2 md:px-4 flex items-center gap-2">
+        <Skeleton className="w-8 h-8 rounded-xl" />
+        <Skeleton className="w-9 h-9 rounded-full shrink-0" />
+        <div className="flex flex-col gap-1.5">
+          <Skeleton className="h-4 w-28" />
+          <Skeleton className="h-3 w-16" />
+        </div>
+      </div>
+      <div className="flex-1 px-4 md:px-6 py-4 space-y-2 overflow-hidden">
+        <div className="flex gap-2.5 items-end">
+          <Skeleton className="h-10 rounded-2xl rounded-tl-md w-2/5" />
+        </div>
+        <div className="flex gap-2.5 items-end flex-row-reverse">
+          <Skeleton className="h-10 rounded-2xl rounded-tr-md w-1/3" />
+        </div>
+        <div className="flex gap-2.5 items-end">
+          <Skeleton className="h-14 rounded-2xl rounded-tl-md w-1/2" />
+        </div>
+        <div className="flex gap-2.5 items-end flex-row-reverse">
+          <Skeleton className="h-10 rounded-2xl rounded-tr-md w-2/5" />
+        </div>
+        <div className="flex gap-2.5 items-end">
+          <Skeleton className="h-10 rounded-2xl rounded-tl-md w-3/5" />
+        </div>
+        <div className="flex gap-2.5 items-end flex-row-reverse">
+          <Skeleton className="h-12 rounded-2xl rounded-tr-md w-1/3" />
+        </div>
+      </div>
+      <div className="px-4 md:px-6 py-3 border-t border-white/30 bg-white/55 backdrop-blur-xl flex items-center gap-2 shrink-0">
+        <Skeleton className="flex-1 h-11 rounded-2xl" />
+        <Skeleton className="w-11 h-11 rounded-xl shrink-0" />
+      </div>
+    </div>
+  );
+}
+
 export function DirectChatPage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -248,6 +289,23 @@ export function DirectChatPage() {
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef  = useRef<HTMLInputElement>(null);
+
+  // ── Double-lock loading guard ─────────────────────────────────────────────────
+  // Lock 1: minimum skeleton display time (prevents flash on fast/cached loads)
+  const [isAnimationPlaying, setIsAnimationPlaying] = useState(true);
+  // Lock 2: true until the DM chat query resolves
+  const [isDataLoading, setIsDataLoading] = useState(true);
+
+  useEffect(() => {
+    setIsAnimationPlaying(true);
+    setIsDataLoading(true);
+    const timer = setTimeout(() => setIsAnimationPlaying(false), 500);
+    return () => clearTimeout(timer);
+  }, [username]);
+
+  useEffect(() => {
+    if (!isLoading) setIsDataLoading(false);
+  }, [isLoading, username]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -277,13 +335,11 @@ export function DirectChatPage() {
     }
   }
 
-  if (!username || isLoading) {
-    return (
-      <div className="h-full flex items-center justify-center text-neutral-400 animate-pulse">
-        {t('common.loading')}
-      </div>
-    );
-  }
+  // Phase 1: skeleton timer still running
+  if (!username || isAnimationPlaying) return <DmChatSkeleton />;
+
+  // Phase 2: timer done, waiting for data
+  if (isDataLoading) return <DmChatSkeleton />;
 
   if (isError || !chat) {
     return (
@@ -297,7 +353,12 @@ export function DirectChatPage() {
   }
 
   return (
-    <div className="h-full flex flex-col font-body">
+    <m.div
+      className="h-full flex flex-col font-body"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.1, ease: 'easeOut' }}
+    >
       <header className="glass-header shadow-[0_0.5px_0_rgba(0,0,0,0.06)] shrink-0 px-2 md:px-4 h-12 flex items-center gap-2">
         <BackButton />
         {/* Tap on peer info → open profile modal (not navigate away) */}
@@ -383,6 +444,6 @@ export function DirectChatPage() {
         open={showProfile}
         onClose={() => setShowProfile(false)}
       />
-    </div>
+    </m.div>
   );
 }

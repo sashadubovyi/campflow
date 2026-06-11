@@ -3,7 +3,7 @@ import { m } from 'framer-motion';
 import { useAuthStore } from '../store/auth.store';
 import { Skeleton } from './Skeleton';
 
-// ─── Skeleton screen (waiting for auth bootstrap) ─────────────────────────────
+// ─── Skeleton screen ──────────────────────────────────────────────────────────
 
 function SkeletonScreen() {
   return (
@@ -45,19 +45,25 @@ interface Props {
   children: ReactNode;
 }
 
-/**
- * Shows a skeleton while auth bootstrap is running, then fades in the app.
- * No splash/preloader animation — straight to skeleton → content.
- */
 export function AppPreloader({ children }: Props) {
   const isInitialized = useAuthStore((s) => s.isInitialized);
-  const [ready, setReady] = useState(isInitialized);
+
+  // Lock 1 — minimum display time so the skeleton always completes a full render cycle
+  const [isAnimationPlaying, setIsAnimationPlaying] = useState(true);
+  // Lock 2 — true until auth bootstrap confirms the session
+  const [isDataLoading, setIsDataLoading] = useState(!isInitialized);
 
   useEffect(() => {
-    if (isInitialized) setReady(true);
+    const timer = setTimeout(() => setIsAnimationPlaying(false), 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (isInitialized) setIsDataLoading(false);
   }, [isInitialized]);
 
-  if (!ready) {
+  // Phase 1: skeleton animation minimum time not elapsed yet
+  if (isAnimationPlaying) {
     return (
       <div className="fixed inset-0 z-[200]">
         <SkeletonScreen />
@@ -65,6 +71,16 @@ export function AppPreloader({ children }: Props) {
     );
   }
 
+  // Phase 2: animation done, but auth session not confirmed yet → keep skeleton
+  if (isDataLoading) {
+    return (
+      <div className="fixed inset-0 z-[200]">
+        <SkeletonScreen />
+      </div>
+    );
+  }
+
+  // Phase 3: both locks released → fade in the app
   return (
     <m.div
       initial={{ opacity: 0 }}
