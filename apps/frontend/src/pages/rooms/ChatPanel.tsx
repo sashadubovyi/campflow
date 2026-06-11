@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Send, MessageCircle, MoreHorizontal, Trash2, Star, RefreshCw, CornerUpLeft, X } from 'lucide-react';
+import { useDrag } from '@use-gesture/react';
 import { useRoomChat } from '../../shared/api/useRoomChat';
 import { useAuth } from '../../shared/store/useAuth';
 import { Avatar } from '../../shared/ui/Avatar';
 import { Skeleton } from '../../shared/ui/Skeleton';
 import { useBlockedUsers } from '../../shared/api/blocks.hooks';
+import { isTouchDevice } from '../../shared/lib/isTouchDevice';
 import type { Message } from '../../shared/api/chat.api';
 
 interface Props {
@@ -94,9 +96,19 @@ export function ChatPanel({ roomId, roomName: _roomName, importantOnly = false, 
 
   const othersTyping = [...typingUsers].filter((id) => id !== user?.id);
 
+  // Keyboard dismiss on scroll (touch only)
+  function handleChatScroll() {
+    if (isTouchDevice() && document.activeElement === inputRef.current) {
+      inputRef.current?.blur();
+    }
+  }
+
   return (
     <section className="h-full flex flex-col min-h-0">
-      <div className="flex-1 overflow-y-auto scrollbar-thin px-4 md:px-6 py-4 space-y-1">
+      <div
+        className="flex-1 overflow-y-auto scrollbar-thin px-4 md:px-6 py-4 space-y-1"
+        onScroll={handleChatScroll}
+      >
         {isLoading && (
           <div className="space-y-3 pt-2">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -107,7 +119,6 @@ export function ChatPanel({ roomId, roomName: _roomName, importantOnly = false, 
             ))}
           </div>
         )}
-
         {!isLoading && visibleMessages.length === 0 && (
           <div className="h-full flex items-center justify-center">
             <div className="text-center text-neutral-400">
@@ -229,66 +240,67 @@ function MessageBubble({
   const triggerRef = useRef<HTMLButtonElement>(null);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressTriggered = useRef(false);
-  const touchOrigin = useRef<{ x: number; y: number } | null>(null);
-  const gestureMode = useRef<'idle' | 'swipe' | 'longpress' | 'scroll'>('idle');
-
-  function startLongPress() {
-    longPressTriggered.current = false;
-    longPressTimer.current = setTimeout(() => {
-      if (gestureMode.current !== 'swipe' && gestureMode.current !== 'scroll') {
-        longPressTriggered.current = true;
-        gestureMode.current = 'longpress';
-        setOpenDown(false);
-        setMenuOpen(true);
-        try { navigator.vibrate?.(15); } catch { /* ignore */ }
-      }
-    }, 550);
-  }
+  const triggered = useRef(false);
+  const touchOrigin = useRef({ x: 0, y: 0 });
 
   function cancelLongPress() {
     if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null; }
   }
 
+  // Long-press via native touch events (independent of pointer-based useDrag)
   function handleTouchStart(e: React.TouchEvent) {
     if (message.type === 'system') return;
     const touch = e.touches[0];
     if (!touch) return;
     touchOrigin.current = { x: touch.clientX, y: touch.clientY };
-    gestureMode.current = 'idle';
-    startLongPress();
+    longPressTriggered.current = false;
+    longPressTimer.current = setTimeout(() => {
+      longPressTriggered.current = true;
+      if (triggerRef.current) {
+        const rect = triggerRef.current.getBoundingClientRect();
+        setOpenDown(rect.top < 120);
+      }
+      setMenuOpen(true);
+      try { navigator.vibrate?.(15); } catch { /* ignore */ }
+    }, 550);
   }
 
   function handleTouchMove(e: React.TouchEvent) {
     const touch = e.touches[0];
-    if (!touch || !touchOrigin.current) return;
-    const dx = touch.clientX - touchOrigin.current.x;
-    const adx = Math.abs(dx);
+    if (!touch) return;
+    const adx = Math.abs(touch.clientX - touchOrigin.current.x);
     const ady = Math.abs(touch.clientY - touchOrigin.current.y);
-
-    if (gestureMode.current === 'idle' && (adx > 5 || ady > 5)) {
-      if (adx > ady && dx < 0) {
-        gestureMode.current = 'swipe';
-        cancelLongPress();
-      } else {
-        gestureMode.current = 'scroll';
-        cancelLongPress();
-      }
-    }
-
-    if (gestureMode.current === 'swipe' && dx < 0) {
-      setSwipeX(Math.min(-dx, 70));
-    }
+    if (adx > 5 || ady > 5) cancelLongPress();
   }
 
   function handleTouchEnd() {
     cancelLongPress();
-    if (gestureMode.current === 'swipe' && swipeX >= SWIPE_REPLY_THRESHOLD) {
-      onReply();
-      try { navigator.vibrate?.(15); } catch { /* ignore */ }
-    }
-    setSwipeX(0);
-    gestureMode.current = 'idle';
   }
+
+  // Right-swipe to reply via @use-gesture/react — touch only, axis:x lets vertical scroll pass through
+  const bind = useDrag(
+    ({ movement: [mx], last }) => {
+      if (message.type === 'system' || !isTouchDevice()) return;
+      cancelLongPress();
+      const x = Math.max(0, Math.min(mx, SWIPE_REPLY_THRESHOLD + 20));
+      setSwipeX(x);
+      if (x >= SWIPE_REPLY_THRESHOLD && !triggered.current) {
+        triggered.current = true;
+        try { navigator.vibrate?.(15); } catch { /* ignore */ }
+      }
+      if (last) {
+        if (x >= SWIPE_REPLY_THRESHOLD) onReply();
+        triggered.current = false;
+        setSwipeX(0);
+      }
+    },
+    {
+      axis: 'x',
+      pointer: { touch: true },
+      filterTaps: true,
+      bounds: { left: 0, right: SWIPE_REPLY_THRESHOLD + 20 },
+    },
+  );
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -355,6 +367,7 @@ function MessageBubble({
       onTouchEnd={handleTouchEnd}
       onTouchCancel={handleTouchEnd}
       onContextMenu={(e) => { if (longPressTriggered.current) e.preventDefault(); }}
+      {...bind()}
     >
       {!isOwn && (showAvatar
         ? <Avatar fullName={message.author?.fullName ?? '?'} avatarUrl={message.author?.avatarUrl} size={32} />
@@ -377,13 +390,13 @@ function MessageBubble({
 
         {/* Bubble + reply icon layer */}
         <div className="relative flex items-center">
-          {/* Reply icon — appears behind the bubble when swiping left */}
+          {/* Reply icon — appears to the side of the bubble when swiping right */}
           <div
             className="absolute pointer-events-none"
             style={{
               [isOwn ? 'right' : 'left']: '100%',
               opacity: replyIconOpacity,
-              transform: `translateX(${isOwn ? '' : '-'}${Math.min(swipeX * 0.4, 16)}px)`,
+              transform: `translateX(${isOwn ? -1 : 1}${Math.min(swipeX * 0.3, 10)}px)`,
               transition: swipeX === 0 ? 'opacity 0.15s' : 'none',
             }}
           >
@@ -393,11 +406,12 @@ function MessageBubble({
             />
           </div>
 
-          {/* Bubble with swipe transform */}
+          {/* Bubble slides RIGHT on right swipe; springs back on release */}
           <div
             style={{
-              transform: `translateX(-${swipeX}px)`,
-              transition: swipeX === 0 ? 'transform 0.2s ease' : 'none',
+              transform: `translateX(${swipeX}px)`,
+              transition: swipeX === 0 ? 'transform 0.22s cubic-bezier(0.2,0,0,1)' : 'none',
+              touchAction: 'pan-y',
             }}
           >
             {message.isImportant ? (

@@ -2,9 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Send, Reply, X, MoreHorizontal, Star, Trash2, CornerUpLeft } from 'lucide-react';
+import { useDrag } from '@use-gesture/react';
 import { useDmGetOrCreate, useDmMessages, useSendDm } from '../shared/api/dm.hooks';
 import { Avatar } from '../shared/ui/Avatar';
 import { BackButton } from '../shared/ui';
+import { isTouchDevice } from '../shared/lib/isTouchDevice';
 
 function formatTime(iso: string, locale: string): string {
   const map: Record<string, string> = { uk: 'uk-UA', en: 'en-US', ru: 'ru-RU' };
@@ -38,78 +40,78 @@ function DmMessageBubble({
   const [swipeX, setSwipeX] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [openDown, setOpenDown] = useState(false);
-  const gestureMode = useRef<'idle' | 'swipe' | 'scroll' | 'longpress'>('idle');
-  const touchOrigin = useRef({ x: 0, y: 0 });
-  const triggered = useRef(false);
-  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressTriggered = useRef(false);
+  const triggered = useRef(false);
+  const touchOrigin = useRef({ x: 0, y: 0 });
 
   function cancelLongPress() {
-    if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null; }
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
   }
 
+  // Long-press via native touch events (independent of useDrag pointer events)
   function onTouchStart(e: React.TouchEvent) {
     const touch = e.touches[0];
     if (!touch) return;
     touchOrigin.current = { x: touch.clientX, y: touch.clientY };
-    gestureMode.current = 'idle';
-    triggered.current = false;
-
+    longPressTriggered.current = false;
     longPressTimer.current = setTimeout(() => {
-      if (gestureMode.current === 'idle') {
-        gestureMode.current = 'longpress';
-        if (triggerRef.current) {
-          const rect = triggerRef.current.getBoundingClientRect();
-          setOpenDown(rect.top < 120);
-        }
-        setMenuOpen(true);
-        try { navigator.vibrate?.(15); } catch { /* ignore */ }
+      longPressTriggered.current = true;
+      if (triggerRef.current) {
+        const rect = triggerRef.current.getBoundingClientRect();
+        setOpenDown(rect.top < 120);
       }
+      setMenuOpen(true);
+      try { navigator.vibrate?.(15); } catch { /* ignore */ }
     }, LONG_PRESS_MS);
   }
 
   function onTouchMove(e: React.TouchEvent) {
     const touch = e.touches[0];
     if (!touch) return;
-    const dx = touch.clientX - touchOrigin.current.x;
+    const dx = Math.abs(touch.clientX - touchOrigin.current.x);
     const dy = Math.abs(touch.clientY - touchOrigin.current.y);
-
-    if (gestureMode.current === 'idle' && (Math.abs(dx) > 6 || dy > 6)) {
-      if (Math.abs(dx) > dy && dx < 0) {
-        gestureMode.current = 'swipe';
-        cancelLongPress();
-      } else {
-        gestureMode.current = 'scroll';
-        cancelLongPress();
-      }
-    }
-
-    if (gestureMode.current === 'swipe' && dx < 0) {
-      const raw = Math.min(-dx, SWIPE_REPLY_THRESHOLD + 20);
-      setSwipeX(raw);
-      if (raw >= SWIPE_REPLY_THRESHOLD && !triggered.current) {
-        triggered.current = true;
-        try { navigator.vibrate?.(30); } catch { /* ignore */ }
-      }
-    }
+    if (dx > 5 || dy > 5) cancelLongPress();
   }
 
   function onTouchEnd() {
     cancelLongPress();
-    if (gestureMode.current === 'swipe' && swipeX >= SWIPE_REPLY_THRESHOLD) {
-      onReply(message);
-    }
-    setSwipeX(0);
-    gestureMode.current = 'idle';
   }
+
+  // Right-swipe to reply — touch only, axis locked to X so vertical scroll works normally
+  const bind = useDrag(
+    ({ movement: [mx], last }) => {
+      if (!isTouchDevice()) return;
+      cancelLongPress();
+      const x = Math.max(0, Math.min(mx, SWIPE_REPLY_THRESHOLD + 20));
+      setSwipeX(x);
+      if (x >= SWIPE_REPLY_THRESHOLD && !triggered.current) {
+        triggered.current = true;
+        try { navigator.vibrate?.(30); } catch { /* ignore */ }
+      }
+      if (last) {
+        if (x >= SWIPE_REPLY_THRESHOLD) onReply(message);
+        triggered.current = false;
+        setSwipeX(0);
+      }
+    },
+    {
+      axis: 'x',                     // lock to X; library sets touch-action: pan-y automatically
+      pointer: { touch: true },       // desktop mouse is unaffected
+      filterTaps: true,
+      bounds: { left: 0, right: SWIPE_REPLY_THRESHOLD + 20 },
+    },
+  );
 
   useEffect(() => {
     if (!menuOpen) return;
     function handler(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false);
-      }
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
     }
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
@@ -133,10 +135,12 @@ function DmMessageBubble({
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
-      onContextMenu={(e) => { if (gestureMode.current === 'longpress') e.preventDefault(); }}
+      onContextMenu={(e) => { if (longPressTriggered.current) e.preventDefault(); }}
+      {...bind()}
     >
-      {/* Reply icon behind bubble */}
+      {/* Reply icon + swipeable bubble */}
       <div className="relative flex items-center">
+        {/* Reply icon — own: left of bubble; others: right of bubble */}
         <div
           className="absolute pointer-events-none"
           style={{
@@ -149,10 +153,11 @@ function DmMessageBubble({
           <Reply size={18} color={replyIconColor} />
         </div>
 
+        {/* Bubble slides RIGHT on swipe; springs back when released */}
         <div
           style={{
-            transform: `translateX(${-swipeX}px)`,
-            transition: swipeX === 0 ? 'transform 0.2s ease' : 'none',
+            transform: `translateX(${swipeX}px)`,
+            transition: swipeX === 0 ? 'transform 0.22s cubic-bezier(0.2,0,0,1)' : 'none',
             touchAction: 'pan-y',
           }}
           className={`max-w-[75%] px-3.5 py-2 text-sm rounded-2xl shadow-sm ${
@@ -257,6 +262,13 @@ export function DirectChatPage() {
     }
   }
 
+  // Dismiss keyboard on scroll (touch only)
+  function handleChatScroll() {
+    if (isTouchDevice() && document.activeElement === inputRef.current) {
+      inputRef.current?.blur();
+    }
+  }
+
   if (!username || isLoading) {
     return (
       <div className="h-full flex items-center justify-center text-neutral-400 animate-pulse">
@@ -305,7 +317,11 @@ export function DirectChatPage() {
         </button>
       </header>
 
-      <div className="flex-1 overflow-y-auto px-4 md:px-6 py-4 space-y-2">
+      {/* Scroll area: dismiss keyboard when user starts scrolling */}
+      <div
+        className="flex-1 overflow-y-auto px-4 md:px-6 py-4 space-y-2"
+        onScroll={handleChatScroll}
+      >
         {messages.length === 0 && (
           <p className="text-center text-neutral-400 text-sm pt-12">
             {t('dm.noMessages', 'Ще немає повідомлень')}
