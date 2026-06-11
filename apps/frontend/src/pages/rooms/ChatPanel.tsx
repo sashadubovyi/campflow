@@ -32,6 +32,7 @@ export function ChatPanel({ roomId, roomName: _roomName, importantOnly = false, 
   const { data: blockedUsers } = useBlockedUsers();
   const [text, setText] = useState('');
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
+  const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -143,6 +144,9 @@ export function ChatPanel({ roomId, roomName: _roomName, importantOnly = false, 
               isOwn={isOwn}
               showAvatar={showAvatar}
               locale={i18n.language}
+              activeMenuId={activeMenuId}
+              onMenuOpen={setActiveMenuId}
+              onMenuClose={() => setActiveMenuId(null)}
               onReply={() => startReplyTo(m)}
               onDelete={() => deleteMessage(m.id)}
               onToggleImportant={() => toggleImportant(m.id)}
@@ -216,6 +220,9 @@ function MessageBubble({
   isOwn,
   showAvatar,
   locale,
+  activeMenuId,
+  onMenuOpen,
+  onMenuClose,
   onReply,
   onDelete,
   onToggleImportant,
@@ -225,13 +232,16 @@ function MessageBubble({
   isOwn: boolean;
   showAvatar: boolean;
   locale: string;
+  activeMenuId: string | null;
+  onMenuOpen: (id: string) => void;
+  onMenuClose: () => void;
   onReply: () => void;
   onDelete: () => void;
   onToggleImportant: () => void;
   onRetry: () => void;
 }) {
   const { t } = useTranslation();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const menuOpen = activeMenuId === message.id;
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [openDown, setOpenDown] = useState(false);
   const [swipeX, setSwipeX] = useState(0);
@@ -263,7 +273,7 @@ function MessageBubble({
           const rect = triggerRef.current.getBoundingClientRect();
           setOpenDown(rect.top < 120);
         }
-        setMenuOpen(true);
+        onMenuOpen(message.id);
         try { navigator.vibrate?.(15); } catch { /* ignore */ }
       }
     }, 550);
@@ -309,20 +319,24 @@ function MessageBubble({
     if (!menuOpen) return;
     function handler(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false);
+        onMenuClose();
         setDeleteConfirm(false);
       }
     }
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
-  }, [menuOpen]);
+  }, [menuOpen, onMenuClose]);
 
   function handleToggleMenu() {
     if (!menuOpen && triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
       setOpenDown(rect.top < 120);
     }
-    setMenuOpen((v) => !v);
+    if (menuOpen) {
+      onMenuClose();
+    } else {
+      onMenuOpen(message.id);
+    }
     setDeleteConfirm(false);
   }
 
@@ -453,7 +467,7 @@ function MessageBubble({
           <div className={`absolute ${openDown ? 'top-8' : 'bottom-8'} ${isOwn ? 'right-0' : 'left-0'} glass-surface rounded-2xl py-1 z-20 min-w-[160px]`}>
             {/* Reply — desktop only, mobile uses swipe */}
             <button
-              onClick={() => { onReply(); setMenuOpen(false); }}
+              onClick={() => { onReply(); onMenuClose(); }}
               className="hidden md:flex w-full items-center gap-2.5 px-3 py-2 text-sm text-neutral-700 hover:bg-white/50 transition-colors"
             >
               <CornerUpLeft size={14} className="text-neutral-400" />
@@ -461,7 +475,7 @@ function MessageBubble({
             </button>
 
             <button
-              onClick={() => { onToggleImportant(); setMenuOpen(false); }}
+              onClick={() => { onToggleImportant(); onMenuClose(); }}
               className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-neutral-700 hover:bg-white/50 transition-colors"
             >
               <Star size={14} className={message.isImportant ? 'text-amber-400 fill-amber-400' : 'text-neutral-400'} />
@@ -482,7 +496,7 @@ function MessageBubble({
                   <div className="px-3 py-2">
                     <p className="text-xs text-neutral-500 mb-2">{t('chat.deleteConfirm') ?? 'Delete this message?'}</p>
                     <div className="flex gap-2">
-                      <button onClick={() => { onDelete(); setMenuOpen(false); setDeleteConfirm(false); }}
+                      <button onClick={() => { onDelete(); onMenuClose(); setDeleteConfirm(false); }}
                         className="flex-1 text-xs bg-red-500 text-white rounded-lg py-1 hover:bg-red-600 transition-colors">
                         {t('common.yes') ?? 'Yes'}
                       </button>

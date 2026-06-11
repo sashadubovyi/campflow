@@ -366,21 +366,17 @@ export function RoomPage() {
         {chat}
       </div>
 
-      {/* Members Modal */}
-      <Modal open={membersOpen} onClose={() => setMembersOpen(false)} title={t('rooms.members')} size="lg">
-        <div className="h-[60vh] overflow-hidden rounded-2xl">
-          {members}
-        </div>
+      {/* Members Modal — full-height sheet */}
+      <Modal open={membersOpen} onClose={() => setMembersOpen(false)} title={t('rooms.members')} fullHeight>
+        {members}
       </Modal>
 
-      {/* Info + Polls Modal */}
-      <Modal open={infoOpen} onClose={() => setInfoOpen(false)} size="md">
-        <div className="space-y-4">
+      {/* Info + Polls Modal — full-height sheet */}
+      <Modal open={infoOpen} onClose={() => setInfoOpen(false)} fullHeight>
+        <div className="overflow-y-auto h-full px-6 pt-2 pb-8 space-y-4">
           {infoMeta}
           <div className="border-t border-neutral-100 pt-1">
-            <div className="h-[42vh] overflow-hidden rounded-2xl">
-              {polls}
-            </div>
+            {polls}
           </div>
         </div>
       </Modal>

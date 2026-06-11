@@ -30,15 +30,21 @@ const LONG_PRESS_MS = 550;
 function DmMessageBubble({
   message,
   locale,
+  activeMenuId,
+  onMenuOpen,
+  onMenuClose,
   onReply,
 }: {
   message: DmMessage;
   locale: string;
+  activeMenuId: string | null;
+  onMenuOpen: (id: string) => void;
+  onMenuClose: () => void;
   onReply: (msg: DmMessage) => void;
 }) {
   const { t } = useTranslation();
+  const menuOpen = activeMenuId === message.id;
   const [swipeX, setSwipeX] = useState(0);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [openDown, setOpenDown] = useState(false);
   const menuRef    = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -68,7 +74,7 @@ function DmMessageBubble({
           const rect = triggerRef.current.getBoundingClientRect();
           setOpenDown(rect.top < 120);
         }
-        setMenuOpen(true);
+        onMenuOpen(message.id);
         try { navigator.vibrate?.(15); } catch { /* ignore */ }
       }
     }, LONG_PRESS_MS);
@@ -112,18 +118,22 @@ function DmMessageBubble({
   useEffect(() => {
     if (!menuOpen) return;
     function handler(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) onMenuClose();
     }
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
-  }, [menuOpen]);
+  }, [menuOpen, onMenuClose]);
 
   function handleToggleMenu() {
     if (!menuOpen && triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
       setOpenDown(rect.top < 120);
     }
-    setMenuOpen((v) => !v);
+    if (menuOpen) {
+      onMenuClose();
+    } else {
+      onMenuOpen(message.id);
+    }
   }
 
   const progress = Math.min(swipeX / SWIPE_REPLY_THRESHOLD, 1);
@@ -193,14 +203,14 @@ function DmMessageBubble({
             className={`absolute ${openDown ? 'top-8' : 'bottom-8'} ${message.isOwn ? 'right-0' : 'left-0'} glass-surface rounded-2xl py-1 z-20 min-w-[160px]`}
           >
             <button
-              onClick={() => { onReply(message); setMenuOpen(false); }}
+              onClick={() => { onReply(message); onMenuClose(); }}
               className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-neutral-700 hover:bg-white/50 transition-colors"
             >
               <CornerUpLeft size={14} className="text-neutral-400" />
               {t('chat.reply', 'Відповісти')}
             </button>
             <button
-              onClick={() => setMenuOpen(false)}
+              onClick={onMenuClose}
               className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-neutral-700 hover:bg-white/50 transition-colors"
             >
               <Star size={14} className="text-neutral-400" />
@@ -210,7 +220,7 @@ function DmMessageBubble({
               <>
                 <div className="mx-3 my-1 border-t border-neutral-100" />
                 <button
-                  onClick={() => setMenuOpen(false)}
+                  onClick={onMenuClose}
                   className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors"
                 >
                   <Trash2 size={14} />
@@ -235,6 +245,7 @@ export function DirectChatPage() {
   const [text, setText] = useState('');
   const [replyingTo, setReplyingTo] = useState<DmMessage | null>(null);
   const [showProfile, setShowProfile] = useState(false);
+  const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef  = useRef<HTMLInputElement>(null);
 
@@ -323,7 +334,15 @@ export function DirectChatPage() {
           </p>
         )}
         {messages.map((m) => (
-          <DmMessageBubble key={m.id} message={m} locale={i18n.language} onReply={handleReply} />
+          <DmMessageBubble
+            key={m.id}
+            message={m}
+            locale={i18n.language}
+            activeMenuId={activeMenuId}
+            onMenuOpen={setActiveMenuId}
+            onMenuClose={() => setActiveMenuId(null)}
+            onReply={handleReply}
+          />
         ))}
         <div ref={bottomRef} />
       </div>
