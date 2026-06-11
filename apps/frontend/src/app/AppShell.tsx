@@ -6,8 +6,8 @@ import { MobileTabBar } from './MobileTabBar';
 import { CreateRoomModal } from '../pages/rooms/CreateRoomModal';
 import { JoinRoomModal } from '../pages/rooms/JoinRoomModal';
 
-const enterTransition = { duration: 0.28, ease: 'easeOut' } as const;
-const exitTransition  = { duration: 0.15, ease: 'easeIn'  } as const;
+const enterTransition = { duration: 0.56, ease: 'easeOut' } as const;
+const exitTransition  = { duration: 0.30, ease: 'easeIn'  } as const;
 
 export function AppShell() {
   const navigate = useNavigate();
