@@ -2,12 +2,10 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft, Users, Info, ChevronDown, ChevronUp, X, Trash2, Pencil, Star } from 'lucide-react';
-import { useDrag } from '@use-gesture/react';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { useRoom } from '../../shared/api/rooms.hooks';
 import { useAuth } from '../../shared/store/useAuth';
 import { useMediaQuery } from '../../shared/lib/useMediaQuery';
-import { isTouchDevice } from '../../shared/lib/isTouchDevice';
 import { MembersPanel } from './MembersPanel';
 import { ChatPanel } from './ChatPanel';
 import { PollsPanel } from './PollsPanel';
@@ -27,8 +25,8 @@ export function RoomPage() {
   const { data: room, isLoading, isError } = useRoom(id ?? '');
   const [showCloseModal, setShowCloseModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [mobileView, setMobileView] = useState<'chat' | 'members' | 'info'>('chat');
   const [infoOpen, setInfoOpen] = useState(false);
+  const [membersOpen, setMembersOpen] = useState(false);
   const isDesktop = useMediaQuery('(min-width: 768px)');
   usePresence(id ?? '');
   const [showMembers, setShowMembers] = useState(false);
@@ -36,40 +34,6 @@ export function RoomPage() {
   const [importantOnly, setImportantOnly] = useState(false);
   const [hasImportant, setHasImportant] = useState(false);
   const archiveRoom = useArchiveRoom();
-
-  // ── Mobile gesture: horizontal swipe on main content to switch tabs ──────────
-  // Left swipe: chat → members → info   |   Right swipe: info → members → chat
-  const SWIPE_TAB_PX = 60;
-  const bindTabSwipe = useDrag(
-    ({ movement: [mx], velocity: [vx], direction: [dx], last }) => {
-      if (!last || !isTouchDevice()) return;
-      const isLeft  = mx < -SWIPE_TAB_PX || (vx > 0.45 && dx < 0);
-      const isRight = mx >  SWIPE_TAB_PX || (vx > 0.45 && dx > 0);
-      if (isLeft)  setMobileView((v) => v === 'chat' ? 'members' : v === 'members' ? 'info' : 'info');
-      if (isRight) setMobileView((v) => v === 'info' ? 'members' : v === 'members' ? 'chat' : 'chat');
-    },
-    { axis: 'x', pointer: { touch: true }, filterTaps: true },
-  );
-
-  // ── Mobile gesture: swipe right on overlay to close side panel ───────────────
-  const bindOverlayClose = useDrag(
-    ({ movement: [mx], velocity: [vx], last }) => {
-      if (!last || !isTouchDevice()) return;
-      if (mx > 50 || vx > 0.45) setMobileView('chat');
-    },
-    { axis: 'x', pointer: { touch: true }, filterTaps: true },
-  );
-
-  // ── Mobile gesture: right-edge swipe to open members panel ───────────────────
-  const bindEdgeOpen = useDrag(
-    ({ initial: [ix], movement: [mx], last }) => {
-      if (!last || !isTouchDevice()) return;
-      if (ix > window.innerWidth - 24 && mx < -48 && mobileView === 'chat') {
-        setMobileView('members');
-      }
-    },
-    { pointer: { touch: true }, filterTaps: true },
-  );
 
   if (isLoading) {
     return (
@@ -120,9 +84,7 @@ export function RoomPage() {
       onClick={() => setImportantOnly((v) => !v)}
       title={t('chat.importantFilter', 'Тільки важливі')}
       className={`flex items-center justify-center w-9 h-9 rounded-xl transition ${
-        importantOnly
-          ? 'bg-amber-50 text-amber-500'
-          : 'glass-icon'
+        importantOnly ? 'bg-amber-50 text-amber-500' : 'glass-icon'
       }`}
     >
       <Star size={16} className={importantOnly ? 'fill-amber-400' : ''} />
@@ -131,7 +93,7 @@ export function RoomPage() {
 
   const closeBtn = isAdmin && !isClosed && (
     <button
-      onClick={() => { setMobileView('chat'); setShowCloseModal(true); }}
+      onClick={() => setShowCloseModal(true)}
       title={t('polls.ai.closeRoom')}
       aria-label={t('polls.ai.closeRoom')}
       className="w-full flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl transition bg-danger-gradient text-white text-sm font-semibold whitespace-nowrap"
@@ -150,27 +112,132 @@ export function RoomPage() {
     />
   );
 
+  // Info modal meta: room name, description, admin actions
+  const infoMeta = (
+    <div className="space-y-4">
+      <div className="flex items-start gap-3">
+        {room.coverUrl && (
+          <img
+            src={getMediaUrl(room.coverUrl)}
+            alt=""
+            className="w-12 h-12 rounded-xl object-cover shrink-0"
+          />
+        )}
+        <div className="min-w-0 flex-1">
+          <h2 className="font-display text-lg font-bold text-neutral-900 leading-tight">
+            {room.name}
+          </h2>
+          {room.description && (
+            <p className="text-sm text-neutral-500 mt-1 leading-relaxed">{room.description}</p>
+          )}
+        </div>
+      </div>
+
+      {isAdmin && !isClosed && (
+        <div className="grid grid-cols-3 gap-2">
+          <InviteButton roomId={room.id} inviteCode={room.inviteCode} iconOnly />
+          <button
+            onClick={() => { setInfoOpen(false); setShowEditModal(true); }}
+            className="flex items-center justify-center py-2.5 rounded-xl glass-icon transition"
+            title={t('rooms.editRoom')}
+            aria-label={t('rooms.editRoom')}
+          >
+            <Pencil size={16} />
+          </button>
+          <button
+            onClick={() => { setInfoOpen(false); setShowCloseModal(true); }}
+            className="flex items-center justify-center py-2.5 rounded-xl bg-danger-gradient text-white transition"
+            title={t('polls.ai.closeRoom')}
+            aria-label={t('polls.ai.closeRoom')}
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
+
+      {!isAdmin && (
+        <InviteButton roomId={room.id} inviteCode={room.inviteCode} />
+      )}
+
+      {isAdmin && isClosed && (
+        <div className="space-y-2">
+          <InviteButton roomId={room.id} inviteCode={room.inviteCode} />
+          <button
+            onClick={() => { setInfoOpen(false); setShowDeleteConfirm(true); }}
+            className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-semibold text-red-500 hover:bg-red-50 border border-red-100 transition"
+          >
+            <Trash2 size={15} />
+            {t('rooms.delete')}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+
+  const deleteConfirmModal = (
+    <Modal open={showDeleteConfirm} onClose={() => setShowDeleteConfirm(false)} size="sm">
+      <div className="text-center space-y-4">
+        <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mx-auto">
+          <Trash2 size={22} className="text-red-500" />
+        </div>
+        <div>
+          <h3 className="font-display text-lg font-bold text-neutral-900 mb-1">
+            {t('rooms.delete')}
+          </h3>
+          <p className="text-sm text-neutral-500">
+            {t('rooms.deleteConfirmText', { name: room.name })}
+          </p>
+        </div>
+        <div className="flex gap-3">
+          <button
+            onClick={() => setShowDeleteConfirm(false)}
+            className="flex-1 glass-btn py-2.5 text-sm"
+          >
+            {t('common.cancel')}
+          </button>
+          <button
+            onClick={async () => {
+              await archiveRoom.mutateAsync(room.id);
+              navigate('/rooms');
+            }}
+            disabled={archiveRoom.isPending}
+            className="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-2.5 rounded-xl transition text-sm disabled:opacity-50"
+          >
+            {archiveRoom.isPending ? '...' : t('rooms.confirmDelete')}
+          </button>
+        </div>
+      </div>
+    </Modal>
+  );
+
   /* ---------- DESKTOP ---------- */
   if (isDesktop) {
     return (
       <div className="h-full flex flex-col overflow-hidden">
-        {/* Хедер — h1 абсолютно позиціонований щоб не зсувався від кнопок */}
         <header className="relative glass-header shadow-[0_0.5px_0_rgba(0,0,0,0.06)] shrink-0 px-4 h-12 flex items-center">
           <div className="flex items-center justify-start min-w-[2.5rem] shrink-0">
             <BackButton />
           </div>
-          {/* Title: absolute center, pointer-events-none щоб не блокувати кнопки */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none px-24 gap-2">
-            {room.coverUrl && (
-              <img
-                src={getMediaUrl(room.coverUrl)}
-                alt=""
-                className="w-7 h-7 rounded-md object-cover shrink-0"
-              />
-            )}
-            <h1 className="font-display text-lg font-bold text-neutral-900 truncate">
-              {room.name}
-            </h1>
+          {/* Clickable title: info icon + room name */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none px-24">
+            <div className="pointer-events-auto">
+              <button
+                onClick={() => setInfoOpen(true)}
+                className="flex items-center gap-1.5 hover:bg-white/50 px-2.5 py-1.5 rounded-xl transition max-w-full min-w-0"
+              >
+                <Info size={15} className="text-neutral-400 shrink-0" />
+                {room.coverUrl && (
+                  <img
+                    src={getMediaUrl(room.coverUrl)}
+                    alt=""
+                    className="w-6 h-6 rounded-md object-cover shrink-0"
+                  />
+                )}
+                <h1 className="font-display text-lg font-bold text-neutral-900 truncate">
+                  {room.name}
+                </h1>
+              </button>
+            </div>
           </div>
           <div className="flex items-center justify-end gap-1.5 shrink-0 ml-auto">
             {importantStar}
@@ -199,30 +266,23 @@ export function RoomPage() {
           </div>
         </header>
 
-        {/* Основний вміст — resizable panels */}
         <PanelGroup
           direction="horizontal"
           autoSaveId="room-h"
           style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}
         >
-          {/* Чат */}
           <Panel defaultSize={78} minSize={50} style={{ minHeight: 0, overflow: 'hidden' }}>
             {chat}
           </Panel>
-
-          {/* Вертикальний resizer */}
-          <PanelResizeHandle style={{ width: 4, background: '#f0f0f0', cursor: 'col-resize', transition: 'background 0.15s' }}
+          <PanelResizeHandle
+            style={{ width: 4, background: '#f0f0f0', cursor: 'col-resize', transition: 'background 0.15s' }}
             onDragging={(isDragging) => {
               const el = document.querySelector('[data-panel-resize-handle-id]') as HTMLElement;
               if (el) el.style.background = isDragging ? '#2d6ff8' : '#f0f0f0';
             }}
           />
-
-          {/* Права панель */}
           <Panel defaultSize={22} minSize={15} maxSize={45} style={{ minHeight: 0, overflow: 'hidden', borderLeft: '1px solid #f0f2f5' }}>
             <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-
-              {/* Polls + Members (resizable vertically) */}
               <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
                 {showMembers ? (
                   <PanelGroup direction="vertical" autoSaveId="room-v" style={{ height: '100%' }}>
@@ -238,8 +298,6 @@ export function RoomPage() {
                   <div style={{ height: '100%', overflow: 'hidden' }}>{polls}</div>
                 )}
               </div>
-
-              {/* Toggle members кнопка */}
               <button
                 onClick={() => setShowMembers((v) => !v)}
                 className="shrink-0 border-t border-neutral-100 py-3.5 text-sm font-semibold text-neutral-500 hover:bg-gemini-active-hover hover:text-accent-600 transition flex items-center justify-center gap-1.5"
@@ -253,46 +311,11 @@ export function RoomPage() {
         </PanelGroup>
 
         {modal}
-        {showEditModal && (
-          <EditRoomModal room={room} onClose={() => setShowEditModal(false)} />
-        )}
-        <Modal
-          open={showDeleteConfirm}
-          onClose={() => setShowDeleteConfirm(false)}
-          size="sm"
-        >
-          <div className="text-center space-y-4">
-            <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mx-auto">
-              <Trash2 size={22} className="text-red-500" />
-            </div>
-            <div>
-              <h3 className="font-display text-lg font-bold text-neutral-900 mb-1">
-                {t('rooms.delete')}
-              </h3>
-              <p className="text-sm text-neutral-500">
-                {t('rooms.deleteConfirmText', { name: room.name })}
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 glass-btn py-2.5 text-sm"
-              >
-                {t('common.cancel')}
-              </button>
-              <button
-                onClick={async () => {
-                  await archiveRoom.mutateAsync(room.id);
-                  navigate('/rooms');
-                }}
-                disabled={archiveRoom.isPending}
-                className="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-2.5 rounded-xl transition text-sm disabled:opacity-50"
-              >
-                {archiveRoom.isPending ? '...' : t('rooms.confirmDelete')}
-              </button>
-            </div>
-          </div>
+        {showEditModal && <EditRoomModal room={room} onClose={() => setShowEditModal(false)} />}
+        <Modal open={infoOpen} onClose={() => setInfoOpen(false)} size="md">
+          {infoMeta}
         </Modal>
+        {deleteConfirmModal}
       </div>
     );
   }
@@ -302,153 +325,69 @@ export function RoomPage() {
     <div className="h-full flex flex-col overflow-hidden">
       <header className="relative glass-header shadow-[0_0.5px_0_rgba(0,0,0,0.06)] shrink-0 px-2 h-12 flex items-center gap-1">
         <button
-          onClick={() => (mobileView !== 'chat' ? setMobileView('chat') : navigate('/rooms'))}
+          onClick={() => navigate('/rooms')}
           className="p-2 text-neutral-500 hover:text-neutral-900 rounded-lg shrink-0"
         >
           <ChevronLeft size={20} />
         </button>
-        {/* Абсолютно позиціонований заголовок — не зсувається від кнопок */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none px-20 gap-2">
-          {room.coverUrl && (
-            <img
-              src={getMediaUrl(room.coverUrl)}
-              alt=""
-              className="w-7 h-7 rounded-md object-cover shrink-0"
-            />
-          )}
-          <h1 className="font-display text-lg font-bold text-neutral-900 truncate">
-            {room.name}
-          </h1>
+        {/* Clickable title: info icon + room name */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none px-20">
+          <div className="pointer-events-auto max-w-full overflow-hidden">
+            <button
+              onClick={() => setInfoOpen(true)}
+              className="flex items-center gap-1.5 hover:bg-white/50 px-2 py-1 rounded-xl transition max-w-full min-w-0"
+            >
+              <Info size={15} className="text-neutral-400 shrink-0" />
+              {room.coverUrl && (
+                <img
+                  src={getMediaUrl(room.coverUrl)}
+                  alt=""
+                  className="w-6 h-6 rounded-md object-cover shrink-0"
+                />
+              )}
+              <h1 className="font-display text-lg font-bold text-neutral-900 truncate">
+                {room.name}
+              </h1>
+            </button>
+          </div>
         </div>
         <div className="ml-auto flex items-center gap-0.5 shrink-0">
           {importantStar}
           <button
-            onClick={() => setMobileView((v) => (v === 'members' ? 'chat' : 'members'))}
-            className={`p-2 rounded-lg transition ${mobileView === 'members' ? 'text-accent-600 bg-accent-50' : 'text-neutral-500 hover:text-accent-600'}`}
+            onClick={() => setMembersOpen(true)}
+            className="p-2 rounded-lg transition text-neutral-500 hover:text-accent-600"
           >
             <Users size={20} />
-          </button>
-          <button
-            onClick={() => setMobileView((v) => (v === 'info' ? 'chat' : 'info'))}
-            className={`p-2 rounded-lg transition ${mobileView === 'info' ? 'text-accent-600 bg-accent-50' : 'text-neutral-500 hover:text-accent-600'}`}
-          >
-            <Info size={20} />
           </button>
         </div>
       </header>
 
-      {/* Main content area — horizontal swipe switches tabs; edge swipe opens panel */}
-      <div
-        {...bindTabSwipe()}
-        {...bindEdgeOpen()}
-        className="flex-1 min-h-0 overflow-hidden relative"
-        style={{ touchAction: 'pan-y' }}
-      >
+      <div className="flex-1 min-h-0 overflow-hidden">
         {chat}
-        {/* Overlay: tap or swipe right to close side panel */}
-        <div
-          {...bindOverlayClose()}
-          onClick={() => setMobileView('chat')}
-          className={`absolute inset-0 bg-neutral-900/40 z-10 transition-opacity duration-300 ${
-            mobileView !== 'chat' ? 'opacity-100' : 'opacity-0 pointer-events-none'
-          }`}
-          style={{ touchAction: mobileView !== 'chat' ? 'none' : 'auto' }}
-        />
-        <div
-          className={`absolute top-2 right-0 bottom-0 z-20 w-[85vw] bg-white/75 backdrop-blur-2xl shadow-glass-panel flex flex-col transition-transform duration-300 ease-out overflow-hidden ${
-            mobileView === 'members' ? 'translate-x-0' : 'translate-x-full'
-          }`}
-          style={{ borderTopLeftRadius: '14px' }}
-        >
-          {members}
-        </div>
-        <div
-          className={`absolute top-2 right-0 bottom-0 z-20 w-[85vw] bg-white/75 backdrop-blur-2xl shadow-glass-panel flex flex-col transition-transform duration-300 ease-out overflow-hidden ${
-            mobileView === 'info' ? 'translate-x-0' : 'translate-x-full'
-          }`}
-          style={{ borderTopLeftRadius: '14px' }}
-        >
-          <div className="border-b border-white/30 shrink-0">
-            <div className="px-4 pt-3 pb-2 flex items-start justify-between gap-2">
-              <div className="min-w-0 flex-1">
-                <h2 className="text-base font-bold text-neutral-900 truncate">{room.name}</h2>
-                {room.description && (
-                  <p className="text-xs text-neutral-500 mt-0.5 line-clamp-2">{room.description}</p>
-                )}
-              </div>
-              <button
-                onClick={() => setMobileView('chat')}
-                className="p-1.5 text-neutral-400 hover:text-neutral-700 rounded-lg shrink-0"
-              >
-                <X size={16} />
-              </button>
-            </div>
-            {isAdmin && !isClosed ? (
-              <div className="grid grid-cols-3 gap-1 bg-white/35 border border-white/50 backdrop-blur-md mx-2 mb-2 p-1 rounded-2xl">
-                <InviteButton roomId={room.id} inviteCode={room.inviteCode} iconOnly />
-                <button
-                  onClick={() => { setMobileView('chat'); setShowEditModal(true); }}
-                  className="flex items-center justify-center py-2 rounded-xl text-neutral-500 hover:bg-white/70 transition"
-                  title={t('rooms.editRoom')}
-                  aria-label={t('rooms.editRoom')}
-                >
-                  <Pencil size={16} />
-                </button>
-                <button
-                  onClick={() => { setMobileView('chat'); setShowCloseModal(true); }}
-                  title={t('polls.ai.closeRoom')}
-                  aria-label={t('polls.ai.closeRoom')}
-                  className="flex items-center justify-center py-2 rounded-xl bg-danger-gradient text-white transition"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-            ) : (
-              <div className="flex mx-2 mb-2">
-                <InviteButton roomId={room.id} inviteCode={room.inviteCode} />
-              </div>
-            )}
-            {isAdmin && isClosed && (
-              <div className="px-2 pb-2">
-                {!showDeleteConfirm ? (
-                  <button
-                    onClick={() => setShowDeleteConfirm(true)}
-                    className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold text-red-500 hover:bg-red-50 transition whitespace-nowrap"
-                  >
-                    <Trash2 size={13} />
-                    {t('rooms.delete')}
-                  </button>
-                ) : (
-                  <div className="flex gap-1">
-                    <button
-                      onClick={() => setShowDeleteConfirm(false)}
-                      className="flex-1 py-1.5 rounded-lg text-xs font-semibold text-neutral-500 glass-icon"
-                    >
-                      {t('common.cancel')}
-                    </button>
-                    <button
-                      onClick={async () => {
-                        await archiveRoom.mutateAsync(room.id);
-                        navigate('/rooms');
-                      }}
-                      disabled={archiveRoom.isPending}
-                      className="flex-1 py-1.5 rounded-lg text-xs font-semibold bg-red-500 text-white hover:bg-red-600 transition disabled:opacity-50"
-                    >
-                      {t('rooms.confirmDelete')}
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-          <div className="flex-1 min-h-0 overflow-hidden">{polls}</div>
-        </div>
       </div>
 
+      {/* Members Modal */}
+      <Modal open={membersOpen} onClose={() => setMembersOpen(false)} title={t('rooms.members')} size="lg">
+        <div className="h-[60vh] overflow-hidden rounded-2xl">
+          {members}
+        </div>
+      </Modal>
+
+      {/* Info + Polls Modal */}
+      <Modal open={infoOpen} onClose={() => setInfoOpen(false)} size="md">
+        <div className="space-y-4">
+          {infoMeta}
+          <div className="border-t border-neutral-100 pt-1">
+            <div className="h-[42vh] overflow-hidden rounded-2xl">
+              {polls}
+            </div>
+          </div>
+        </div>
+      </Modal>
+
       {modal}
-      {showEditModal && (
-        <EditRoomModal room={room} onClose={() => setShowEditModal(false)} />
-      )}
+      {showEditModal && <EditRoomModal room={room} onClose={() => setShowEditModal(false)} />}
+      {deleteConfirmModal}
     </div>
   );
 }
