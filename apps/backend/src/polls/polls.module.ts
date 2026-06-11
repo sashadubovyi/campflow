@@ -8,6 +8,6 @@ import { RoomsModule } from '../rooms/rooms.module';
   imports: [RoomsModule],
   controllers: [PollsController],
   providers: [PollsService, PollsGateway],
-  exports: [PollsService],
+  exports: [PollsService, PollsGateway],
 })
 export class PollsModule {}
