@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft, Users, Info, ChevronDown, ChevronUp, X, Trash2, Pencil, Star } from 'lucide-react';
+import { useDrag } from '@use-gesture/react';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { useRoom } from '../../shared/api/rooms.hooks';
 import { useAuth } from '../../shared/store/useAuth';
 import { useMediaQuery } from '../../shared/lib/useMediaQuery';
+import { isTouchDevice } from '../../shared/lib/isTouchDevice';
 import { MembersPanel } from './MembersPanel';
 import { ChatPanel } from './ChatPanel';
 import { PollsPanel } from './PollsPanel';
@@ -34,6 +36,40 @@ export function RoomPage() {
   const [importantOnly, setImportantOnly] = useState(false);
   const [hasImportant, setHasImportant] = useState(false);
   const archiveRoom = useArchiveRoom();
+
+  // ── Mobile gesture: horizontal swipe on main content to switch tabs ──────────
+  // Left swipe: chat → members → info   |   Right swipe: info → members → chat
+  const SWIPE_TAB_PX = 60;
+  const bindTabSwipe = useDrag(
+    ({ movement: [mx], velocity: [vx], direction: [dx], last }) => {
+      if (!last || !isTouchDevice()) return;
+      const isLeft  = mx < -SWIPE_TAB_PX || (vx > 0.45 && dx < 0);
+      const isRight = mx >  SWIPE_TAB_PX || (vx > 0.45 && dx > 0);
+      if (isLeft)  setMobileView((v) => v === 'chat' ? 'members' : v === 'members' ? 'info' : 'info');
+      if (isRight) setMobileView((v) => v === 'info' ? 'members' : v === 'members' ? 'chat' : 'chat');
+    },
+    { axis: 'x', pointer: { touch: true }, filterTaps: true },
+  );
+
+  // ── Mobile gesture: swipe right on overlay to close side panel ───────────────
+  const bindOverlayClose = useDrag(
+    ({ movement: [mx], velocity: [vx], last }) => {
+      if (!last || !isTouchDevice()) return;
+      if (mx > 50 || vx > 0.45) setMobileView('chat');
+    },
+    { axis: 'x', pointer: { touch: true }, filterTaps: true },
+  );
+
+  // ── Mobile gesture: right-edge swipe to open members panel ───────────────────
+  const bindEdgeOpen = useDrag(
+    ({ initial: [ix], movement: [mx], last }) => {
+      if (!last || !isTouchDevice()) return;
+      if (ix > window.innerWidth - 24 && mx < -48 && mobileView === 'chat') {
+        setMobileView('members');
+      }
+    },
+    { pointer: { touch: true }, filterTaps: true },
+  );
 
   if (isLoading) {
     return (
@@ -301,14 +337,22 @@ export function RoomPage() {
         </div>
       </header>
 
-      <div className="flex-1 min-h-0 overflow-hidden relative">
+      {/* Main content area — horizontal swipe switches tabs; edge swipe opens panel */}
+      <div
+        {...bindTabSwipe()}
+        {...bindEdgeOpen()}
+        className="flex-1 min-h-0 overflow-hidden relative"
+        style={{ touchAction: 'pan-y' }}
+      >
         {chat}
+        {/* Overlay: tap or swipe right to close side panel */}
         <div
+          {...bindOverlayClose()}
           onClick={() => setMobileView('chat')}
           className={`absolute inset-0 bg-neutral-900/40 z-10 transition-opacity duration-300 ${
             mobileView !== 'chat' ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
-          
+          style={{ touchAction: mobileView !== 'chat' ? 'none' : 'auto' }}
         />
         <div
           className={`absolute top-2 right-0 bottom-0 z-20 w-[85vw] bg-white/75 backdrop-blur-2xl shadow-glass-panel flex flex-col transition-transform duration-300 ease-out overflow-hidden ${
