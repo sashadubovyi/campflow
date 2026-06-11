@@ -119,7 +119,14 @@ export function useRoomChat(roomId: string) {
               prev.map((m) => (m.id === tempId ? { ...m, _status: 'failed' as const } : m)),
             );
           } else {
-            setMessages((prev) => prev.filter((m) => m.id !== tempId));
+            // Promote optimistic → confirmed with real server ID.
+            // If the server also broadcasts message:new, the dedup check
+            // in onNewMessage will skip the duplicate.
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === tempId ? { ...m, id: ack.id, _status: undefined } : m,
+              ),
+            );
           }
         },
       );

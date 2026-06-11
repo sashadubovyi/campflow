@@ -142,51 +142,55 @@ function DmMessageBubble({
 
   return (
     <div
-      className={`flex gap-2.5 group items-end ${message.isOwn ? 'flex-row-reverse' : ''}`}
+      className={`flex gap-2 group items-end ${message.isOwn ? 'flex-row-reverse' : ''}`}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
       onContextMenu={(e) => { if (longPressTriggered.current) e.preventDefault(); }}
     >
-      {/* Reply icon + swipeable bubble */}
-      <div className="relative flex items-center">
-        {/* Reply icon: left of own bubbles, right of others' */}
-        <div
-          className="absolute pointer-events-none"
-          style={{
-            [message.isOwn ? 'right' : 'left']: '100%',
-            opacity: progress,
-            transition: swipeX === 0 ? 'opacity 0.15s' : 'none',
-            pointerEvents: 'none',
-          }}
-        >
-          <Reply size={18} color={replyIconColor} />
+      {/* Bubble column: constrains width + aligns left/right */}
+      <div className={`flex flex-col max-w-[75%] ${message.isOwn ? 'items-end' : 'items-start'}`}>
+        {/* Swipe layer + reply icon */}
+        <div className="relative flex items-center">
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              [message.isOwn ? 'right' : 'left']: '100%',
+              paddingRight: message.isOwn ? 6 : 0,
+              paddingLeft: message.isOwn ? 0 : 6,
+              opacity: progress,
+              transition: swipeX === 0 ? 'opacity 0.15s' : 'none',
+            }}
+          >
+            <Reply size={18} color={replyIconColor} />
+          </div>
+
+          <div
+            style={{
+              transform: `translateX(${swipeX}px)`,
+              transition: swipeX === 0 ? 'transform 0.22s cubic-bezier(0.2,0,0,1)' : 'none',
+              touchAction: 'pan-y',
+            }}
+            className={`px-3.5 py-2 text-sm rounded-2xl shadow-sm ${
+              message.isOwn
+                ? 'bg-gradient-to-br from-accent-400 to-accent-600 text-white rounded-tr-sm'
+                : 'bg-white/75 backdrop-blur-sm text-neutral-900 rounded-tl-sm'
+            }`}
+          >
+            <p className="leading-relaxed whitespace-pre-wrap">{message.content}</p>
+          </div>
         </div>
 
-        {/* Bubble slides RIGHT on right swipe */}
-        <div
-          style={{
-            transform: `translateX(${swipeX}px)`,
-            transition: swipeX === 0 ? 'transform 0.22s cubic-bezier(0.2,0,0,1)' : 'none',
-            touchAction: 'pan-y',
-          }}
-          className={`max-w-[75%] px-3.5 py-2 text-sm rounded-2xl shadow-sm ${
-            message.isOwn
-              ? 'bg-gradient-to-br from-accent-400 to-accent-600 text-white rounded-tr-md'
-              : 'bg-white/75 backdrop-blur-sm text-neutral-900 rounded-tl-md'
-          }`}
-        >
-          <p className="leading-relaxed whitespace-pre-wrap">{message.content}</p>
-          <p className={`text-[10px] mt-0.5 text-right ${message.isOwn ? 'text-white/70' : 'text-neutral-400'}`}>
-            {formatTime(message.createdAt, locale)}
-          </p>
-        </div>
+        {/* Timestamp below bubble */}
+        <span className="text-[10px] text-neutral-400 mt-0.5 px-1">
+          {formatTime(message.createdAt, locale)}
+        </span>
       </div>
 
-      {/* Three-dot menu: desktop hover + mobile long-press */}
+      {/* Three-dot menu */}
       <div
         ref={menuRef}
-        className={`self-end mb-1 relative transition-opacity ${
+        className={`self-end mb-5 relative transition-opacity ${
           menuOpen ? 'flex opacity-100' : 'md:flex md:opacity-0 md:group-hover:opacity-100 hidden'
         }`}
       >
