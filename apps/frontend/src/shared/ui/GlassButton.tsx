@@ -118,7 +118,10 @@ export function GlassButton({
       />
 
       {loading ? (
-        <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+        <span className={cn(
+          "inline-block w-4 h-4 border-2 border-t-transparent rounded-full animate-spin",
+          variant === 'ai' ? 'border-violet-500' : 'border-current',
+        )} />
       ) : variant === 'ai' ? (
         <span style={aiTextStyle}>{children}</span>
       ) : (

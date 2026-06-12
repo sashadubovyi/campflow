@@ -9,7 +9,7 @@ import {
 import { useGenerateChecklist, useCheckDuplicate } from '../../../shared/api/ai.hooks';
 import type { PollType } from '../../../shared/api/polls.api';
 import { MapPicker, type PickedLocation } from '../../../shared/ui/map/MapPicker';
-import { Sparkles, CircleDot, ListChecks, MapPin } from 'lucide-react';
+import { Sparkles, CircleDot, ListChecks, MapPin, Loader2 } from 'lucide-react';
 import { cn } from '../../../shared/ui';
 
 interface Props {
@@ -359,8 +359,9 @@ export function CreatePollModal({ roomId, onClose }: Props) {
                 type="button"
                 onClick={handleAiGenerate}
                 disabled={generateChecklist.isPending || aiDescription.trim().length < 5}
-                className="w-full btn-glass-blue disabled:opacity-50 font-semibold py-2 rounded-2xl text-sm transition"
+                className="w-full btn-glass-blue disabled:opacity-50 font-semibold py-2 rounded-2xl text-sm transition flex items-center justify-center gap-2"
               >
+                {generateChecklist.isPending && <Loader2 size={14} className="animate-spin" />}
                 {generateChecklist.isPending ? t('polls.ai.generating') : t('polls.ai.generate')}
               </button>
             </div>
