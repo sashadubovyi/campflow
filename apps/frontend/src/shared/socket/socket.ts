@@ -17,6 +17,11 @@ export function getSocket(): Socket {
     autoConnect: true,
   });
 
+  socket.on('connect', () => console.log('[WS] connected', socket?.id));
+  socket.on('disconnect', (reason) => console.warn('[WS] disconnected', reason));
+  socket.on('connect_error', (err) => console.error('[WS] connect_error', err.message));
+  socket.on('exception', (data) => console.error('[WS] server exception', data));
+
   return socket;
 }
 
@@ -26,3 +31,4 @@ export function disconnectSocket() {
     socket = null;
   }
 }
+

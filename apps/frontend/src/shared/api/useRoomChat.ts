@@ -113,8 +113,9 @@ export function useRoomChat(roomId: string) {
       socket.timeout(6000).emit(
         'message:send',
         { roomId, content, replyToId: replyTo?.id },
-        (err: Error | null, ack: { ok: boolean; id: string } | undefined) => {
+        (err: Error | null, ack: { ok: boolean; id: string; error?: string } | undefined) => {
           if (err || !ack?.ok) {
+            console.error('[WS] message:send failed', { err: err?.message, ack, connected: socket.connected });
             setMessages((prev) =>
               prev.map((m) => (m.id === tempId ? { ...m, _status: 'failed' as const } : m)),
             );
