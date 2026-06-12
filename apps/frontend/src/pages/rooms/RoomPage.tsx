@@ -257,33 +257,31 @@ export function RoomPage() {
   if (isDesktop) {
     return (
       <div className="h-full flex flex-col overflow-hidden">
-        <header className="relative glass-header shadow-[0_0.5px_0_rgba(0,0,0,0.06)] shrink-0 px-4 h-12 flex items-center">
-          <div className="flex items-center justify-start min-w-[2.5rem] shrink-0">
+        <header className="glass-header shadow-[0_0.5px_0_rgba(0,0,0,0.06)] shrink-0 px-4 h-12 grid grid-cols-[auto_1fr_auto] items-center gap-2">
+          <div className="flex items-center min-w-[2.5rem]">
             <BackButton />
           </div>
           {/* Clickable title: info icon + room name */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none px-24">
-            <div className="pointer-events-auto">
-              <button
-                onClick={() => setInfoOpen(true)}
-                className="flex items-center gap-1.5 hover:bg-white/50 px-2.5 py-1.5 rounded-xl transition max-w-full min-w-0"
-              >
-                <Info size={15} className="text-neutral-400 shrink-0" />
-                {room.coverUrl && (
-                  <img
-                    src={getMediaUrl(room.coverUrl)}
-                    alt=""
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                    className="w-6 h-6 rounded-md object-cover shrink-0"
-                  />
-                )}
-                <h1 className="font-display text-lg font-bold text-neutral-900 truncate">
-                  {room.name}
-                </h1>
-              </button>
-            </div>
+          <div className="flex items-center justify-center min-w-0">
+            <button
+              onClick={() => setInfoOpen(true)}
+              className="flex items-center gap-1.5 hover:bg-white/50 px-2.5 py-1.5 rounded-xl transition min-w-0 max-w-full"
+            >
+              <Info size={15} className="text-neutral-400 shrink-0" />
+              {room.coverUrl && (
+                <img
+                  src={getMediaUrl(room.coverUrl)}
+                  alt=""
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  className="w-6 h-6 rounded-md object-cover shrink-0"
+                />
+              )}
+              <h1 className="font-display text-lg font-bold text-neutral-900 truncate">
+                {room.name}
+              </h1>
+            </button>
           </div>
-          <div className="flex items-center justify-end gap-1.5 shrink-0 ml-auto">
+          <div className="flex items-center justify-end gap-1.5">
             {importantStar}
             {isAdmin && !isClosed && (
               <button
