@@ -120,14 +120,16 @@ export function useRoomChat(roomId: string) {
               prev.map((m) => (m.id === tempId ? { ...m, _status: 'failed' as const } : m)),
             );
           } else {
-            // Promote optimistic → confirmed with real server ID.
-            // If the server also broadcasts message:new, the dedup check
-            // in onNewMessage will skip the duplicate.
-            setMessages((prev) =>
-              prev.map((m) =>
+            setMessages((prev) => {
+              // If message:new broadcast arrived before the ack, the real message
+              // is already in the list — just drop the orphaned optimistic entry.
+              if (prev.some((m) => m.id === ack.id)) {
+                return prev.filter((m) => m.id !== tempId);
+              }
+              return prev.map((m) =>
                 m.id === tempId ? { ...m, id: ack.id, _status: undefined } : m,
-              ),
-            );
+              );
+            });
           }
         },
       );
