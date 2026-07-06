@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { m } from 'framer-motion';
 
 const spring = { type: 'spring', duration: 0.15, bounce: 0.12 } as const;

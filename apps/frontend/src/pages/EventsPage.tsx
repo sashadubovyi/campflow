@@ -64,7 +64,9 @@ function FitBounds({ points }: { points: MapPoint[] }) {
       }
     }, 100);
     return () => clearTimeout(timer);
-  }, [points.length, map]);
+    // react-query структурно шарить дані, тож identity `points` стабільна,
+    // поки точки реально не змінились — refit не смикається на кожен refetch.
+  }, [points, map]);
   return null;
 }
 

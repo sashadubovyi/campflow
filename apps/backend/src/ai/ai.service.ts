@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { GeoResolverService } from './geo-resolver.service';
+import { GeoResolverService, type GeoPlace } from './geo-resolver.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { GeminiService } from './gemini.service';
 
@@ -8,6 +8,7 @@ export interface DraftPoll {
   question: string;
   options?: string[];
   geoQuery?: { area: string; category: string; limit: number };
+  resolvedPlaces?: GeoPlace[];
 }
 
 export interface RoomDraft {
@@ -76,7 +77,7 @@ Write all text in ${lang} language.`;
           poll.geoQuery.limit,
         );
         if (places.length > 0) {
-          (poll as any).resolvedPlaces = places;
+          poll.resolvedPlaces = places;
         }
       }
     }

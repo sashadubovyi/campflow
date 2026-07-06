@@ -8,7 +8,7 @@ import {
   useApprovePoll,
   useAssignOption,
 } from '../../../shared/api/polls.hooks';
-import type { PollDetails, PollOption } from '../../../shared/api/polls.api';
+import type { PollDetails } from '../../../shared/api/polls.api';
 import type { RoomMember } from '../../../shared/api/rooms.api';
 import { Avatar } from '../../../shared/ui/Avatar';
 import { LocationMap } from '../../../shared/ui/map/LocationMap';
@@ -430,4 +430,3 @@ function AdminActions({ poll }: { poll: PollDetails }) {
   );
 }
 
-type _Option = PollOption;

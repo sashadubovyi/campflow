@@ -19,7 +19,7 @@ interface RoomCardProps {
 const LONG_PRESS_MS = 550;
 
 export function RoomCard({ room, onOpen, compact = false, onDelete, onTogglePublic }: RoomCardProps) {
-  const { i18n, t } = useTranslation();
+  const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
   const [deleteConfirm, setDeleteConfirm] = useState(false);

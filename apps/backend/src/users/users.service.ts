@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import type { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { PresenceService } from '../presence/presence.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
@@ -129,7 +130,7 @@ export class UsersService {
 
     const mode = by === 'auto' ? this.detectSearchMode(q) : by;
 
-    let where: import('@prisma/client').Prisma.UserWhereInput;
+    let where: Prisma.UserWhereInput;
     switch (mode) {
       case 'username': {
         const stripped = q.replace(/^@/, '').toLowerCase();

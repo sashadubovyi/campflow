@@ -36,10 +36,15 @@ export class GeoResolverService {
       });
 
       if (!res.ok) return [];
-      const data = await res.json() as any[];
+      const data = (await res.json()) as Array<{
+        display_name?: string;
+        name?: string;
+        lat: string;
+        lon: string;
+      }>;
 
-      return data.map((p: any) => ({
-        label: p.display_name?.split(',').slice(0, 2).join(', ') ?? p.name,
+      return data.map((p) => ({
+        label: p.display_name?.split(',').slice(0, 2).join(', ') ?? p.name ?? '',
         latitude: parseFloat(p.lat),
         longitude: parseFloat(p.lon),
         address: p.display_name ?? '',
