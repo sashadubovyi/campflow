@@ -184,8 +184,13 @@ export function ChatPage() {
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   async function handleDelete(chatId: string) {
-    await deleteChat.mutateAsync(chatId);
-    setDeleteConfirmId(null);
+    try {
+      await deleteChat.mutateAsync(chatId);
+    } finally {
+      // Закриваємо confirm навіть при помилці — без цього UI зависає
+      // на підтвердженні і кидає unhandled rejection.
+      setDeleteConfirmId(null);
+    }
   }
 
   return (

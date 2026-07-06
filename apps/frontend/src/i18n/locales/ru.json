@@ -41,7 +41,8 @@
     "signinWithApple": "Войти через Apple",
     "signupWithApple": "Регистрация через Apple",
     "signinWithFacebook": "Войти через Facebook",
-    "signupWithFacebook": "Регистрация через Facebook"
+    "signupWithFacebook": "Регистрация через Facebook",
+    "privacyPolicy": "Политика конфиденциальности"
   },
   "rooms": {
     "title": "Будущие события",

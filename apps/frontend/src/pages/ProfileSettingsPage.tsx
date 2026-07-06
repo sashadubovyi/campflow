@@ -147,6 +147,15 @@ export function ProfileSettingsPage() {
   }
 
   async function handleSave() {
+    try {
+      await doSave();
+    } catch {
+      // Помилку показує update.isError під кнопкою; без catch це був би
+      // unhandled rejection прямо з onClick.
+    }
+  }
+
+  async function doSave() {
     const updated = await update.mutateAsync({
       fullName: form.fullName,
       phone: form.phone,
@@ -199,7 +208,11 @@ export function ProfileSettingsPage() {
                   : 'bg-white/30 text-neutral-400 border border-white/50 cursor-default'
               }`}
             >
-              {update.isPending ? t('common.saving') : t('common.save')}
+              {update.isPending
+                ? t('common.saving')
+                : update.isError
+                  ? t('common.error')
+                  : t('common.save')}
             </button>
           )}
         </div>

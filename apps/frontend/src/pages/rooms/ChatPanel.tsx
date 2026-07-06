@@ -53,6 +53,14 @@ export function ChatPanel({ roomId, roomName: _roomName, importantOnly = false, 
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Прибираємо відкладений emitTyping(false) при демонтажі — інакше таймер
+  // стріляє зі stale roomId у кімнату, яку вже покинули.
+  useEffect(() => {
+    return () => {
+      if (typingTimeout.current) clearTimeout(typingTimeout.current);
+    };
+  }, []);
+
   const hasImportant = messages.some((m) => m.isImportant);
   useEffect(() => {
     onHasImportantChange?.(hasImportant);
@@ -150,7 +158,7 @@ export function ChatPanel({ roomId, roomName: _roomName, importantOnly = false, 
               onReply={() => startReplyTo(m)}
               onDelete={() => deleteMessage(m.id)}
               onToggleImportant={() => toggleImportant(m.id)}
-              onRetry={() => sendMessage(m.content, m.id)}
+              onRetry={() => sendMessage(m.content, m.id, m.replyTo)}
             />
           );
         })}

@@ -41,7 +41,8 @@
     "signinWithApple": "Увійти через Apple",
     "signupWithApple": "Зареєструватись через Apple",
     "signinWithFacebook": "Увійти через Facebook",
-    "signupWithFacebook": "Зареєструватись через Facebook"
+    "signupWithFacebook": "Зареєструватись через Facebook",
+    "privacyPolicy": "Політика конфіденційності"
   },
   "rooms": {
     "title": "Майбутні події",

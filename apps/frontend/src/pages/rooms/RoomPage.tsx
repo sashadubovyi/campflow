@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft, Users, Info, ChevronDown, ChevronUp, X, Trash2, Pencil, Star } from 'lucide-react';
@@ -239,9 +239,8 @@ export function RoomPage() {
             {t('common.cancel')}
           </button>
           <button
-            onClick={async () => {
-              await archiveRoom.mutateAsync(room.id);
-              navigate('/rooms');
+            onClick={() => {
+              archiveRoom.mutate(room.id, { onSuccess: () => navigate('/rooms') });
             }}
             disabled={archiveRoom.isPending}
             className="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-2.5 rounded-xl transition text-sm disabled:opacity-50"

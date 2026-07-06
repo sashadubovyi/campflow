@@ -8,13 +8,7 @@ import { useContacts, useAddContact } from '../shared/api/contacts.hooks';
 import { Avatar } from '../shared/ui/Avatar';
 import { PageHeader, cn } from '../shared/ui';
 
-const TABS: { id: UserSearchBy; label: string }[] = [
-  { id: 'auto', label: 'Авто' },
-  { id: 'name', label: 'ФІО' },
-  { id: 'username', label: 'Username' },
-  { id: 'email', label: 'Email' },
-  { id: 'phone', label: 'Телефон' },
-];
+const TAB_IDS: UserSearchBy[] = ['auto', 'name', 'username', 'email', 'phone'];
 
 // Невелика debounce-обгортка через useEffect.
 function useDebouncedValue<T>(value: T, delay: number): T {
@@ -72,18 +66,18 @@ export function SearchPage() {
             )}
           </div>
           <div className="flex gap-1.5 mt-2 overflow-x-auto -mx-1 px-1 pb-1 scrollbar-hide">
-            {TABS.map((tab) => (
+            {TAB_IDS.map((id) => (
               <button
-                key={tab.id}
-                onClick={() => setBy(tab.id)}
+                key={id}
+                onClick={() => setBy(id)}
                 className={cn(
                   'shrink-0 px-3 py-1 rounded-full text-xs font-semibold transition border',
-                  by === tab.id
+                  by === id
                     ? 'bg-accent-50 border-accent-500/40 text-accent-600'
                     : 'bg-white/50 border-white/70 text-neutral-500 hover:border-accent-500/30 hover:text-neutral-700',
                 )}
               >
-                {t(`search.by.${tab.id}`, tab.label)}
+                {t(`search.by.${id}`)}
               </button>
             ))}
           </div>

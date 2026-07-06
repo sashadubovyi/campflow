@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Send, Reply, X, MoreHorizontal, Star, Trash2, CornerUpLeft } from 'lucide-react';
+import { Send, Reply, X, MoreHorizontal, CornerUpLeft } from 'lucide-react';
 import { useDmGetOrCreate, useDmMessages, useSendDm } from '../shared/api/dm.hooks';
 import { Avatar } from '../shared/ui/Avatar';
 import { BackButton } from '../shared/ui';
@@ -207,6 +207,8 @@ function DmMessageBubble({
           <div
             className={`absolute ${openDown ? 'top-8' : 'bottom-8'} ${message.isOwn ? 'right-0' : 'left-0'} glass-surface rounded-2xl py-1 z-20 min-w-[160px]`}
           >
+            {/* "Важливо" та "Видалити" прибрані: бекенд DM їх поки не підтримує,
+                а кнопки-пустушки, що лише закривають меню, гірші за їх відсутність. */}
             <button
               onClick={() => { onReply(message); onMenuClose(); }}
               className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-neutral-700 hover:bg-white/50 transition-colors"
@@ -214,25 +216,6 @@ function DmMessageBubble({
               <CornerUpLeft size={14} className="text-neutral-400" />
               {t('chat.reply', 'Відповісти')}
             </button>
-            <button
-              onClick={onMenuClose}
-              className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-neutral-700 hover:bg-white/50 transition-colors"
-            >
-              <Star size={14} className="text-neutral-400" />
-              {t('chat.markImportant', 'Важливо')}
-            </button>
-            {message.isOwn && (
-              <>
-                <div className="mx-3 my-1 border-t border-neutral-100" />
-                <button
-                  onClick={onMenuClose}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors"
-                >
-                  <Trash2 size={14} />
-                  {t('chat.delete', 'Видалити')}
-                </button>
-              </>
-            )}
           </div>
         )}
       </div>
@@ -308,7 +291,10 @@ export function DirectChatPage() {
     if (!trimmed || !chat) return;
     setText('');
     setReplyingTo(null);
-    send.mutate(trimmed);
+    send.mutate(trimmed, {
+      // Не мовчки губимо текст: якщо відправка впала — повертаємо його в інпут.
+      onError: () => setText((current) => current || trimmed),
+    });
   }
 
   function handleKey(e: React.KeyboardEvent<HTMLInputElement>) {

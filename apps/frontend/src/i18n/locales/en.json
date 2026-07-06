@@ -41,7 +41,8 @@
     "signinWithApple": "Sign in with Apple",
     "signupWithApple": "Sign up with Apple",
     "signinWithFacebook": "Sign in with Facebook",
-    "signupWithFacebook": "Sign up with Facebook"
+    "signupWithFacebook": "Sign up with Facebook",
+    "privacyPolicy": "Privacy Policy"
   },
   "rooms": {
     "title": "Upcoming events",

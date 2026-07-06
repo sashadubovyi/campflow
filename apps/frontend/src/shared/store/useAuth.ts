@@ -39,6 +39,9 @@ export function useAuth() {
   async function logout() {
     try {
       await authApi.logout();
+    } catch {
+      // Сервер недоступний — не страшно: локальна сесія все одно чиститься,
+      // а refresh-токен вже видалено з localStorage в authApi.logout.
     } finally {
       clear();
       queryClient.clear();

@@ -13,6 +13,10 @@ export function useRoomChat(roomId: string) {
   useEffect(() => {
     let cancelled = false;
     setIsLoading(true);
+    // Скидаємо стан попередньої кімнати, інакше при перемиканні кімнат
+    // до завантаження історії видно чужі повідомлення та "друкує…".
+    setMessages([]);
+    setTypingUsers(new Set());
     chatApi
       .history(roomId)
       .then((page) => {
@@ -32,6 +36,10 @@ export function useRoomChat(roomId: string) {
     function onConnect() {
       setConnected(true);
       socket.emit('room:join', { roomId });
+    }
+
+    function onDisconnect() {
+      setConnected(false);
     }
 
     function onNewMessage(msg: Message) {
@@ -65,6 +73,7 @@ export function useRoomChat(roomId: string) {
 
     if (socket.connected) onConnect();
     socket.on('connect', onConnect);
+    socket.on('disconnect', onDisconnect);
     socket.on('message:new', onNewMessage);
     socket.on('message:deleted', onMessageDeleted);
     socket.on('message:updated', onMessageUpdated);
@@ -74,6 +83,7 @@ export function useRoomChat(roomId: string) {
     return () => {
       socket.emit('room:leave', { roomId });
       socket.off('connect', onConnect);
+      socket.off('disconnect', onDisconnect);
       socket.off('message:new', onNewMessage);
       socket.off('message:deleted', onMessageDeleted);
       socket.off('message:updated', onMessageUpdated);

@@ -119,7 +119,7 @@ export function LoginPage() {
         </p>
         <p className="text-center text-xs text-neutral-400 mt-3 font-body">
           <Link to="/privacy" className="hover:underline hover:text-neutral-600 transition-colors">
-            Політика конфіденційності
+            {t('auth.privacyPolicy')}
           </Link>
         </p>
       </m.div>

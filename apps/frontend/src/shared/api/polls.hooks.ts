@@ -93,6 +93,9 @@ export function useVote() {
     mutationFn: ({ pollId, optionId }: { pollId: string; optionId: string }) =>
       pollsApi.vote(pollId, optionId),
     onMutate: async ({ pollId, optionId }) => {
+      // Скасовуємо in-flight refetch — інакше стара відповідь, що прилетить
+      // після оптимістичного запису, відкотить голос до onSettled.
+      await qc.cancelQueries({ queryKey: ['polls'] });
       // Знаходимо опитування в кеші й одразу оновлюємо UI
       const queries = qc.getQueriesData<PollDetails[]>({ queryKey: ['polls'] });
       const snapshots: [readonly unknown[], PollDetails[] | undefined][] = [];
@@ -143,6 +146,7 @@ export function useToggleVote() {
     mutationFn: ({ pollId, optionId }: { pollId: string; optionId: string }) =>
       pollsApi.toggleVote(pollId, optionId),
     onMutate: async ({ pollId, optionId }) => {
+      await qc.cancelQueries({ queryKey: ['polls'] });
       const queries = qc.getQueriesData<PollDetails[]>({ queryKey: ['polls'] });
       const snapshots: [readonly unknown[], PollDetails[] | undefined][] = [];
 

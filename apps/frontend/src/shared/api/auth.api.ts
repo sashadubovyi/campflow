@@ -43,8 +43,13 @@ export const authApi = {
   },
 
   async logout(): Promise<void> {
-    await api.post('/auth/logout');
-    clearRefreshToken();
+    // Локальний токен чистимо ЗАВЖДИ, навіть якщо запит впав (офлайн, 500) —
+    // інакше на shared-девайсі bootstrap() тихо залогінить юзера назад.
+    try {
+      await api.post('/auth/logout');
+    } finally {
+      clearRefreshToken();
+    }
   },
 
   async me(): Promise<User> {
