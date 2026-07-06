@@ -18,6 +18,7 @@ import { DeleteMessageDto } from './dto/delete-message.dto';
 import { ToggleImportantDto } from './dto/toggle-important.dto';
 import type { JwtPayload } from '../auth/strategies/jwt.strategy';
 import { PresenceService } from '../presence/presence.service';
+import { wsCorsOrigin } from '../common/ws-cors.util';
 
 interface AuthenticatedSocket extends Socket {
   data: {
@@ -28,7 +29,7 @@ interface AuthenticatedSocket extends Socket {
 
 @WebSocketGateway({
   cors: {
-    origin: true,
+    origin: wsCorsOrigin,
     credentials: true,
   },
   namespace: '/ws',
@@ -60,9 +61,23 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       client.data.email = payload.email;
       this.logger.log(`Client connected: ${payload.email} (${client.id})`);
 
-      // ↓↓↓ Presence: онлайн ↓↓↓
-      await this.presence.markOnline(payload.sub);
-      this.server.emit('presence:online', { userId: payload.sub });
+      // socket.io очищає client.rooms ДО події 'disconnect', тому кімнати
+      // треба знімати на 'disconnecting', поки set ще заповнений.
+      client.on('disconnecting', () => {
+        for (const room of client.rooms) {
+          if (room.startsWith('room:')) {
+            const roomId = room.slice(5);
+            void this.chatService.touchLastSeen(payload.sub, roomId).catch(() => {});
+            client.to(room).emit('presence:leave', { userId: payload.sub });
+          }
+        }
+      });
+
+      // ↓↓↓ Presence: онлайн (broadcast тільки на перехід offline → online) ↓↓↓
+      const wentOnline = await this.presence.markOnline(payload.sub);
+      if (wentOnline) {
+        this.server.emit('presence:online', { userId: payload.sub });
+      }
     } catch (err) {
       this.logger.warn(`Connection rejected: ${(err as Error).message}`);
       client.emit('error', { message: 'Unauthorized' });
@@ -71,26 +86,25 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   async handleDisconnect(client: AuthenticatedSocket) {
-    this.logger.log(`Client disconnected: ${client.data?.email ?? client.id}`);
-    if (!client.data?.userId) return;
+    // Nest підписує handleDisconnect без catch — будь-який reject тут стає
+    // unhandled rejection і кладе весь процес. Тому все у try/catch.
+    try {
+      this.logger.log(`Client disconnected: ${client.data?.email ?? client.id}`);
+      if (!client.data?.userId) return;
 
-    const userId = client.data.userId;
+      const userId = client.data.userId;
 
-    // Сообщаем всем комнатам, в которых был сокет, что юзер вышел
-    for (const room of client.rooms) {
-      if (room.startsWith('room:')) {
-        const roomId = room.slice(5);
-        await this.chatService.touchLastSeen(userId, roomId).catch(() => {});
-        client.to(room).emit('presence:leave', { userId });
+      // ↓↓↓ Presence: офлайн (broadcast тільки коли закрився останній сокет) ↓↓↓
+      const wentOffline = await this.presence.markOffline(userId);
+      if (wentOffline) {
+        this.server.emit('presence:offline', {
+          userId,
+          lastSeenAt: new Date().toISOString(),
+        });
       }
+    } catch (err) {
+      this.logger.error(`handleDisconnect failed: ${(err as Error).message}`);
     }
-
-    // ↓↓↓ Presence: офлайн ↓↓↓
-    await this.presence.markOffline(userId);
-    this.server.emit('presence:offline', {
-      userId,
-      lastSeenAt: new Date().toISOString(),
-    });
   }
 
   @SubscribeMessage('room:join')
@@ -114,6 +128,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { roomId: string },
   ) {
     if (!data?.roomId) return;
+    // Не був у кімнаті — нема звідки виходити (і нема права емітити presence:leave).
+    if (!client.rooms.has(this.roomChannel(data.roomId))) return;
     await client.leave(this.roomChannel(data.roomId));
     client.to(this.roomChannel(data.roomId)).emit('presence:leave', {
       userId: client.data.userId,
@@ -147,9 +163,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() dto: DeleteMessageDto,
   ) {
-    const result = await this.chatService.deleteMessage(client.data.userId, dto.messageId, dto.roomId);
-    this.server.to(this.roomChannel(dto.roomId)).emit('message:deleted', result);
-    return { ok: true };
+    try {
+      const result = await this.chatService.deleteMessage(
+        client.data.userId,
+        dto.messageId,
+        dto.roomId,
+      );
+      this.server.to(this.roomChannel(dto.roomId)).emit('message:deleted', result);
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, error: (err as Error).message };
+    }
   }
 
   @SubscribeMessage('message:toggleImportant')
@@ -157,13 +181,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() dto: ToggleImportantDto,
   ) {
-    const message = await this.chatService.toggleImportant(
-      client.data.userId,
-      dto.messageId,
-      dto.roomId,
-    );
-    this.server.to(this.roomChannel(dto.roomId)).emit('message:updated', message);
-    return { ok: true };
+    try {
+      const message = await this.chatService.toggleImportant(
+        client.data.userId,
+        dto.messageId,
+        dto.roomId,
+      );
+      this.server.to(this.roomChannel(dto.roomId)).emit('message:updated', message);
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, error: (err as Error).message };
+    }
   }
 
   @SubscribeMessage('typing:start')
@@ -172,6 +200,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { roomId: string },
   ) {
     if (!data?.roomId) return;
+    // Емітити можна тільки в кімнату, до якої сокет реально приєднаний
+    // (join проходить через assertMembership) — інакше будь-який юзер
+    // може слати typing-івенти в чужі кімнати.
+    if (!client.rooms.has(this.roomChannel(data.roomId))) return;
     client.to(this.roomChannel(data.roomId)).emit('typing:start', {
       userId: client.data.userId,
     });
@@ -183,6 +215,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { roomId: string },
   ) {
     if (!data?.roomId) return;
+    if (!client.rooms.has(this.roomChannel(data.roomId))) return;
     client.to(this.roomChannel(data.roomId)).emit('typing:stop', {
       userId: client.data.userId,
     });

@@ -1,8 +1,9 @@
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
+import { wsCorsOrigin } from '../common/ws-cors.util';
 
 @WebSocketGateway({
-  cors: { origin: true, credentials: true },
+  cors: { origin: wsCorsOrigin, credentials: true },
   namespace: '/ws',
 })
 export class PollsGateway {

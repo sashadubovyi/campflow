@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, ForbiddenException, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { AiService } from './ai.service';
 import { GenerateChecklistDto } from './dto/generate-checklist.dto';
 import { CheckDuplicateDto } from './dto/check-duplicate.dto';
@@ -21,6 +21,11 @@ export class AiController {
   @Post('check-duplicate')
   @HttpCode(HttpStatus.OK)
   async checkDuplicate(@CurrentUser() user: AuthenticatedUser, @Body() dto: CheckDuplicateDto) {
+    const member = await this.prisma.roomMember.findUnique({
+      where: { roomId_userId: { roomId: dto.roomId, userId: user.id } },
+    });
+    if (!member) throw new ForbiddenException('You are not a member of this room');
+
     const existing = await this.prisma.poll.findMany({
       where: { roomId: dto.roomId },
       select: { title: true },

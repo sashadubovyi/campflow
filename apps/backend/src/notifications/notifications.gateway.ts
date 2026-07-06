@@ -4,13 +4,14 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Server, Socket } from 'socket.io';
 import type { JwtPayload } from '../auth/strategies/jwt.strategy';
+import { wsCorsOrigin } from '../common/ws-cors.util';
 
 interface AuthenticatedSocket extends Socket {
   data: { userId: string; email: string };
 }
 
 @WebSocketGateway({
-  cors: { origin: true, credentials: true },
+  cors: { origin: wsCorsOrigin, credentials: true },
   namespace: '/notifications',
 })
 export class NotificationsGateway implements OnGatewayConnection {
