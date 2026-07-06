@@ -42,13 +42,31 @@ export class RoomLifecycleService {
     return d;
   }
 
+  /**
+   * Prisma-фільтр «deletionDate(room) <= cutoff» — той самий предикат, що
+   * deletionDate(), але виражений у SQL, щоб take-ліміт не відрізав
+   * прострочені кімнати, які випадково не потрапили в перші N рядків.
+   */
+  private expiryFilter(cutoff: Date) {
+    const eventCutoff = new Date(cutoff);
+    eventCutoff.setDate(eventCutoff.getDate() - EVENT_GRACE_DAYS);
+    const activityCutoff = new Date(cutoff);
+    activityCutoff.setDate(activityCutoff.getDate() - INACTIVITY_DAYS);
+    return {
+      OR: [
+        { eventDate: { lte: eventCutoff } },
+        { eventDate: null, lastActivityAt: { lte: activityCutoff } },
+      ],
+    };
+  }
+
   private async warnSoonToBeDeleted() {
     const now = new Date();
     const warnThreshold = new Date();
     warnThreshold.setDate(warnThreshold.getDate() + WARN_BEFORE_DAYS);
 
     const rooms = await this.prisma.room.findMany({
-      where: { status: 'active', deletionWarnedAt: null },
+      where: { status: 'active', deletionWarnedAt: null, ...this.expiryFilter(warnThreshold) },
       select: { id: true, eventDate: true, lastActivityAt: true },
       take: 1000,
     });
@@ -81,17 +99,21 @@ export class RoomLifecycleService {
     const now = new Date();
     let totalDeleted = 0;
 
-    const candidates = await this.prisma.room.findMany({
-      where: { status: 'active' },
-      select: { id: true, name: true, eventDate: true, lastActivityAt: true },
-      take: BATCH_SIZE,
-    });
+    // Батчами до вичерпання: видалені кімнати випадають з наступної вибірки,
+    // тому цикл гарантовано завершується.
+    for (;;) {
+      const candidates = await this.prisma.room.findMany({
+        where: { status: 'active', ...this.expiryFilter(now) },
+        select: { id: true, name: true, eventDate: true, lastActivityAt: true },
+        take: BATCH_SIZE,
+      });
+      if (candidates.length === 0) break;
 
-    for (const room of candidates) {
-      const delDate = this.deletionDate(room);
-      if (delDate > now) continue;
-      await this.archiveAndDelete(room.id, room.name, room.eventDate);
-      totalDeleted++;
+      for (const room of candidates) {
+        await this.archiveAndDelete(room.id, room.name, room.eventDate);
+        totalDeleted++;
+      }
+      if (candidates.length < BATCH_SIZE) break;
     }
 
     if (totalDeleted > 0) this.logger.log(`Deleted ${totalDeleted} room(s)`);

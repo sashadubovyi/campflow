@@ -71,10 +71,6 @@ export class MapService {
         approved: false,
       }));
 
-    const result = [...fromFinal, ...fromOptions];
-    console.log(
-      `[MapService] userId=${userId} → finalItems=${finalItems.length} pollOptions=${pollOptions.length} total=${result.length}`,
-    );
-    return result;
+    return [...fromFinal, ...fromOptions];
   }
 }

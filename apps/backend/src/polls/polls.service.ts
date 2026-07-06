@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import type { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePollDto } from './dto/create-poll.dto';
 import { CreateMultiPollDto } from './dto/create-multi-poll.dto';
@@ -72,16 +73,23 @@ export class PollsService {
   async listRoomPolls(userId: string, roomId: string) {
     await this.assertMember(userId, roomId);
 
-    const polls = await this.prisma.poll.findMany({
-      where: { roomId },
-      include: {
-        options: { orderBy: { position: 'asc' } },
-        _count: { select: { votes: true } },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+    // Все за два запити замість ~3 на кожне опитування (N+1 на гарячому шляху).
+    const [polls, totalMembers] = await Promise.all([
+      this.prisma.poll.findMany({
+        where: { roomId },
+        include: {
+          options: {
+            orderBy: { position: 'asc' },
+            include: { _count: { select: { votes: true } } },
+          },
+          votes: { select: { optionId: true, userId: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.roomMember.count({ where: { roomId } }),
+    ]);
 
-    return Promise.all(polls.map((p) => this.getPollResults(userId, p.id)));
+    return polls.map((p) => this.serializePoll(p, totalMembers, userId));
   }
 
   async getPollResults(userId: string, pollId: string) {
@@ -93,7 +101,6 @@ export class PollsService {
           include: { _count: { select: { votes: true } } },
         },
         votes: { select: { optionId: true, userId: true } },
-        room: { select: { id: true } },
       },
     });
 
@@ -105,6 +112,19 @@ export class PollsService {
       where: { roomId: poll.roomId },
     });
 
+    return this.serializePoll(poll, totalMembers, userId);
+  }
+
+  private serializePoll(
+    poll: Prisma.PollGetPayload<{
+      include: {
+        options: { include: { _count: { select: { votes: true } } } };
+        votes: { select: { optionId: true; userId: true } };
+      };
+    }>,
+    totalMembers: number,
+    userId: string,
+  ) {
     // Унікальні юзери, що проголосували
     const votedUserIds = new Set(poll.votes.map((v) => v.userId));
 
@@ -149,6 +169,11 @@ export class PollsService {
 
     if (poll.status !== 'open' && poll.status !== 'reopened') {
       throw new BadRequestException('Poll is not open for voting');
+    }
+    // Дзеркальний guard до toggleVote: виклик vote() на multi_choice знищив би
+    // ВСІ мультиголоси юзера через deleteMany нижче.
+    if (poll.type === 'multi_choice') {
+      throw new BadRequestException('Use toggleVote for multi_choice polls');
     }
 
     const optionBelongs = poll.options.some((o) => o.id === optionId);

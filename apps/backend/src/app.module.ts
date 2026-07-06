@@ -36,7 +36,6 @@ import { DmModule } from './dm/dm.module';
     ChatModule,
     PollsModule,
     FinalPlanModule,
-    FinalPlanModule,
     RoomLifecycleModule,
     AiModule,
     PresenceModule,

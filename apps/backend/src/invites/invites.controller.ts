@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { InvitesService } from './invites.service';
+import { CreateInviteDto } from './dto/create-invite.dto';
 import { CurrentUser, AuthenticatedUser } from '../auth/decorators/current-user.decorator';
 
 @Controller()
@@ -20,7 +21,7 @@ export class InvitesController {
   create(
     @CurrentUser() user: AuthenticatedUser,
     @Param('roomId') roomId: string,
-    @Body() body: { username: string; message?: string },
+    @Body() body: CreateInviteDto,
   ) {
     return this.invitesService.createInvite(user.id, body.username, roomId, body.message);
   }

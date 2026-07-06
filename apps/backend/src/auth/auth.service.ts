@@ -74,8 +74,10 @@ export class AuthService {
   }
 
   async login(dto: LoginDto, meta: { userAgent?: string; ip?: string }) {
+    // register() зберігає email у lowercase — логін мусить нормалізувати так само,
+    // інакше "Foo@Bar.com" не знайде свій акаунт.
     const user = await this.prisma.user.findUnique({
-      where: { email: dto.email },
+      where: { email: dto.email.toLowerCase().trim() },
     });
 
     if (!user) {

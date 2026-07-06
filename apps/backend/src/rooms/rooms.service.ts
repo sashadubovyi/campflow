@@ -539,9 +539,12 @@ export class RoomsService {
   }
 
   async touchActivity(roomId: string) {
+    // Нова активність скидає deletionWarnedAt — інакше кімната, що ожила
+    // після попередження, при наступному простої видаляється БЕЗ другого
+    // попередження (warn-вибірка фільтрує deletionWarnedAt: null).
     await this.prisma.room.updateMany({
       where: { id: roomId, status: 'active' },
-      data: { lastActivityAt: new Date() },
+      data: { lastActivityAt: new Date(), deletionWarnedAt: null },
     });
   }
 

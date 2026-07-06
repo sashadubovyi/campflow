@@ -116,12 +116,15 @@ export class DmService {
 
   async getMessages(userId: string, chatId: string) {
     await this.assertMember(userId, chatId);
+    // Останні 200 повідомлень (desc + reverse), а не перші 200 — інакше
+    // після 200-го повідомлення чат "замерзає" на найстаріших.
     const messages = await this.prisma.directMessage.findMany({
       where: { chatId },
-      orderBy: { createdAt: 'asc' },
+      orderBy: { createdAt: 'desc' },
       take: 200,
       select: { id: true, content: true, createdAt: true, authorId: true },
     });
+    messages.reverse();
     return messages.map((m) => ({
       id: m.id,
       content: m.content,
