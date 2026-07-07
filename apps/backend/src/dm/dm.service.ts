@@ -122,7 +122,13 @@ export class DmService {
       where: { chatId },
       orderBy: { createdAt: 'desc' },
       take: 200,
-      select: { id: true, content: true, createdAt: true, authorId: true },
+      select: {
+        id: true,
+        content: true,
+        createdAt: true,
+        authorId: true,
+        replyTo: { select: { id: true, content: true, authorId: true } },
+      },
     });
     messages.reverse();
     return messages.map((m) => ({
@@ -130,6 +136,13 @@ export class DmService {
       content: m.content,
       createdAt: m.createdAt,
       isOwn: m.authorId === userId,
+      replyTo: m.replyTo
+        ? {
+            id: m.replyTo.id,
+            content: m.replyTo.content,
+            isOwn: m.replyTo.authorId === userId,
+          }
+        : null,
     }));
   }
 
@@ -139,7 +152,7 @@ export class DmService {
     await this.prisma.directChat.delete({ where: { id: chatId } });
   }
 
-  async sendMessage(userId: string, chatId: string, content: string) {
+  async sendMessage(userId: string, chatId: string, content: string, replyToId?: string) {
     const trimmed = content.trim();
     if (!trimmed) throw new BadRequestException('Empty message');
     if (trimmed.length > 4000) throw new BadRequestException('Message too long');
@@ -148,9 +161,26 @@ export class DmService {
     const blocked = await this.blocks.isBlockedEitherWay(userId, peer.id);
     if (blocked) throw new ForbiddenException('Cannot DM this user');
 
+    // Reply можна робити тільки на повідомлення з ЦЬОГО чату
+    if (replyToId) {
+      const target = await this.prisma.directMessage.findUnique({
+        where: { id: replyToId },
+        select: { chatId: true },
+      });
+      if (!target || target.chatId !== chatId) {
+        throw new BadRequestException('Reply target is not in this chat');
+      }
+    }
+
     const message = await this.prisma.directMessage.create({
-      data: { chatId, authorId: userId, content: trimmed },
-      select: { id: true, content: true, createdAt: true, authorId: true },
+      data: { chatId, authorId: userId, content: trimmed, replyToId: replyToId ?? null },
+      select: {
+        id: true,
+        content: true,
+        createdAt: true,
+        authorId: true,
+        replyTo: { select: { id: true, content: true, authorId: true } },
+      },
     });
     await this.prisma.directChat.update({
       where: { id: chatId },
@@ -161,6 +191,13 @@ export class DmService {
       content: message.content,
       createdAt: message.createdAt,
       isOwn: true,
+      replyTo: message.replyTo
+        ? {
+            id: message.replyTo.id,
+            content: message.replyTo.content,
+            isOwn: message.replyTo.authorId === userId,
+          }
+        : null,
     };
   }
 }

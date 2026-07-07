@@ -63,6 +63,6 @@ export class DmController {
     @Param('chatId', new ParseUUIDPipe()) chatId: string,
     @Body() dto: SendDmMessageDto,
   ) {
-    return this.dm.sendMessage(user.id, chatId, dto.content);
+    return this.dm.sendMessage(user.id, chatId, dto.content, dto.replyToId);
   }
 }

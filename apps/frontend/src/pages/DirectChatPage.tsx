@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Send, Reply, X, MoreHorizontal, CornerUpLeft } from 'lucide-react';
 import { useDmGetOrCreate, useDmMessages, useSendDm } from '../shared/api/dm.hooks';
+import type { DmMessage } from '../shared/api/dm.api';
 import { Avatar } from '../shared/ui/Avatar';
 import { BackButton } from '../shared/ui';
 import { Skeleton } from '../shared/ui/Skeleton';
@@ -17,13 +18,6 @@ function formatTime(iso: string, locale: string): string {
   });
 }
 
-type DmMessage = {
-  id: string;
-  content: string;
-  isOwn: boolean;
-  createdAt: string;
-  senderName?: string;
-};
 
 const SWIPE_REPLY_THRESHOLD = 55;
 const LONG_PRESS_MS = 550;
@@ -177,6 +171,17 @@ function DmMessageBubble({
                 : 'bg-white/75 backdrop-blur-sm text-neutral-900 rounded-tl-sm'
             }`}
           >
+            {message.replyTo && (
+              <div
+                className={`mb-1.5 pl-2 border-l-2 text-xs leading-snug ${
+                  message.isOwn
+                    ? 'border-white/50 text-white/80'
+                    : 'border-accent-400 text-neutral-500'
+                }`}
+              >
+                <p className="line-clamp-2 whitespace-pre-wrap">{message.replyTo.content}</p>
+              </div>
+            )}
             <p className="leading-relaxed whitespace-pre-wrap">{message.content}</p>
           </div>
         </div>
@@ -289,12 +294,16 @@ export function DirectChatPage() {
   function handleSend() {
     const trimmed = text.trim();
     if (!trimmed || !chat) return;
+    const replyToId = replyingTo?.id;
     setText('');
     setReplyingTo(null);
-    send.mutate(trimmed, {
-      // Не мовчки губимо текст: якщо відправка впала — повертаємо його в інпут.
-      onError: () => setText((current) => current || trimmed),
-    });
+    send.mutate(
+      { content: trimmed, replyToId },
+      {
+        // Не мовчки губимо текст: якщо відправка впала — повертаємо його в інпут.
+        onError: () => setText((current) => current || trimmed),
+      },
+    );
   }
 
   function handleKey(e: React.KeyboardEvent<HTMLInputElement>) {

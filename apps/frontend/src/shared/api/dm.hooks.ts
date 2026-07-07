@@ -40,7 +40,8 @@ export function useDeleteDmChat() {
 export function useSendDm(chatId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (content: string) => dmApi.send(chatId, content),
+    mutationFn: ({ content, replyToId }: { content: string; replyToId?: string }) =>
+      dmApi.send(chatId, content, replyToId),
     onSuccess: (msg) => {
       qc.setQueryData<DmMessage[]>(['dm', 'messages', chatId], (prev) =>
         prev ? [...prev, msg] : [msg],

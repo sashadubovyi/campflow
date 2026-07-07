@@ -466,11 +466,15 @@ model DirectMessage {
   chatId    String   @map("chat_id") @db.Uuid
   authorId  String   @map("author_id") @db.Uuid
   content   String   @db.Text
+  replyToId String?  @map("reply_to_id") @db.Uuid
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
 
-  chat   DirectChat @relation(fields: [chatId], references: [id], onDelete: Cascade)
-  author User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  chat    DirectChat      @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  author  User            @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  replyTo DirectMessage?  @relation("DmReplies", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies DirectMessage[] @relation("DmReplies")
 
   @@index([chatId, createdAt(sort: Desc)])
+  @@index([replyToId])
   @@map("direct_messages")
 }

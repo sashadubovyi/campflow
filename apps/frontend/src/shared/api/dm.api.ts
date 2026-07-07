@@ -32,6 +32,11 @@ export interface DmMessage {
   content: string;
   createdAt: string;
   isOwn: boolean;
+  replyTo?: {
+    id: string;
+    content: string;
+    isOwn: boolean;
+  } | null;
 }
 
 export const dmApi = {
@@ -51,8 +56,11 @@ export const dmApi = {
     const { data } = await api.get<DmMessage[]>(`/dm/${chatId}/messages`);
     return data;
   },
-  async send(chatId: string, content: string): Promise<DmMessage> {
-    const { data } = await api.post<DmMessage>(`/dm/${chatId}/messages`, { content });
+  async send(chatId: string, content: string, replyToId?: string): Promise<DmMessage> {
+    const { data } = await api.post<DmMessage>(`/dm/${chatId}/messages`, {
+      content,
+      ...(replyToId ? { replyToId } : {}),
+    });
     return data;
   },
   async deleteChat(chatId: string): Promise<void> {
