@@ -229,7 +229,8 @@
       "locations": "Локации",
       "items": "Вещи",
       "noAssignee": "не назначено",
-      "approvedAt": "Утверждено {{time}}"
+      "approvedAt": "Утверждено {{time}}",
+      "addToCalendar": "Добавить в календарь (.ics)"
     },
     "ai": {
       "assist": "AI-помощник",

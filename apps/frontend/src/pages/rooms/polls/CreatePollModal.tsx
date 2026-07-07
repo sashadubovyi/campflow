@@ -124,6 +124,9 @@ export function CreatePollModal({ roomId, onClose }: Props) {
       setAiSource(result.source);
       setShowAiInput(false);
       setValue('title', aiDescription.trim().slice(0, 80));
+      // Чекліст без розподілу "хто що бере" — половина фічі: вмикаємо одразу,
+      // юзер може зняти галочку перед створенням.
+      setValue('allowAssign', true);
     } catch {
       alert(t('polls.ai.errorBody'));
     }

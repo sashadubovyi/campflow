@@ -229,7 +229,8 @@
       "locations": "Locations",
       "items": "Items",
       "noAssignee": "unassigned",
-      "approvedAt": "Approved {{time}}"
+      "approvedAt": "Approved {{time}}",
+      "addToCalendar": "Add to calendar (.ics)"
     },
     "ai": {
       "assist": "AI assistant",

@@ -1,17 +1,47 @@
 import { useTranslation } from 'react-i18next';
 import { useFinalPlan } from '../../shared/api/final-plan.hooks';
-import type { FinalPlanItem } from '../../shared/api/final-plan.api';
+import type { FinalPlan, FinalPlanItem } from '../../shared/api/final-plan.api';
+import { useRoom } from '../../shared/api/rooms.hooks';
+import type { RoomDetails } from '../../shared/api/rooms.api';
 import { Avatar } from '../../shared/ui/Avatar';
 import { relativeTime } from '../../shared/lib/relativeTime';
-import { Calendar, MapPin, ClipboardList, type LucideIcon } from 'lucide-react';
+import { buildIcs, downloadIcs } from '../../shared/lib/buildIcs';
+import { Calendar, CalendarPlus, MapPin, ClipboardList, type LucideIcon } from 'lucide-react';
 
 interface Props {
   roomId: string;
 }
 
+function exportPlanToCalendar(room: RoomDetails, plan: FinalPlan) {
+  const firstLocation = plan.grouped.locations.find((l) => l.address || l.title);
+  const geoItem = plan.grouped.locations.find(
+    (l) => l.latitude !== null && l.longitude !== null,
+  );
+
+  const descriptionLines = [
+    room.description ?? '',
+    ...plan.grouped.decisions.map((d) => `✔ ${d.title}`),
+    ...plan.grouped.items.map(
+      (i) => `• ${i.title}${i.assignee ? ` — ${i.assignee.fullName}` : ''}`,
+    ),
+  ].filter(Boolean);
+
+  const ics = buildIcs({
+    uid: `room-${room.id}@andu`,
+    title: room.name,
+    description: descriptionLines.join('\n'),
+    startsAt: new Date(room.startsAt as string),
+    endsAt: room.endsAt ? new Date(room.endsAt) : null,
+    location: firstLocation ? (firstLocation.address ?? firstLocation.title) : null,
+    geo: geoItem ? { latitude: geoItem.latitude!, longitude: geoItem.longitude! } : null,
+  });
+  downloadIcs(room.name, ics);
+}
+
 export function FinalPlanPanel({ roomId }: Props) {
   const { t } = useTranslation();
   const { data: plan, isLoading } = useFinalPlan(roomId);
+  const { data: room } = useRoom(roomId);
 
   if (isLoading) {
     return (
@@ -39,6 +69,17 @@ export function FinalPlanPanel({ roomId }: Props) {
 
   return (
     <div className="px-3 py-3 space-y-4">
+      {/* Експорт у календар: тільки якщо в кімнати є дата */}
+      {room?.startsAt && (
+        <button
+          onClick={() => exportPlanToCalendar(room, plan)}
+          className="w-full flex items-center justify-center gap-2 glass-btn py-2.5 rounded-xl text-sm font-semibold text-neutral-700 transition"
+        >
+          <CalendarPlus size={15} />
+          {t('polls.finalPlan.addToCalendar')}
+        </button>
+      )}
+
       {plan.grouped.decisions.length > 0 && (
         <Section title={t('polls.finalPlan.decisions')} icon={Calendar}>
           {plan.grouped.decisions.map((item) => (

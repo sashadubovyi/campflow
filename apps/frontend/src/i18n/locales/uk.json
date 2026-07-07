@@ -229,7 +229,8 @@
       "locations": "Локації",
       "items": "Речі",
       "noAssignee": "не призначено",
-      "approvedAt": "Затверджено {{time}}"
+      "approvedAt": "Затверджено {{time}}",
+      "addToCalendar": "Додати в календар (.ics)"
     },
     "ai": {
       "assist": "Помічник AI",
