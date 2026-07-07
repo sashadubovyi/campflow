@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
+import { InvalidateSizeOnMount } from './InvalidateSizeOnMount';
 import { MapPin, ChevronDown, ChevronUp, Loader2, Search } from 'lucide-react';
 
 const pickerIcon = L.divIcon({
@@ -43,6 +44,7 @@ function ClickHandler({ onClick }: { onClick: (lat: number, lng: number) => void
   });
   return null;
 }
+
 
 async function forwardGeocode(query: string): Promise<PickedLocation | null> {
   try {
@@ -174,6 +176,7 @@ export function MapPicker({ onPick, initialCenter = [50.4501, 30.5234], height =
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
+              <InvalidateSizeOnMount />
               <ClickHandler onClick={handleClick} />
               {pending && <Marker position={[pending.lat, pending.lng]} icon={pickerIcon} />}
             </MapContainer>

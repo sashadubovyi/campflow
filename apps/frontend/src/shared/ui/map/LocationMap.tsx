@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
+import { InvalidateSizeOnMount } from './InvalidateSizeOnMount';
 
 // Кастомна іконка з кількістю голосів. Мемоїзуємо через Map щоб уникнути
 // recreate-іконки при кожному рендері — це запобігає "мерехтінню" маркерів.
@@ -50,6 +51,9 @@ function FitBounds({ points }: { points: MapPoint[] }) {
     if (points.length === 0) return;
     const timer = setTimeout(() => {
       try {
+        // Спершу перемірюємо контейнер — fitBounds на "сирому" розмірі
+        // центрує камеру неправильно і лишає сірі плитки.
+        map.invalidateSize();
         if (points.length === 1) {
           map.setView([points[0]!.latitude, points[0]!.longitude], 13);
         } else {
@@ -58,9 +62,6 @@ function FitBounds({ points }: { points: MapPoint[] }) {
           );
           map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
         }
-        // Після fitBounds Leaflet інвалідує розмір; примусовий invalidateSize
-        // усуває "сірі плитки" після анімації зміни розміру контейнера.
-        map.invalidateSize();
       } catch {
         // map може бути вже unmounted
       }
@@ -91,6 +92,7 @@ export function LocationMap({ points, height = 240, fitBounds = true }: Props) {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        <InvalidateSizeOnMount />
         {fitBounds && <FitBounds points={points} />}
         {points.map((p) => (
           <Marker

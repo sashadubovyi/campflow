@@ -12,8 +12,9 @@ import {
 import { useGenerateChecklist, useCheckDuplicate } from '../../../shared/api/ai.hooks';
 import type { PollType } from '../../../shared/api/polls.api';
 import { MapPicker, type PickedLocation } from '../../../shared/ui/map/MapPicker';
-import { Sparkles, CircleDot, ListChecks, MapPin, Loader2 } from 'lucide-react';
+import { Sparkles, CircleDot, ListChecks, MapPin } from 'lucide-react';
 import { cn } from '../../../shared/ui';
+import { GlassButton } from '../../../shared/ui/GlassButton';
 
 interface Props {
   roomId: string;
@@ -336,16 +337,18 @@ export function CreatePollModal({ roomId, onClose }: Props) {
             </label>
           )}
 
-          {/* AI блок для multi_choice */}
+          {/* AI блок для multi_choice — той самий брендовий AI-стиль,
+              що й у створенні кімнати з Gemini (GlassButton variant="ai") */}
           {type === 'multi_choice' && !showAiInput && (
-            <button
+            <GlassButton
               type="button"
+              variant="ai"
               onClick={() => setShowAiInput(true)}
-              className="ai-border w-full rounded-xl py-2.5 flex items-center justify-center gap-2 text-sm font-semibold text-neutral-900 bg-gradient-to-br from-white/70 to-accent-50/50 backdrop-blur-md hover:from-white/90 transition"
+              className="w-full py-2.5"
             >
-              <Sparkles size={16} className="text-[#655adc]" />
+              <Sparkles size={15} className="text-violet-500" />
               {t('polls.ai.assist')}
-            </button>
+            </GlassButton>
           )}
 
           {type === 'multi_choice' && showAiInput && (
@@ -369,15 +372,17 @@ export function CreatePollModal({ roomId, onClose }: Props) {
                 placeholder={t('polls.ai.describePlaceholder')}
                 className="w-full px-3 py-2 rounded-lg border border-neutral-100 focus:border-accent-500 outline-none text-sm resize-none"
               />
-              <button
+              <GlassButton
                 type="button"
+                variant="ai"
                 onClick={handleAiGenerate}
-                disabled={generateChecklist.isPending || aiDescription.trim().length < 5}
-                className="w-full btn-glass-blue disabled:opacity-50 font-semibold py-2 rounded-2xl text-sm transition flex items-center justify-center gap-2"
+                loading={generateChecklist.isPending}
+                disabled={aiDescription.trim().length < 5}
+                className="w-full py-2"
               >
-                {generateChecklist.isPending && <Loader2 size={14} className="animate-spin" />}
+                <Sparkles size={14} className="text-violet-500" />
                 {generateChecklist.isPending ? t('polls.ai.generating') : t('polls.ai.generate')}
-              </button>
+              </GlassButton>
             </div>
           )}
 

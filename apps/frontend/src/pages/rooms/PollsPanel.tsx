@@ -39,7 +39,9 @@ export function PollsPanel({ roomId, isAdmin, members, currentUserId }: Props) {
     );
 
   return (
-    <aside className="h-full bg-white flex flex-col min-h-0">
+    // Напівпрозорий фон як у MembersPanel: усередині glass-модалки Room Info
+    // суцільний bg-white ламав скругління і виглядав чужорідною білою плитою.
+    <aside className="h-full bg-white/55 backdrop-blur-xl flex flex-col min-h-0 rounded-[inherit]">
       <div className="px-2 pt-2 shrink-0 border-b border-neutral-100">
         <div className="flex gap-1 bg-white/35 border border-white/50 backdrop-blur-md p-1 rounded-2xl mb-2">
           <button onClick={() => setTab('polls')} className={tabCls(tab === 'polls')}>
