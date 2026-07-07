@@ -146,19 +146,23 @@ export class InvitesService {
       throw new BadRequestException('Invite already resolved');
     }
 
-    // Додаємо в кімнату (якщо ще не там — на випадок гонитви)
-    const exists = await this.prisma.roomMember.findUnique({
-      where: { roomId_userId: { roomId: invite.roomId, userId } },
-    });
-    if (!exists) {
-      await this.prisma.roomMember.create({
-        data: { roomId: invite.roomId, userId, role: 'member' },
+    await this.prisma.$transaction(async (tx) => {
+      // Атомарний "claim": лише один конкурентний accept пройде фільтр за
+      // статусом — double-click більше не дає дубль-нотифікацію чи P2002.
+      const claimed = await tx.roomInvite.updateMany({
+        where: { id: invite.id, status: { in: ['pending', 'deferred'] } },
+        data: { status: 'accepted', respondedAt: new Date() },
       });
-    }
+      if (claimed.count === 0) {
+        throw new BadRequestException('Invite already resolved');
+      }
 
-    await this.prisma.roomInvite.update({
-      where: { id: invite.id },
-      data: { status: 'accepted', respondedAt: new Date() },
+      // upsert — ідемпотентний навіть якщо юзер уже в кімнаті іншим шляхом
+      await tx.roomMember.upsert({
+        where: { roomId_userId: { roomId: invite.roomId, userId } },
+        update: {},
+        create: { roomId: invite.roomId, userId, role: 'member' },
+      });
     });
 
     // Сповіщення запрошувачу
