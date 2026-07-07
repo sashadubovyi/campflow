@@ -169,7 +169,9 @@
     "importantFilter": "Тільки важливі",
     "noImportantMessages": "Немає важливих повідомлень",
     "reply": "Відповісти",
-    "replyingTo": "Відповідь:"
+    "replyingTo": "Відповідь:",
+    "copy": "Копіювати текст",
+    "mentionUser": "Згадати учасника"
   },
   "qr": {
     "title": "QR код профілю",

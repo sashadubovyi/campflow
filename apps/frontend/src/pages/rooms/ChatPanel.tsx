@@ -1,20 +1,49 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Send, MessageCircle, MoreHorizontal, Trash2, Star, RefreshCw, CornerUpLeft, X } from 'lucide-react';
+import { Send, MessageCircle, MoreHorizontal, Trash2, Star, RefreshCw, CornerUpLeft, Copy, X } from 'lucide-react';
 import { useRoomChat } from '../../shared/api/useRoomChat';
 import { useAuth } from '../../shared/store/useAuth';
 import { Avatar } from '../../shared/ui/Avatar';
 import { Skeleton } from '../../shared/ui/Skeleton';
 import { useBlockedUsers } from '../../shared/api/blocks.hooks';
 import { isTouchDevice } from '../../shared/lib/isTouchDevice';
+import { copyToClipboard } from '../../shared/lib/clipboard';
 import type { Message } from '../../shared/api/chat.api';
+import type { RoomMember } from '../../shared/api/rooms.api';
 
 interface Props {
   roomId: string;
   roomName: string;
+  members?: RoomMember[];
   importantOnly?: boolean;
   onHasImportantChange?: (has: boolean) => void;
 }
+
+/** Токен @username: та сама абетка, що й у бекенд-валідації username. */
+const MENTION_RE = /@[a-z0-9_-]{2,32}/g;
+
+/** Підсвічує @згадки в тексті повідомлення. */
+function renderWithMentions(content: string, isOwn: boolean): ReactNode {
+  const re = new RegExp(MENTION_RE.source, 'g');
+  const parts: ReactNode[] = [];
+  let last = 0;
+  for (let m = re.exec(content); m !== null; m = re.exec(content)) {
+    if (m.index > last) parts.push(content.slice(last, m.index));
+    parts.push(
+      <span
+        key={m.index}
+        className={isOwn ? 'font-semibold underline decoration-white/70' : 'font-semibold text-accent-700'}
+      >
+        {m[0]}
+      </span>,
+    );
+    last = m.index + m[0].length;
+  }
+  if (parts.length === 0) return content;
+  if (last < content.length) parts.push(content.slice(last));
+  return parts;
+}
+
 
 function formatTime(iso: string, locale: string): string {
   const localeMap: Record<string, string> = { uk: 'uk-UA', en: 'en-US', ru: 'ru-RU' };
@@ -24,7 +53,7 @@ function formatTime(iso: string, locale: string): string {
   });
 }
 
-export function ChatPanel({ roomId, roomName: _roomName, importantOnly = false, onHasImportantChange }: Props) {
+export function ChatPanel({ roomId, roomName: _roomName, members = [], importantOnly = false, onHasImportantChange }: Props) {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const { messages, isLoading, typingUsers, sendMessage, deleteMessage, toggleImportant, emitTyping } =
@@ -33,6 +62,9 @@ export function ChatPanel({ roomId, roomName: _roomName, importantOnly = false, 
   const [text, setText] = useState('');
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+  // @згадки: позиція символа '@' у тексті + те, що набрано після нього
+  const [mention, setMention] = useState<{ start: number; query: string } | null>(null);
+  const [mentionIndex, setMentionIndex] = useState(0);
   const bottomRef = useRef<HTMLDivElement>(null);
   const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -41,6 +73,51 @@ export function ChatPanel({ roomId, roomName: _roomName, importantOnly = false, 
     () => new Set((blockedUsers ?? []).map((b) => b.user.id)),
     [blockedUsers],
   );
+
+  const mentionCandidates = useMemo(() => {
+    if (!mention) return [];
+    const q = mention.query.toLowerCase();
+    return members
+      .filter((m) => m.user.id !== user?.id)
+      .filter(
+        (m) =>
+          !q ||
+          m.user.username.toLowerCase().includes(q) ||
+          m.user.fullName.toLowerCase().includes(q),
+      )
+      .slice(0, 6);
+  }, [mention, members, user?.id]);
+
+  /** Знаходить незавершений @токен перед кареткою (напр. "прив @an|"). */
+  function detectMention(value: string, caret: number) {
+    const upToCaret = value.slice(0, caret);
+    const match = /(^|\s)@([a-z0-9_-]*)$/i.exec(upToCaret);
+    if (!match) {
+      setMention(null);
+      return;
+    }
+    const query = match[2] ?? '';
+    const start = caret - query.length - 1; // позиція '@'
+    setMention((prev) => {
+      if (prev?.start !== start || prev?.query !== query) setMentionIndex(0);
+      return { start, query };
+    });
+  }
+
+  function selectMention(member: RoomMember) {
+    if (!mention) return;
+    const caret = inputRef.current?.selectionStart ?? text.length;
+    const inserted = `@${member.user.username} `;
+    const next = text.slice(0, mention.start) + inserted + text.slice(caret);
+    setText(next);
+    setMention(null);
+    // Каретку — одразу після вставленої згадки
+    const newCaret = mention.start + inserted.length;
+    requestAnimationFrame(() => {
+      inputRef.current?.focus();
+      inputRef.current?.setSelectionRange(newCaret, newCaret);
+    });
+  }
 
   function startReplyTo(m: Message) {
     setReplyingTo(m);
@@ -71,6 +148,7 @@ export function ChatPanel({ roomId, roomName: _roomName, importantOnly = false, 
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setText(e.target.value);
+    detectMention(e.target.value, e.target.selectionStart ?? e.target.value.length);
     emitTyping(true);
     if (typingTimeout.current) clearTimeout(typingTimeout.current);
     typingTimeout.current = setTimeout(() => emitTyping(false), 1500);
@@ -92,10 +170,34 @@ export function ChatPanel({ roomId, roomName: _roomName, importantOnly = false, 
     sendMessage(trimmed, undefined, replyPayload);
     setText('');
     setReplyingTo(null);
+    setMention(null);
     emitTyping(false);
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    // Клавіатурна навігація по списку @згадок має пріоритет над відправкою
+    if (mention && mentionCandidates.length > 0) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setMentionIndex((i) => (i + 1) % mentionCandidates.length);
+        return;
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setMentionIndex((i) => (i - 1 + mentionCandidates.length) % mentionCandidates.length);
+        return;
+      }
+      if (e.key === 'Enter' || e.key === 'Tab') {
+        e.preventDefault();
+        selectMention(mentionCandidates[mentionIndex] ?? mentionCandidates[0]!);
+        return;
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setMention(null);
+        return;
+      }
+    }
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -198,12 +300,46 @@ export function ChatPanel({ roomId, roomName: _roomName, importantOnly = false, 
           </div>
         )}
 
-        <div className="flex items-center gap-2 px-4 md:px-6 py-3">
+        <div className="relative flex items-center gap-2 px-4 md:px-6 py-3">
+          {/* @згадки: дропдаун над інпутом */}
+          {mention && mentionCandidates.length > 0 && (
+            <div
+              role="listbox"
+              aria-label={t('chat.mentionUser', 'Згадати учасника')}
+              className="absolute bottom-full mb-1 left-4 right-4 md:left-6 md:right-6 glass-surface rounded-2xl py-1 z-30 max-h-60 overflow-y-auto shadow-glass-panel"
+            >
+              {mentionCandidates.map((m, i) => (
+                <button
+                  key={m.user.id}
+                  role="option"
+                  aria-selected={i === mentionIndex}
+                  // pointerDown, не click: click спрацьовує після blur інпута
+                  // і на мобільному губить фокус/клавіатуру
+                  onPointerDown={(e) => {
+                    e.preventDefault();
+                    selectMention(m);
+                  }}
+                  onMouseEnter={() => setMentionIndex(i)}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-left transition-colors ${
+                    i === mentionIndex ? 'bg-accent-500/10' : 'hover:bg-white/50'
+                  }`}
+                >
+                  <Avatar fullName={m.user.fullName} avatarUrl={m.user.avatarUrl} size={28} />
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm text-neutral-900 truncate">{m.user.fullName}</span>
+                    <span className="block text-xs text-neutral-400 truncate">@{m.user.username}</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+
           <input
             ref={inputRef}
             value={text}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
+            onBlur={() => setMention(null)}
             placeholder={t('chat.placeholder')}
             className="flex-1 h-11 px-4 rounded-2xl glass-input text-neutral-900 placeholder:text-neutral-400 focus:ring-0 outline-none transition"
           />
@@ -380,18 +516,32 @@ function MessageBubble({
           <p className="truncate opacity-80">{message.replyTo.content}</p>
         </div>
       )}
-      {message.content}
+      {renderWithMentions(message.content, isOwn)}
     </div>
   );
 
   return (
     <div
-      className={`flex gap-2.5 group items-end ${isOwn ? 'flex-row-reverse' : ''}`}
+      className={`flex gap-2.5 group items-end select-none ${isOwn ? 'flex-row-reverse' : ''}`}
+      // Вимикаємо нативний вибір тексту і iOS-callout: усі дії з повідомленням —
+      // через кастомне меню (long-press / right-click), включно з копіюванням.
+      style={{ WebkitUserSelect: 'none', WebkitTouchCallout: 'none' } as React.CSSProperties}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       onTouchCancel={handleTouchEnd}
-      onContextMenu={(e) => { if (longPressTriggered.current) e.preventDefault(); }}
+      onContextMenu={(e) => {
+        // Right-click на десктопі відкриває кастомне меню замість браузерного;
+        // на мобільному глушимо системне меню після long-press
+        e.preventDefault();
+        if (message.type !== 'system' && !longPressTriggered.current && !menuOpen) {
+          if (triggerRef.current) {
+            const rect = triggerRef.current.getBoundingClientRect();
+            setOpenDown(rect.top < 120);
+          }
+          onMenuOpen(message.id);
+        }
+      }}
     >
       {!isOwn && (showAvatar
         ? <Avatar fullName={message.author?.fullName ?? '?'} avatarUrl={message.author?.avatarUrl} size={32} />
@@ -472,19 +622,26 @@ function MessageBubble({
         </button>
 
         {menuOpen && (
-          <div className={`absolute ${openDown ? 'top-8' : 'bottom-8'} ${isOwn ? 'right-0' : 'left-0'} glass-surface rounded-2xl py-1 z-20 min-w-[160px]`}>
-            {/* Reply — desktop only, mobile uses swipe */}
+          <div className={`absolute ${openDown ? 'top-8' : 'bottom-8'} ${isOwn ? 'right-0' : 'left-0'} glass-surface rounded-2xl py-1 z-20 min-w-[170px]`}>
             <button
               onClick={() => { onReply(); onMenuClose(); }}
-              className="hidden md:flex w-full items-center gap-2.5 px-3 py-2 text-sm text-neutral-700 hover:bg-white/50 transition-colors"
+              className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-neutral-700 hover:bg-white/50 transition-colors"
             >
               <CornerUpLeft size={14} className="text-neutral-400" />
               {t('chat.reply', 'Відповісти')}
             </button>
 
             <button
+              onClick={() => { void copyToClipboard(message.content); onMenuClose(); }}
+              className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-neutral-700 hover:bg-white/50 transition-colors"
+            >
+              <Copy size={14} className="text-neutral-400" />
+              {t('chat.copy', 'Копіювати текст')}
+            </button>
+
+            <button
               onClick={() => { onToggleImportant(); onMenuClose(); }}
-              className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-neutral-700 hover:bg-white/50 transition-colors"
+              className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-neutral-700 hover:bg-white/50 transition-colors"
             >
               <Star size={14} className={message.isImportant ? 'text-amber-400 fill-amber-400' : 'text-neutral-400'} />
               {message.isImportant ? (t('chat.unmarkImportant') ?? 'Unmark important') : (t('chat.markImportant') ?? 'Mark important')}
@@ -496,7 +653,7 @@ function MessageBubble({
                 {!deleteConfirm ? (
                   <button
                     onClick={() => setDeleteConfirm(true)}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors"
+                    className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
                   >
                     <Trash2 size={14} />{t('chat.delete') ?? 'Delete'}
                   </button>

@@ -112,6 +112,7 @@ export function RoomPage() {
     <ChatPanel
       roomId={room.id}
       roomName={room.name}
+      members={room.members}
       importantOnly={importantOnly}
       onHasImportantChange={setHasImportant}
     />

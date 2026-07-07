@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Send, Reply, X, MoreHorizontal, CornerUpLeft } from 'lucide-react';
+import { Send, Reply, X, MoreHorizontal, CornerUpLeft, Copy } from 'lucide-react';
+import { copyToClipboard } from '../shared/lib/clipboard';
 import { useDmGetOrCreate, useDmMessages, useSendDm } from '../shared/api/dm.hooks';
 import type { DmMessage } from '../shared/api/dm.api';
 import { Avatar } from '../shared/ui/Avatar';
@@ -136,11 +137,16 @@ function DmMessageBubble({
 
   return (
     <div
-      className={`flex gap-2 group items-end ${message.isOwn ? 'flex-row-reverse' : ''}`}
+      className={`flex gap-2 group items-end select-none ${message.isOwn ? 'flex-row-reverse' : ''}`}
+      style={{ WebkitUserSelect: 'none', WebkitTouchCallout: 'none' } as React.CSSProperties}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
-      onContextMenu={(e) => { if (longPressTriggered.current) e.preventDefault(); }}
+      onContextMenu={(e) => {
+        // Right-click (десктоп) відкриває кастомне меню; системне — глушимо
+        e.preventDefault();
+        if (!longPressTriggered.current && !menuOpen) onMenuOpen(message.id);
+      }}
     >
       {/* Bubble column: constrains width + aligns left/right */}
       <div className={`flex flex-col max-w-[75%] ${message.isOwn ? 'items-end' : 'items-start'}`}>
@@ -216,10 +222,17 @@ function DmMessageBubble({
                 а кнопки-пустушки, що лише закривають меню, гірші за їх відсутність. */}
             <button
               onClick={() => { onReply(message); onMenuClose(); }}
-              className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-neutral-700 hover:bg-white/50 transition-colors"
+              className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-neutral-700 hover:bg-white/50 transition-colors"
             >
               <CornerUpLeft size={14} className="text-neutral-400" />
               {t('chat.reply', 'Відповісти')}
+            </button>
+            <button
+              onClick={() => { void copyToClipboard(message.content); onMenuClose(); }}
+              className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-neutral-700 hover:bg-white/50 transition-colors"
+            >
+              <Copy size={14} className="text-neutral-400" />
+              {t('chat.copy', 'Копіювати текст')}
             </button>
           </div>
         )}

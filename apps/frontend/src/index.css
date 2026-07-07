@@ -75,17 +75,32 @@
            transition-all duration-200;
   }
 
-  /* ── Liquid Glass header (page top bar) ── */
+  /* ── Liquid Glass header (page top bar) ──
+     Тінт по краях плавно розчиняється до повної прозорості в центрі екрана;
+     скло тримається на сильному backdrop-blur, а не на заливці. */
   .glass-header {
-    background: rgba(232, 236, 245, 0.84);
+    background: linear-gradient(
+      90deg,
+      rgba(232, 236, 245, 0.92) 0%,
+      rgba(232, 236, 245, 0.55) 22%,
+      rgba(232, 236, 245, 0) 50%,
+      rgba(232, 236, 245, 0.55) 78%,
+      rgba(232, 236, 245, 0.92) 100%
+    );
     backdrop-filter: saturate(200%) blur(40px);
     -webkit-backdrop-filter: saturate(200%) blur(40px);
     border-bottom: 0.5px solid rgba(255, 255, 255, 0.60);
   }
 
-  /* ── Liquid Glass sidebar nav ── */
+  /* ── Liquid Glass sidebar nav ──
+     Той самий патерн: тінт біля зовнішнього краю, прозорість — до центру екрана. */
   .glass-nav {
-    background: rgba(232, 236, 245, 0.88);
+    background: linear-gradient(
+      90deg,
+      rgba(232, 236, 245, 0.94) 0%,
+      rgba(232, 236, 245, 0.60) 55%,
+      rgba(232, 236, 245, 0.12) 100%
+    );
     backdrop-filter: saturate(200%) blur(40px);
     -webkit-backdrop-filter: saturate(200%) blur(40px);
     border-right: 0.5px solid rgba(255, 255, 255, 0.65);
@@ -93,7 +108,14 @@
 
   /* ── Liquid Glass bottom tab bar ── */
   .glass-tabbar {
-    background: rgba(232, 236, 245, 0.92);
+    background: linear-gradient(
+      90deg,
+      rgba(232, 236, 245, 0.95) 0%,
+      rgba(232, 236, 245, 0.62) 22%,
+      rgba(232, 236, 245, 0) 50%,
+      rgba(232, 236, 245, 0.62) 78%,
+      rgba(232, 236, 245, 0.95) 100%
+    );
     backdrop-filter: saturate(200%) blur(40px);
     -webkit-backdrop-filter: saturate(200%) blur(40px);
     border-top: 0.5px solid rgba(255, 255, 255, 0.70);

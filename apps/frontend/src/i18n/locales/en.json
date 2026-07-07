@@ -169,7 +169,9 @@
     "importantFilter": "Important only",
     "noImportantMessages": "No important messages",
     "reply": "Reply",
-    "replyingTo": "Reply to:"
+    "replyingTo": "Reply to:",
+    "copy": "Copy text",
+    "mentionUser": "Mention a member"
   },
   "qr": {
     "title": "Profile QR code",

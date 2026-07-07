@@ -169,7 +169,9 @@
     "importantFilter": "Только важные",
     "noImportantMessages": "Нет важных сообщений",
     "reply": "Ответить",
-    "replyingTo": "Ответ:"
+    "replyingTo": "Ответ:",
+    "copy": "Копировать текст",
+    "mentionUser": "Упомянуть участника"
   },
   "qr": {
     "title": "QR код профиля",
