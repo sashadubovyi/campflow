@@ -3,7 +3,7 @@ import { ValidationPipe, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import cookieParser from 'cookie-parser';
-import { join } from 'path';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
 
 function parseAllowedOrigins(input: string | undefined): string[] {
@@ -26,7 +26,21 @@ async function bootstrap() {
   app.set('trust proxy', 1);
 
   app.setGlobalPrefix('api');
-  app.useStaticAssets(join(__dirname, '..', 'uploads'), { prefix: '/uploads' });
+  // /uploads більше не сервиться: обкладинки й аватарки живуть у БД як
+  // base64 data URL (диск на Railway ефемерний, файли зникали після deploy).
+  app.use(
+    helmet({
+      // API повертає тільки JSON — сувора CSP тут страхує від відображення
+      // будь-якого відбитого контенту як HTML. CSP для самого SPA — у vercel.json.
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'none'"],
+          frameAncestors: ["'none'"],
+        },
+      },
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+    }),
+  );
   app.use(cookieParser());
 
   app.useGlobalPipes(
