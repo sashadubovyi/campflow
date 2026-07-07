@@ -97,6 +97,8 @@ export class RoomsService {
               authorId: userId,
               title: poll.question,
               type: 'multi_choice',
+              // AI-чекліст ("хто що бере") — одразу з розподілом по учасниках
+              allowAssign: true,
               options: {
                 create: options.map((label) => ({ label })),
               },
@@ -427,17 +429,18 @@ export class RoomsService {
       throw new NotFoundException('Invite code is invalid');
     }
 
-    const existing = await this.prisma.roomMember.findUnique({
-      where: { roomId_userId: { roomId: room.id, userId } },
-    });
-
-    if (existing) {
-      throw new ConflictException('You are already a member of this room');
+    // Атомарно через unique constraint (roomId, userId): конкурентний
+    // подвійний join дає P2002 → 409, а не 500 з check-then-create гонки.
+    try {
+      await this.prisma.roomMember.create({
+        data: { roomId: room.id, userId, role: 'member' },
+      });
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+        throw new ConflictException('You are already a member of this room');
+      }
+      throw err;
     }
-
-    await this.prisma.roomMember.create({
-      data: { roomId: room.id, userId, role: 'member' },
-    });
 
     await this.touchActivity(room.id);
 
@@ -590,51 +593,61 @@ export class RoomsService {
 
   // ====== Самовихід ======
   async leaveRoom(userId: string, roomId: string) {
-    const member = await this.prisma.roomMember.findUnique({
-      where: { roomId_userId: { roomId, userId } },
-      include: { user: { select: { id: true, fullName: true } } },
-    });
-    if (!member) throw new ForbiddenException('You are not a member of this room');
+    // Serializable-транзакція: рахунок адмінів/учасників і видалення мають
+    // бути атомарними, інакше два останні адміни, що виходять одночасно,
+    // обидва бачать "є ще один адмін" — і кімната лишається без адміна.
+    // При serialization-конфлікті (P2034) Postgres відхиляє одну з
+    // транзакцій — повторюємо її кілька разів.
+    for (let attempt = 1; ; attempt++) {
+      try {
+        return await this.prisma.$transaction(
+          async (tx) => {
+            const member = await tx.roomMember.findUnique({
+              where: { roomId_userId: { roomId, userId } },
+              include: { user: { select: { id: true, fullName: true } } },
+            });
+            if (!member) throw new ForbiddenException('You are not a member of this room');
 
-    const room = await this.prisma.room.findUnique({
-      where: { id: roomId },
-      include: { _count: { select: { members: true } } },
-    });
-    if (!room) throw new NotFoundException('Room not found');
+            const totalMembers = await tx.roomMember.count({ where: { roomId } });
+            const otherAdmins = await tx.roomMember.count({
+              where: { roomId, role: 'admin', NOT: { userId } },
+            });
+            const isLastAdmin = member.role === 'admin' && otherAdmins === 0;
 
-    const otherAdmins = await this.prisma.roomMember.count({
-      where: { roomId, role: 'admin', NOT: { userId } },
-    });
-    const totalMembers = room._count.members;
-    const isLastAdmin = member.role === 'admin' && otherAdmins === 0;
+            // Якщо я останній адмін і в кімнаті ще є інші учасники → треба передати права
+            if (isLastAdmin && totalMembers > 1) {
+              throw new BadRequestException({
+                reason: 'transfer_admin_required',
+                message: 'Передайте права адміна іншому учаснику, перш ніж вийти',
+              });
+            }
 
-    // Якщо я останній адмін і в кімнаті ще є інші учасники → треба передати права
-    if (isLastAdmin && totalMembers > 1) {
-      throw new BadRequestException({
-        reason: 'transfer_admin_required',
-        message: 'Передайте права адміна іншому учаснику, перш ніж вийти',
-      });
+            // Якщо я останній учасник взагалі — кімната видаляється
+            if (totalMembers === 1) {
+              await tx.room.delete({ where: { id: roomId } });
+              return { ok: true, deleted: true };
+            }
+
+            // Звичайний вихід
+            await tx.roomMember.delete({ where: { id: member.id } });
+            await tx.message.create({
+              data: {
+                roomId,
+                type: 'system',
+                content: `${member.user.fullName} залишив(-ла) кімнату`,
+              },
+            });
+
+            return { ok: true, deleted: false };
+          },
+          { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+        );
+      } catch (err) {
+        const isSerializationConflict =
+          err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2034';
+        if (!isSerializationConflict || attempt >= 3) throw err;
+      }
     }
-
-    // Якщо я останній учасник взагалі — кімната видаляється
-    if (totalMembers === 1) {
-      await this.prisma.room.delete({ where: { id: roomId } });
-      return { ok: true, deleted: true };
-    }
-
-    // Звичайний вихід
-    await this.prisma.$transaction([
-      this.prisma.roomMember.delete({ where: { id: member.id } }),
-      this.prisma.message.create({
-        data: {
-          roomId,
-          type: 'system',
-          content: `${member.user.fullName} залишив(-ла) кімнату`,
-        },
-      }),
-    ]);
-
-    return { ok: true, deleted: false };
   }
 
   // ====== Передача прав адміна ======

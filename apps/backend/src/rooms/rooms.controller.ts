@@ -15,8 +15,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { join } from 'path';
+import { memoryStorage } from 'multer';
 import { RoomsService } from './rooms.service';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
@@ -26,22 +25,12 @@ import { AiService } from '../ai/ai.service';
 import { AiDraftRoomDto } from './dto/ai-draft-room.dto';
 import { AiCommitRoomDto } from './dto/ai-commit-room.dto';
 
-// Extension is derived from the validated mimetype, never from the client
-// filename — otherwise an attacker can upload x.html with an image/* header
-// and get stored XSS served from /uploads.
-const COVER_EXT_BY_MIME: Record<string, string> = {
-  'image/jpeg': '.jpg',
-  'image/png': '.png',
-  'image/webp': '.webp',
-};
-
-const coverStorage = diskStorage({
-  destination: join(__dirname, '..', '..', 'uploads', 'covers'),
-  filename: (_req, file, cb) => {
-    const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    cb(null, `${unique}${COVER_EXT_BY_MIME[file.mimetype] ?? '.bin'}`);
-  },
-});
+// Обкладинки зберігаються як base64 data URL у БД — так само, як аватарки
+// (users.controller.ts). Диск на Railway ефемерний: файли з /uploads зникали
+// після кожного redeploy.
+function toDataUrl(file: Express.Multer.File): string {
+  return `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
+}
 
 function coverFilter(
   _req: unknown,
@@ -157,9 +146,10 @@ export class RoomsController {
   @Post(':id/cover')
   @UseInterceptors(
     FileInterceptor('cover', {
-      storage: coverStorage,
+      storage: memoryStorage(),
       fileFilter: coverFilter,
-      limits: { fileSize: 10 * 1024 * 1024 },
+      // 3 MB: ліміт як у user-cover — base64 роздуває на ~33%, тримаємо БД компактною
+      limits: { fileSize: 3 * 1024 * 1024 },
     }),
   )
   async uploadCover(
@@ -168,8 +158,7 @@ export class RoomsController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     if (!file) throw new BadRequestException('No file uploaded');
-    const coverUrl = `/uploads/covers/${file.filename}`;
-    return this.roomsService.updateCover(user.id, id, coverUrl);
+    return this.roomsService.updateCover(user.id, id, toDataUrl(file));
   }
 
   @Post(':id/regenerate-invite')
