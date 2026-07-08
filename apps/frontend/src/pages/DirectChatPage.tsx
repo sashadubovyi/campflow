@@ -42,6 +42,7 @@ function DmMessageBubble({
   const menuOpen = activeMenuId === message.id;
   const [swipeX, setSwipeX] = useState(0);
   const [openDown, setOpenDown] = useState(false);
+  const rowRef     = useRef<HTMLDivElement>(null);
   const menuRef    = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const touchOrigin    = useRef({ x: 0, y: 0 });
@@ -52,6 +53,13 @@ function DmMessageBubble({
 
   function cancelLongPress() {
     if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null; }
+  }
+
+  // Міряємо по рядку повідомлення: трикрапка на мобільному прихована, поки
+  // меню закрите, і її rect — нулі → меню відкривалось за межі екрана.
+  function measureOpenDirection() {
+    const rect = rowRef.current?.getBoundingClientRect();
+    if (rect) setOpenDown(rect.top < 200);
   }
 
   function onTouchStart(e: React.TouchEvent) {
@@ -66,10 +74,7 @@ function DmMessageBubble({
       if (gestureMode.current === 'idle') {
         gestureMode.current = 'longpress';
         longPressTriggered.current = true;
-        if (triggerRef.current) {
-          const rect = triggerRef.current.getBoundingClientRect();
-          setOpenDown(rect.top < 120);
-        }
+        measureOpenDirection();
         onMenuOpen(message.id);
         try { navigator.vibrate?.(15); } catch { /* ignore */ }
       }
@@ -121,10 +126,7 @@ function DmMessageBubble({
   }, [menuOpen, onMenuClose]);
 
   function handleToggleMenu() {
-    if (!menuOpen && triggerRef.current) {
-      const rect = triggerRef.current.getBoundingClientRect();
-      setOpenDown(rect.top < 120);
-    }
+    if (!menuOpen) measureOpenDirection();
     if (menuOpen) {
       onMenuClose();
     } else {
@@ -137,6 +139,7 @@ function DmMessageBubble({
 
   return (
     <div
+      ref={rowRef}
       className={`flex gap-2 group items-end select-none ${message.isOwn ? 'flex-row-reverse' : ''}`}
       style={{ WebkitUserSelect: 'none', WebkitTouchCallout: 'none' } as React.CSSProperties}
       onTouchStart={onTouchStart}
@@ -145,7 +148,10 @@ function DmMessageBubble({
       onContextMenu={(e) => {
         // Right-click (десктоп) відкриває кастомне меню; системне — глушимо
         e.preventDefault();
-        if (!longPressTriggered.current && !menuOpen) onMenuOpen(message.id);
+        if (!longPressTriggered.current && !menuOpen) {
+          measureOpenDirection();
+          onMenuOpen(message.id);
+        }
       }}
     >
       {/* Bubble column: constrains width + aligns left/right */}
@@ -216,7 +222,7 @@ function DmMessageBubble({
 
         {menuOpen && (
           <div
-            className={`absolute ${openDown ? 'top-8' : 'bottom-8'} ${message.isOwn ? 'right-0' : 'left-0'} glass-surface rounded-2xl py-1 z-20 min-w-[160px]`}
+            className={`absolute ${openDown ? 'top-8' : 'bottom-8'} ${message.isOwn ? 'right-0' : 'left-0'} glass-menu rounded-2xl py-1 z-20 min-w-[160px]`}
           >
             {/* "Важливо" та "Видалити" прибрані: бекенд DM їх поки не підтримує,
                 а кнопки-пустушки, що лише закривають меню, гірші за їх відсутність. */}
@@ -232,7 +238,7 @@ function DmMessageBubble({
               className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-neutral-700 hover:bg-white/50 transition-colors"
             >
               <Copy size={14} className="text-neutral-400" />
-              {t('chat.copy', 'Копіювати текст')}
+              {t('chat.copy', 'Копіювати')}
             </button>
           </div>
         )}

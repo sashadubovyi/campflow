@@ -306,7 +306,7 @@ export function ChatPanel({ roomId, roomName: _roomName, members = [], important
             <div
               role="listbox"
               aria-label={t('chat.mentionUser', 'Згадати учасника')}
-              className="absolute bottom-full mb-1 left-4 right-4 md:left-6 md:right-6 glass-surface rounded-2xl py-1 z-30 max-h-60 overflow-y-auto shadow-glass-panel"
+              className="absolute bottom-full mb-1 left-4 right-4 md:left-6 md:right-6 glass-menu rounded-2xl py-1 z-30 max-h-60 overflow-y-auto"
             >
               {mentionCandidates.map((m, i) => (
                 <button
@@ -389,6 +389,7 @@ function MessageBubble({
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [openDown, setOpenDown] = useState(false);
   const [swipeX, setSwipeX] = useState(0);
+  const rowRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -399,6 +400,18 @@ function MessageBubble({
 
   function cancelLongPress() {
     if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null; }
+  }
+
+  /**
+   * Куди відкривати меню — вгору чи вниз. Міряємо по РЯДКУ повідомлення:
+   * на мобільному трикрапковий тригер прихований (hidden), поки меню закрите,
+   * і його getBoundingClientRect() давав нулі → меню завжди відкривалось вниз
+   * і для нижніх повідомлень (найсвіжіших) останні пункти — Видалити —
+   * опинялись за межами екрана.
+   */
+  function measureOpenDirection() {
+    const rect = rowRef.current?.getBoundingClientRect();
+    if (rect) setOpenDown(rect.top < 200);
   }
 
   function handleTouchStart(e: React.TouchEvent) {
@@ -413,10 +426,7 @@ function MessageBubble({
       if (gestureMode.current === 'idle') {
         longPressTriggered.current = true;
         gestureMode.current = 'longpress';
-        if (triggerRef.current) {
-          const rect = triggerRef.current.getBoundingClientRect();
-          setOpenDown(rect.top < 120);
-        }
+        measureOpenDirection();
         onMenuOpen(message.id);
         try { navigator.vibrate?.(15); } catch { /* ignore */ }
       }
@@ -472,10 +482,7 @@ function MessageBubble({
   }, [menuOpen, onMenuClose]);
 
   function handleToggleMenu() {
-    if (!menuOpen && triggerRef.current) {
-      const rect = triggerRef.current.getBoundingClientRect();
-      setOpenDown(rect.top < 120);
-    }
+    if (!menuOpen) measureOpenDirection();
     if (menuOpen) {
       onMenuClose();
     } else {
@@ -522,6 +529,7 @@ function MessageBubble({
 
   return (
     <div
+      ref={rowRef}
       className={`flex gap-2.5 group items-end select-none ${isOwn ? 'flex-row-reverse' : ''}`}
       // Вимикаємо нативний вибір тексту і iOS-callout: усі дії з повідомленням —
       // через кастомне меню (long-press / right-click), включно з копіюванням.
@@ -535,10 +543,7 @@ function MessageBubble({
         // на мобільному глушимо системне меню після long-press
         e.preventDefault();
         if (message.type !== 'system' && !longPressTriggered.current && !menuOpen) {
-          if (triggerRef.current) {
-            const rect = triggerRef.current.getBoundingClientRect();
-            setOpenDown(rect.top < 120);
-          }
+          measureOpenDirection();
           onMenuOpen(message.id);
         }
       }}
@@ -622,7 +627,7 @@ function MessageBubble({
         </button>
 
         {menuOpen && (
-          <div className={`absolute ${openDown ? 'top-8' : 'bottom-8'} ${isOwn ? 'right-0' : 'left-0'} glass-surface rounded-2xl py-1 z-20 min-w-[170px]`}>
+          <div className={`absolute ${openDown ? 'top-8' : 'bottom-8'} ${isOwn ? 'right-0' : 'left-0'} glass-menu rounded-2xl py-1 z-20 min-w-[170px]`}>
             <button
               onClick={() => { onReply(); onMenuClose(); }}
               className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-neutral-700 hover:bg-white/50 transition-colors"
@@ -636,7 +641,7 @@ function MessageBubble({
               className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-neutral-700 hover:bg-white/50 transition-colors"
             >
               <Copy size={14} className="text-neutral-400" />
-              {t('chat.copy', 'Копіювати текст')}
+              {t('chat.copy', 'Копіювати')}
             </button>
 
             <button

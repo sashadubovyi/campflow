@@ -76,31 +76,18 @@
   }
 
   /* ── Liquid Glass header (page top bar) ──
-     Тінт по краях плавно розчиняється до повної прозорості в центрі екрана;
-     скло тримається на сильному backdrop-blur, а не на заливці. */
+     60% тінт через альфа-канал ФОНУ (не opacity на контейнері — вона б
+     робила прозорими і кнопки/текст усередині); скло — на backdrop-blur. */
   .glass-header {
-    background: linear-gradient(
-      90deg,
-      rgba(232, 236, 245, 0.92) 0%,
-      rgba(232, 236, 245, 0.55) 22%,
-      rgba(232, 236, 245, 0) 50%,
-      rgba(232, 236, 245, 0.55) 78%,
-      rgba(232, 236, 245, 0.92) 100%
-    );
+    background-color: rgba(232, 236, 245, 0.60);
     backdrop-filter: saturate(200%) blur(40px);
     -webkit-backdrop-filter: saturate(200%) blur(40px);
     border-bottom: 0.5px solid rgba(255, 255, 255, 0.60);
   }
 
-  /* ── Liquid Glass sidebar nav ──
-     Той самий патерн: тінт біля зовнішнього краю, прозорість — до центру екрана. */
+  /* ── Liquid Glass sidebar nav ── */
   .glass-nav {
-    background: linear-gradient(
-      90deg,
-      rgba(232, 236, 245, 0.94) 0%,
-      rgba(232, 236, 245, 0.60) 55%,
-      rgba(232, 236, 245, 0.12) 100%
-    );
+    background-color: rgba(232, 236, 245, 0.60);
     backdrop-filter: saturate(200%) blur(40px);
     -webkit-backdrop-filter: saturate(200%) blur(40px);
     border-right: 0.5px solid rgba(255, 255, 255, 0.65);
@@ -108,17 +95,22 @@
 
   /* ── Liquid Glass bottom tab bar ── */
   .glass-tabbar {
-    background: linear-gradient(
-      90deg,
-      rgba(232, 236, 245, 0.95) 0%,
-      rgba(232, 236, 245, 0.62) 22%,
-      rgba(232, 236, 245, 0) 50%,
-      rgba(232, 236, 245, 0.62) 78%,
-      rgba(232, 236, 245, 0.95) 100%
-    );
+    background-color: rgba(232, 236, 245, 0.60);
     backdrop-filter: saturate(200%) blur(40px);
     -webkit-backdrop-filter: saturate(200%) blur(40px);
     border-top: 0.5px solid rgba(255, 255, 255, 0.70);
+  }
+
+  /* ── Liquid Glass контекстні меню/дропдауни ──
+     Легший за glass-surface (модалки лишаються 0.80 для читабельності). */
+  .glass-menu {
+    background-color: rgba(255, 255, 255, 0.60);
+    backdrop-filter: saturate(180%) blur(24px);
+    -webkit-backdrop-filter: saturate(180%) blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.80);
+    box-shadow:
+      0 0 0 0.5px rgba(0, 0, 0, 0.04),
+      0 8px 32px rgba(0, 0, 0, 0.12);
   }
 
   /* ── Liquid Glass blue primary button ── */

@@ -167,9 +167,11 @@ export function ProfilePage() {
   const age = calculateAge(profile.birthDate);
 
   return (
-    <div className="h-full flex flex-col overflow-hidden">
-      {/* Collapsing header — always visible, background fades in on scroll */}
-      <header className="shrink-0 relative z-10 h-12 flex items-center px-2 md:px-4">
+    <div className="h-full relative overflow-hidden">
+      {/* Collapsing header — оверлей НАД скролом, а не блок над ним:
+          фото профілю заїжджає ПІД скло і просвічує розмитим, а не
+          обрізається суцільною смугою. Фон плавно з'являється на скролі. */}
+      <header className="absolute top-0 inset-x-0 z-10 h-12 flex items-center px-2 md:px-4">
         <m.div
           className="absolute inset-0 glass-header shadow-[0_0.5px_0_rgba(0,0,0,0.06)] pointer-events-none"
           style={{ opacity: headerBgOpacity }}
@@ -189,8 +191,8 @@ export function ProfilePage() {
         <div className="relative z-10 w-10" />
       </header>
 
-      {/* Scrollable content */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto">
+      {/* Scrollable content — pt-12 компенсує header-оверлей */}
+      <div ref={scrollRef} className="h-full overflow-y-auto pt-12">
         {/* Hero — avatar scrolls naturally away, triggering header animation */}
         <div className="flex flex-col items-center px-6 pt-8 pb-4">
           <RingAvatar fullName={profile.fullName} avatarUrl={profile.avatarUrl} size={96} isOnline={profile.isOnline} />
